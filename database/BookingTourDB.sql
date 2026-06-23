@@ -176,10 +176,10 @@ GO
 -- 1. Insert Data for Account
 INSERT INTO Account (username, password_hash, email, full_name, phone, role, status)
 VALUES 
-('admin_tour', 'hashed_password_123', 'admin@bookingtour.vn', N'Quản trị viên', '0901234567', 'Admin', 'Active'),
-('staff_01', 'hashed_password_123', 'staff1@bookingtour.vn', N'Nhân viên Sale 01', '0912345678', 'Staff', 'Active'),
-('minhpq', 'hashed_password_123', 'minhpq.khachhang@gmail.com', N'Phạm Quốc Minh', '0923456789', 'Customer', 'Active'),
-('khachhang2', 'hashed_password_123', 'khachhang2@gmail.com', N'Nguyễn Văn A', '0934567890', 'Customer', 'Active');
+('admin_tour', 'e10adc3949ba59abbe56e057f20f883e', 'admin@bookingtour.vn', N'Quản trị viên', '0901234567', 'Admin', 'Active'),
+('staff_01', 'e10adc3949ba59abbe56e057f20f883e', 'staff1@bookingtour.vn', N'Nhân viên Sale 01', '0912345678', 'Staff', 'Active'),
+('minhpq', 'e10adc3949ba59abbe56e057f20f883e', 'minhpq.khachhang@gmail.com', N'Phạm Quốc Minh', '0923456789', 'Customer', 'Active'),
+('khachhang2', 'e10adc3949ba59abbe56e057f20f883e', 'khachhang2@gmail.com', N'Nguyễn Văn A', '0934567890', 'Customer', 'Active');
 GO
 
 -- 2. Insert Data for Category
