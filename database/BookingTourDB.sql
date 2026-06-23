@@ -173,41 +173,39 @@ CREATE TABLE Wishlist (
 USE BookingTourWebsite;
 GO
 
--- 1. Insert Data for Account
 INSERT INTO Account (username, password_hash, email, full_name, phone, role, status)
 VALUES 
-('admin_tour', 'e10adc3949ba59abbe56e057f20f883e', 'admin@bookingtour.vn', N'Quản trị viên', '0901234567', 'Admin', 'Active'),
-('staff_01', 'e10adc3949ba59abbe56e057f20f883e', 'staff1@bookingtour.vn', N'Nhân viên Sale 01', '0912345678', 'Staff', 'Active'),
-('minhpq', 'e10adc3949ba59abbe56e057f20f883e', 'minhpq.khachhang@gmail.com', N'Phạm Quốc Minh', '0923456789', 'Customer', 'Active'),
-('khachhang2', 'e10adc3949ba59abbe56e057f20f883e', 'khachhang2@gmail.com', N'Nguyễn Văn A', '0934567890', 'Customer', 'Active');
+('admin_tour', 'e10adc3949ba59abbe56e057f20f883e', 'admin@bookingtour.com', 'System Administrator', '0901234567', 'Admin', 'Active'),
+('staff_01', 'e10adc3949ba59abbe56e057f20f883e', 'sales01@bookingtour.com', 'Sales Executive 01', '0912345678', 'Staff', 'Active'),
+('minhpq', 'e10adc3949ba59abbe56e057f20f883e', 'minhpq.customer@gmail.com', 'Pham Quoc Minh', '0923456789', 'Customer', 'Active'),
+('customer_02', 'e10adc3949ba59abbe56e057f20f883e', 'alex.jones@gmail.com', 'Alex Jones', '0934567890', 'Customer', 'Active');
 GO
 
--- 2. Insert Data for Category
+-- 3. Insert Data for Category
 INSERT INTO Category (category_name, description)
 VALUES 
-(N'Du lịch phượt & Khám phá', N'Các tour di chuyển bằng xe máy, khám phá các địa danh hoang sơ hoặc các tuyến đường phượt.'),
-(N'Du lịch quốc tế', N'Trải nghiệm văn hóa, ẩm thực và cảnh quan tại các quốc gia ngoài Việt Nam.'),
-(N'Kiến tập & Company Tour', N'Các tour tổ chức ngắn ngày tham quan doanh nghiệp, phù hợp cho sinh viên, đoàn thể.');
+('Backpacking & Adventure', 'Motorbike tours, exploring pristine destinations, or challenging off-road routes.'),
+('International Travel', 'Experience culture, cuisine, and landscapes in countries outside of Vietnam.'),
+('Academic & Corporate Visits', 'Short-term field trips and company tours designed for students and organizations.');
 GO
 
--- 3. Insert Data for Destination
+-- 4. Insert Data for Destination
 INSERT INTO Destination (destination_name, province, region, description, image_url)
 VALUES 
-(N'Hà Tiên', N'Kiên Giang', 'South', N'Thành phố ven biển với nhiều di tích lịch sử và hang động kỳ bí.', '/images/destinations/hatien.jpg'),
-(N'Bangkok', N'Bangkok', 'International', N'Thủ đô sầm uất của Thái Lan, thiên đường mua sắm và ẩm thực đường phố.', '/images/destinations/bangkok.jpg'),
-(N'Thành phố Hồ Chí Minh', N'TP. Hồ Chí Minh', 'South', N'Trung tâm kinh tế năng động nhất Việt Nam.', '/images/destinations/hcmc.jpg');
+('Ha Tien', 'Kien Giang', 'South', 'A coastal city known for its rich history, beautiful beaches, and mystical caves.', '/images/destinations/hatien.jpg'),
+('Bangkok', 'Bangkok', 'International', 'The bustling capital of Thailand, a paradise for shopping and vibrant street food.', '/images/destinations/bangkok.jpg'),
+('Ho Chi Minh City', 'Ho Chi Minh City', 'South', 'The most dynamic economic and financial hub in Vietnam.', '/images/destinations/hcmc.jpg');
 GO
 
--- 4. Insert Data for Tour
--- Lưu ý: category_id, created_by, destination_id phụ thuộc vào các ID được tạo tự động ở trên (thường là 1, 2, 3)
+-- 5. Insert Data for Tour
 INSERT INTO Tour (category_id, created_by, destination_id, tour_name, departure_location, description, duration_days, base_price, status)
 VALUES 
-(1, 2, 1, N'Phượt Cần Thơ - Hà Tiên: Khám phá Thập Cảnh', N'Cần Thơ', N'Hành trình phượt xe máy 2 ngày 1 đêm từ Cần Thơ đi Hà Tiên, check-in các điểm đến nổi tiếng.', 2, 1200000.00, 'Active'),
-(2, 2, 2, N'Trải nghiệm Overseas Semester tại Bangkok', N'Thành phố Hồ Chí Minh', N'Chương trình kết hợp du lịch và trao đổi văn hóa sinh viên quốc tế tại Thái Lan.', 5, 8500000.00, 'Active'),
-(3, 2, 3, N'IT Company Tour - Tham quan doanh nghiệp công nghệ', N'Cần Thơ', N'Chuyến đi 1 ngày tham quan các tập đoàn công nghệ lớn tại TP.HCM.', 1, 500000.00, 'Active');
+(1, 2, 1, 'Can Tho - Ha Tien Motorbike Backpacking Trip', 'Can Tho', 'A thrilling 2 days 1 night motorbike adventure from Can Tho to Ha Tien, checking in at iconic nature spots.', 2, 1200000.00, 'Active'),
+(2, 2, 2, 'Bangkok Overseas Semester Experience', 'Ho Chi Minh City', 'An immersive program combining academic exchange and cultural exploration in Thailand.', 5, 8500000.00, 'Active'),
+(3, 2, 3, 'IT Corporate Site Visit & Company Tour', 'Can Tho', 'A comprehensive 1-day professional tour visiting top tech corporations and software hubs in HCMC.', 1, 500000.00, 'Active');
 GO
 
--- 5. Insert Data for TourImage
+-- 6. Insert Data for TourImage
 INSERT INTO TourImage (tour_id, image_url, is_thumbnail)
 VALUES 
 (1, '/images/tours/hatien_thachdong.jpg', 1),
@@ -216,17 +214,17 @@ VALUES
 (3, '/images/tours/hcmc_fpt_software.jpg', 1);
 GO
 
--- 6. Insert Data for Itinerary
+-- 7. Insert Data for Itinerary
 INSERT INTO Itinerary (tour_id, day_number, title, description)
 VALUES 
-(1, 1, N'Cần Thơ - Hà Tiên - Thạch Động', N'Sáng: Di chuyển từ Cần Thơ. Chiều: Tham quan Thạch Động, nghe kể truyền thuyết Thạch Sanh.'),
-(1, 2, N'Khám phá Núi Đá Dựng - Trở về Cần Thơ', N'Sáng: Chinh phục 14 hang động tại Núi Đá Dựng. Chiều: Lên xe máy trở về Cần Thơ kết thúc hành trình.'),
-(2, 1, N'TP.HCM - Bangkok', N'Bay chuyến trưa sang sân bay Suvarnabhumi. Nhận phòng khách sạn.'),
-(2, 2, N'Giao lưu Đại học Kasem Bundit', N'Tham quan campus và giao lưu với sinh viên quốc tế tại đại học Kasem Bundit.'),
-(3, 1, N'Tham quan doanh nghiệp phần mềm', N'Di chuyển lên TP.HCM, tham quan không gian làm việc của kỹ sư phần mềm, nghe chia sẻ về Agile/Scrum.');
+(1, 1, 'Can Tho - Ha Tien - Thach Dong Cave', 'Morning: Ride out from Can Tho. Afternoon: Discover Thạch Động cave and enjoy the scenic coastal sunset.'),
+(1, 2, 'Da Dung Mountain Trek - Return to Can Tho', 'Morning: Explore the 14 historical caves inside Đá Dựng Mountain. Afternoon: Ride back to Can Tho, tour ends.'),
+(2, 1, 'HCMC - Bangkok Arrival', 'Midday flight to Suvarnabhumi Airport. Check-in at the hotel and evening welcome dinner.'),
+(2, 2, 'University Campus Exchange', 'Visit and engage in academic workshops with international students at Kasem Bundit University.'),
+(3, 1, 'Tech Industry Exploration', 'Travel to HCMC, tour active tech workspace environments, and join a seminar on Agile/Scrum application.');
 GO
 
--- 7. Insert Data for TourSchedule
+-- 8. Insert Data for TourSchedule
 INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, available_slots, status)
 VALUES 
 (1, '2026-06-15', '2026-06-16', 1100000.00, 20, 'Open'),
@@ -235,55 +233,53 @@ VALUES
 (3, '2026-08-20', '2026-08-20', 500000.00, 45, 'Open');
 GO
 
--- 8. Insert Data for Promotion
+-- 9. Insert Data for Promotion
 INSERT INTO Promotion (promotion_name, discount_percent, start_date, end_date, status)
 VALUES 
-(N'Mùa hè rực rỡ', 10, '2026-06-01', '2026-08-31', 'Active'),
-(N'Đón tân sinh viên', 15, '2026-09-01', '2026-10-31', 'Active');
+('Vibrant Summer Sale', 10, '2026-06-01', '2026-08-31', 'Active'),
+('Freshman Welcome Discount', 15, '2026-09-01', '2026-10-31', 'Active');
 GO
 
--- 9. Insert Data for TourPromotion
+-- 10. Insert Data for TourPromotion
 INSERT INTO TourPromotion (promotion_id, tour_id)
 VALUES 
 (1, 1),
 (2, 2);
 GO
 
--- 10. Insert Data for Voucher
+-- 11. Insert Data for Voucher
 INSERT INTO Voucher (voucher_code, discount_percent, minimum_order_value, max_discount_amount, quantity, start_date, end_date, status)
 VALUES 
 ('SUMMER26', 5.00, 2000000.00, 500000.00, 100, '2026-06-01', '2026-12-31', 'Active'),
-('SVIT50K', 10.00, 1000000.00, 50000.00, 50, '2026-01-01', '2026-12-31', 'Active');
+('TECHSTUDENT', 10.00, 1000000.00, 50000.00, 50, '2026-01-01', '2026-12-31', 'Active');
 GO
 
--- 11. Insert Data for Booking
--- Giả sử Customer Phạm Quốc Minh (account_id = 3) đặt Tour Phượt Hà Tiên (schedule_id = 1)
+-- 12. Insert Data for Booking
 INSERT INTO Booking (customer_id, schedule_id, number_of_people, contact_name, contact_phone, total_price, status)
 VALUES 
-(3, 1, 2, N'Phạm Quốc Minh', '0923456789', 2200000.00, 'Confirmed'),
-(4, 2, 1, N'Nguyễn Văn A', '0934567890', 1200000.00, 'Pending');
+(3, 1, 2, 'Pham Quoc Minh', '0923456789', 2200000.00, 'Confirmed'),
+(4, 2, 1, 'Alex Jones', '0934567890', 1200000.00, 'Pending');
 GO
 
--- 12. Insert Data for Payment
+-- 13. Insert Data for Payment
 INSERT INTO Payment (booking_id, amount, payment_method, payment_status, transaction_code)
 VALUES 
 (1, 2200000.00, 'VNPay', 'Completed', 'VNPAY123456789');
 GO
 
--- 13. Insert Data for BookingVoucher
--- Chú ý: Bảng này áp dụng nếu khách xài voucher 'SVIT50K' (voucher_id = 2) cho booking_id = 1
+-- 14. Insert Data for BookingVoucher
 INSERT INTO BookingVoucher (booking_id, voucher_id)
 VALUES 
 (1, 2);
 GO
 
--- 14. Insert Data for Review
+-- 15. Insert Data for Review
 INSERT INTO Review (booking_id, customer_id, rating, comment, status)
 VALUES 
-(1, 3, 5, N'Hành trình phượt rất thú vị, cảnh ở Núi Đá Dựng cực kỳ đẹp. HDV hỗ trợ nhiệt tình!', 'Approved');
+(1, 3, 5, 'The backpacking trip was incredibly exciting! The views at Da Dung Mountain were breathtaking. Helpful guide!', 'Approved');
 GO
 
--- 15. Insert Data for Wishlist
+-- 16. Insert Data for Wishlist
 INSERT INTO Wishlist (customer_id, tour_id)
 VALUES 
 (3, 2),
