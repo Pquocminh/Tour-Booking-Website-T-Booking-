@@ -60,7 +60,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero Section with Search -->
     <header class="hero-section">
         <div class="container">
             <span class="hero-badge">Vietnam's Leading Tour Booking Service</span>
@@ -68,10 +68,21 @@
             <p class="hero-subtitle">
                 Experience journeys filled with laughter, valuable knowledge, and the most memorable moments with family and friends.
             </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="#tours-list" class="btn tour-btn px-4 py-2">
-                    <i class="fa-solid fa-compass me-2"></i>Start Exploring
-                </a>
+
+            <!-- Search Form -->
+            <div class="search-form-wrapper mt-4">
+                <form method="GET" action="${pageContext.request.contextPath}/tours" class="search-form">
+                    <div class="input-group input-group-lg shadow-lg rounded-pill">
+                        <span class="input-group-text border-0 bg-white" style="border-radius: 50px 0 0 50px;">
+                            <i class="fa-solid fa-magnifying-glass text-primary"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-0" placeholder="Search tours, destinations, categories..."
+                               value="${not empty searchKeyword ? searchKeyword : ''}" style="border-radius: 0 50px 50px 0;">
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius: 0 50px 50px 0;">
+                            <i class="fa-solid fa-search me-1"></i>Search
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </header>
@@ -80,12 +91,30 @@
     <main class="container my-5" id="tours-list">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="section-title mb-1">Available Tour Packages</h2>
-                <p class="text-muted">Select your next amazing destination</p>
+                <h2 class="section-title mb-1">
+                    <c:choose>
+                        <c:when test="${isSearchResult}">
+                            Search Results for "<span class="text-primary">${searchKeyword}</span>"
+                        </c:when>
+                        <c:otherwise>
+                            Available Tour Packages
+                        </c:otherwise>
+                    </c:choose>
+                </h2>
+                <p class="text-muted">
+                    <c:choose>
+                        <c:when test="${isSearchResult}">
+                            Found ${tours.size()} matching tour(s)
+                        </c:when>
+                        <c:otherwise>
+                            Select your next amazing destination
+                        </c:otherwise>
+                    </c:choose>
+                </p>
             </div>
             <div>
                 <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
-                    ${tours.size()} Active Tours
+                    ${tours.size()} Tour<c:if test="${tours.size() != 1}">s</c:if>
                 </span>
             </div>
         </div>
@@ -95,8 +124,26 @@
                 <c:when test="${empty tours}">
                     <div class="col-12 text-center py-5">
                         <i class="fa-regular fa-face-frown display-1 text-muted mb-3"></i>
-                        <h3>No active tours are available at the moment.</h3>
-                        <p class="text-muted">Please check back later or contact support.</p>
+                        <h3>
+                            <c:choose>
+                                <c:when test="${isSearchResult}">
+                                    No tours found matching your search.
+                                </c:when>
+                                <c:otherwise>
+                                    No active tours are available at the moment.
+                                </c:otherwise>
+                            </c:choose>
+                        </h3>
+                        <p class="text-muted">
+                            <c:choose>
+                                <c:when test="${isSearchResult}">
+                                    Try using different keywords or <a href="${pageContext.request.contextPath}/tours" class="text-primary">browse all tours</a>.
+                                </c:when>
+                                <c:otherwise>
+                                    Please check back later or contact support.
+                                </c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
                 </c:when>
                 <c:otherwise>
@@ -108,11 +155,11 @@
                                         <i class="fa-solid fa-tag me-1"></i>${t.category.categoryName}
                                     </span>
                                     <!-- Fallback image in case the local one does not exist -->
-                                    <img src="${not empty t.thumbnailUrl ? pageContext.request.contextPath.concat(t.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop'}" 
-                                         alt="${t.tourName}" 
+                                    <img src="${not empty t.thumbnailUrl ? pageContext.request.contextPath.concat(t.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop'}"
+                                         alt="${t.tourName}"
                                          class="tour-img"
                                          onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop'">
-                                    
+
                                     <span class="tour-duration-tag">
                                         <i class="fa-regular fa-clock me-1"></i>
                                         <c:choose>
@@ -131,6 +178,12 @@
                                         Departure: ${t.departureLocation}
                                     </div>
                                     <h3 class="tour-title" title="${t.tourName}">${t.tourName}</h3>
+                                    <div class="tour-destination" style="font-size: 0.9rem; color: #6c757d;">
+                                        <i class="fa-solid fa-map-pin"></i>
+                                        <c:if test="${not empty t.destination.destinationName}">
+                                            ${t.destination.destinationName}
+                                        </c:if>
+                                    </div>
                                     <p class="tour-desc">${t.description}</p>
                                     <div class="tour-card-footer">
                                         <div class="tour-price-wrapper">
@@ -139,7 +192,7 @@
                                                 <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                             </span>
                                         </div>
-                                        <a href="#" class="btn tour-btn">
+                                        <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn tour-btn">
                                             Details <i class="fa-solid fa-arrow-right ms-1"></i>
                                         </a>
                                     </div>
@@ -189,3 +242,4 @@
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
