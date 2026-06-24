@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class Tour {
     private int tourId;
@@ -19,6 +20,11 @@ public class Tour {
     private Category category;
     private Destination destination;
     private String thumbnailUrl;
+    
+    // Lists for detailed view
+    private List<String> imageUrls;
+    private List<Itinerary> itineraries;
+    private List<TourSchedule> schedules;
 
     public Tour() {
     }
@@ -149,5 +155,29 @@ public class Tour {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
+
+    public List<Itinerary> getItineraries() {
+        return itineraries;
+    }
+
+    public void setItineraries(List<Itinerary> itineraries) {
+        this.itineraries = itineraries;
+    }
+
+    public List<TourSchedule> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(List<TourSchedule> schedules) {
+        this.schedules = schedules;
     }
 }
