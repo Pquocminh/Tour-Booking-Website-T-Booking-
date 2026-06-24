@@ -10,4 +10,8 @@ public class TourService {
     public List<Tour> getAvailableTours() {
         return tourDAO.getAvailableTours();
     }
+
+    public Tour getTourDetails(int tourId) {
+        return tourDAO.getTourDetails(tourId);
+    }
 }
