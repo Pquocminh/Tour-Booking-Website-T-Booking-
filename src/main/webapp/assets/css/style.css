@@ -300,3 +300,156 @@ footer a {
 footer a:hover {
     color: var(--secondary);
 }
+
+/* --- Tour Details Page Styles --- */
+
+.details-hero {
+    position: relative;
+    padding: 80px 0 60px 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.details-hero .breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(99, 102, 241, 0.15);
+}
+
+.details-section-title {
+    font-weight: 800;
+    font-size: 1.35rem;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
+
+/* Vertical Timeline for Itinerary */
+.itinerary-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.itinerary-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-badge {
+    position: absolute;
+    left: -48px;
+    top: 5px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 99px;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+    text-align: center;
+    white-space: nowrap;
+    border: 2px solid #fff;
+}
+
+.timeline-content {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: var(--transition-smooth);
+}
+
+.timeline-content:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Booking Card Styles */
+.border-primary {
+    border: 1.5px solid rgba(79, 70, 229, 0.45) !important;
+}
+
+.fw-extrabold {
+    font-weight: 800;
+}
+
+.custom-select {
+    border-radius: 12px;
+    padding: 12px 18px;
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    color: var(--text-main);
+    transition: var(--transition-smooth);
+}
+
+.custom-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    background-color: #fff;
+}
+
+.btn-book-now {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+    transition: var(--transition-smooth);
+}
+
+.btn-book-now:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+    transform: scale(1.02);
+    color: #fff;
+}
+
+.btn-book-now:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.dest-card-image img {
+    transition: var(--transition-smooth);
+}
+
+.glass-card:hover .dest-card-image img {
+    transform: scale(1.05);
+}
+
+/* Custom layout rules for footer on details page */
+.footer-custom {
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}

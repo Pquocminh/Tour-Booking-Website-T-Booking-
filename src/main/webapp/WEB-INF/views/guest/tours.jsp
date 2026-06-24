@@ -139,7 +139,7 @@
                                                 <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                             </span>
                                         </div>
-                                        <a href="#" class="btn tour-btn">
+                                        <a href="${pageContext.request.contextPath}/tour-details?id=${t.tourId}" class="btn tour-btn">
                                             Details <i class="fa-solid fa-arrow-right ms-1"></i>
                                         </a>
                                     </div>
