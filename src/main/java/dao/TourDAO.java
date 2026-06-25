@@ -237,6 +237,7 @@ public class TourDAO {
                     sched.setReturnDate(rs.getDate("return_date"));
                     sched.setPrice(rs.getDouble("price"));
                     sched.setAvailableSlots(rs.getInt("available_slots"));
+                    sched.setTotalSlots(rs.getInt("total_slots"));
                     sched.setStatus(rs.getString("status"));
                     list.add(sched);
                 }

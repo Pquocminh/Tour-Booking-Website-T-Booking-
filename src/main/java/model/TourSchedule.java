@@ -64,12 +64,22 @@ public class TourSchedule {
         this.price = price;
     }
 
+    private int totalSlots;
+
     public int getAvailableSlots() {
         return availableSlots;
     }
 
     public void setAvailableSlots(int availableSlots) {
         this.availableSlots = availableSlots;
+    }
+
+    public int getTotalSlots() {
+        return totalSlots;
+    }
+
+    public void setTotalSlots(int totalSlots) {
+        this.totalSlots = totalSlots;
     }
 
     public String getStatus() {

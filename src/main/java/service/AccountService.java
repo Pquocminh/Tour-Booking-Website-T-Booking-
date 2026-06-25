@@ -81,4 +81,13 @@ public class AccountService {
         }
         return "Registration failed. Please try again.";
     }
+
+    public Account getAccountByEmail(String email) {
+        return accountDAO.getAccountByEmail(email);
+    }
+
+    public boolean resetPassword(String email, String newPassword) {
+        String md5Hash = PasswordUtils.hashMD5(newPassword);
+        return accountDAO.updatePassword(email, md5Hash);
+    }
 }
