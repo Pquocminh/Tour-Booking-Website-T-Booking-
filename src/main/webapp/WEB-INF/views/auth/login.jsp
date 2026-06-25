@@ -123,6 +123,12 @@
                 </div>
             </c:if>
             
+            <c:if test="${param.resetSuccess == 'true'}">
+                <div class="alert alert-success border-0 rounded-3 mb-4" role="alert" style="background-color: #f0fdf4; color: #15803d; font-size: 0.9rem;">
+                    <i class="fa-solid fa-circle-check me-2"></i>Password reset successfully! Please sign in with your new password.
+                </div>
+            </c:if>
+            
             <c:if test="${not empty error}">
                 <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
@@ -135,9 +141,14 @@
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     <label for="username">Username or Email</label>
                 </div>
-                <div class="form-floating mb-4">
+                <div class="form-floating mb-3">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                     <label for="password">Password</label>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div></div>
+                    <a href="${pageContext.request.contextPath}/forgot-password" class="text-primary text-decoration-none" style="font-size: 0.85rem; font-weight: 500;">Forgot Password?</a>
                 </div>
                 
                 <button type="submit" class="btn tour-btn w-100 py-3 font-weight-semibold" style="border-radius: 14px;">
