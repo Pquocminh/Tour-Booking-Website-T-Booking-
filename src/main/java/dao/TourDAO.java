@@ -105,7 +105,7 @@ public class TourDAO {
         tour.setBasePrice(rs.getDouble("base_price"));
         tour.setStatus(rs.getString("status"));
         tour.setCreatedAt(rs.getTimestamp("created_at"));
-        
+
         Category category = new Category();
         category.setCategoryId(rs.getInt("category_id"));
         category.setCategoryName(rs.getString("category_name"));
