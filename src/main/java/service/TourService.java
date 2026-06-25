@@ -28,6 +28,7 @@ public class TourService {
     
     public List<Tour> searchByDestination(int destinationId) {
         return tourDAO.searchToursByDestination(destinationId);
+    }
 
     public Tour getTourDetails(int tourId) {
         return tourDAO.getTourDetails(tourId);
