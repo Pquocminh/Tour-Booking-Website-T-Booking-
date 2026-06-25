@@ -69,8 +69,8 @@ public class ForgotPasswordController extends HttpServlet {
         System.out.println("==================================================");
 
         // SMTP configuration
-        final String fromEmail = "tbooking.noreply@gmail.com"; // Configure as needed
-        final String password = "your-app-password-here"; // Gmail App Password
+        final String fromEmail = "pquocminh.ce190255@gmail.com"; // Your Gmail
+        final String password = "fwbd wjof lbsx wpng"; // Generated App Password
         
         Properties properties = new Properties();
         properties.put("mail.smtp.auth", "true");
