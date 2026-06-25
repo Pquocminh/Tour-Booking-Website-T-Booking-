@@ -32,6 +32,7 @@ public class AccountDAO {
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
+                    acc.setLastLogin(rs.getTimestamp("last_login"));
                     return acc;
                 }
             }
@@ -71,6 +72,7 @@ public class AccountDAO {
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
+                    acc.setLastLogin(rs.getTimestamp("last_login"));
                     return acc;
                 }
             }
