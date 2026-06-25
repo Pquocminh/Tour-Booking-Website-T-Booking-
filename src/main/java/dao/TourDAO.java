@@ -236,4 +236,266 @@ public class TourDAO {
         }
         return tour;
     }
+
+    public List<Category> getAllCategories() {
+        List<Category> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        String sql = "SELECT category_id, category_name, description FROM Category";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Category cat = new Category();
+                cat.setCategoryId(rs.getInt("category_id"));
+                cat.setCategoryName(rs.getString("category_name"));
+                cat.setDescription(rs.getString("description"));
+                list.add(cat);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public List<Destination> getAllDestinations() {
+        List<Destination> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        String sql = "SELECT destination_id, destination_name, province, region, description, image_url FROM Destination";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Destination dest = new Destination();
+                dest.setDestinationId(rs.getInt("destination_id"));
+                dest.setDestinationName(rs.getString("destination_name"));
+                dest.setProvince(rs.getString("province"));
+                dest.setRegion(rs.getString("region"));
+                dest.setDescription(rs.getString("description"));
+                dest.setImageUrl(rs.getString("image_url"));
+                list.add(dest);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public List<Tour> searchToursAdmin(String keyword, String status, Integer categoryId, Integer destinationId) {
+        StringBuilder sql = new StringBuilder(TOUR_SELECT_QUERY);
+        sql.append(" WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (t.tour_name LIKE ? OR t.description LIKE ? OR d.destination_name LIKE ? OR c.category_name LIKE ?) ");
+            String searchKeyword = "%" + keyword.trim() + "%";
+            params.add(searchKeyword);
+            params.add(searchKeyword);
+            params.add(searchKeyword);
+            params.add(searchKeyword);
+        }
+
+        if (status != null && !status.isEmpty() && !"All".equalsIgnoreCase(status)) {
+            sql.append(" AND t.status = ? ");
+            params.add(status);
+        }
+
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND t.category_id = ? ");
+            params.add(categoryId);
+        }
+
+        if (destinationId != null && destinationId > 0) {
+            sql.append(" AND t.destination_id = ? ");
+            params.add(destinationId);
+        }
+
+        sql.append(" ORDER BY t.created_at DESC");
+
+        return executeTourQuery(sql.toString(), params.toArray());
+    }
+
+    public boolean addTour(Tour tour) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "INSERT INTO Tour (category_id, created_by, destination_id, tour_name, departure_location, description, duration_days, base_price, status) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            conn.setAutoCommit(false);
+            int tourId = -1;
+            try (PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, tour.getCategoryId());
+                ps.setInt(2, tour.getCreatedBy());
+                ps.setInt(3, tour.getDestinationId());
+                ps.setString(4, tour.getTourName());
+                ps.setString(5, tour.getDepartureLocation());
+                ps.setString(6, tour.getDescription());
+                ps.setInt(7, tour.getDurationDays());
+                ps.setDouble(8, tour.getBasePrice());
+                ps.setString(9, tour.getStatus());
+                
+                int affectedRows = ps.executeUpdate();
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+                
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        tourId = generatedKeys.getInt(1);
+                    }
+                }
+            }
+            
+            if (tourId != -1 && tour.getThumbnailUrl() != null && !tour.getThumbnailUrl().trim().isEmpty()) {
+                String imgSql = "INSERT INTO TourImage (tour_id, image_url, is_thumbnail) VALUES (?, ?, 1)";
+                try (PreparedStatement psImg = conn.prepareStatement(imgSql)) {
+                    psImg.setInt(1, tourId);
+                    psImg.setString(2, tour.getThumbnailUrl().trim());
+                    psImg.executeUpdate();
+                }
+            }
+            
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean updateTour(Tour tour) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "UPDATE Tour SET category_id = ?, destination_id = ?, tour_name = ?, departure_location = ?, description = ?, duration_days = ?, base_price = ?, status = ? WHERE tour_id = ?";
+        try {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, tour.getCategoryId());
+                ps.setInt(2, tour.getDestinationId());
+                ps.setString(3, tour.getTourName());
+                ps.setString(4, tour.getDepartureLocation());
+                ps.setString(5, tour.getDescription());
+                ps.setInt(6, tour.getDurationDays());
+                ps.setDouble(7, tour.getBasePrice());
+                ps.setString(8, tour.getStatus());
+                ps.setInt(9, tour.getTourId());
+                ps.executeUpdate();
+            }
+            
+            if (tour.getThumbnailUrl() != null && !tour.getThumbnailUrl().trim().isEmpty()) {
+                String checkSql = "SELECT image_id FROM TourImage WHERE tour_id = ? AND is_thumbnail = 1";
+                int imgId = -1;
+                try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
+                    psCheck.setInt(1, tour.getTourId());
+                    try (ResultSet rs = psCheck.executeQuery()) {
+                        if (rs.next()) {
+                            imgId = rs.getInt("image_id");
+                        }
+                    }
+                }
+                
+                if (imgId != -1) {
+                    String updateImgSql = "UPDATE TourImage SET image_url = ? WHERE image_id = ?";
+                    try (PreparedStatement psUpd = conn.prepareStatement(updateImgSql)) {
+                        psUpd.setString(1, tour.getThumbnailUrl().trim());
+                        psUpd.setInt(2, imgId);
+                        psUpd.executeUpdate();
+                    }
+                } else {
+                    String insertImgSql = "INSERT INTO TourImage (tour_id, image_url, is_thumbnail) VALUES (?, ?, 1)";
+                    try (PreparedStatement psIns = conn.prepareStatement(insertImgSql)) {
+                        psIns.setInt(1, tour.getTourId());
+                        psIns.setString(2, tour.getThumbnailUrl().trim());
+                        psIns.executeUpdate();
+                    }
+                }
+            }
+            
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean updateTourStatus(int tourId, String status) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "UPDATE Tour SET status = ? WHERE tour_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, tourId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
