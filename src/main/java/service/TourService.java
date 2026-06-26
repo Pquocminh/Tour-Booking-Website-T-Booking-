@@ -4,6 +4,7 @@ import dao.TourDAO;
 import model.Tour;
 import model.Category;
 import model.Destination;
+import model.TourSchedule;
 import java.util.List;
 
 public class TourService {
@@ -58,5 +59,21 @@ public class TourService {
 
     public boolean updateTourStatus(int tourId, String status) {
         return tourDAO.updateTourStatus(tourId, status);
+    }
+
+    public List<TourSchedule> getTourSchedulesAdmin(int tourId) {
+        return tourDAO.getAllTourSchedulesByTourId(tourId);
+    }
+
+    public TourSchedule getTourScheduleById(int scheduleId) {
+        return tourDAO.getTourScheduleById(scheduleId);
+    }
+
+    public boolean updateTourSchedule(TourSchedule schedule) {
+        return tourDAO.updateTourSchedule(schedule);
+    }
+
+    public Tour getTourByIdAdmin(int tourId) {
+        return tourDAO.getTourByIdAdmin(tourId);
     }
 }

@@ -227,6 +227,119 @@ public class TourDAO {
         return list;
     }
 
+    public List<TourSchedule> getAllTourSchedulesByTourId(int tourId) {
+        List<TourSchedule> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        String sql = "SELECT * FROM TourSchedule WHERE tour_id = ? ORDER BY departure_date ASC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tourId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TourSchedule sched = new TourSchedule();
+                    sched.setScheduleId(rs.getInt("schedule_id"));
+                    sched.setTourId(rs.getInt("tour_id"));
+                    sched.setDepartureDate(rs.getDate("departure_date"));
+                    sched.setReturnDate(rs.getDate("return_date"));
+                    sched.setPrice(rs.getDouble("price"));
+                    sched.setAvailableSlots(rs.getInt("available_slots"));
+                    sched.setTotalSlots(rs.getInt("total_slots"));
+                    sched.setStatus(rs.getString("status"));
+                    list.add(sched);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public TourSchedule getTourScheduleById(int scheduleId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return null;
+        }
+        String sql = "SELECT * FROM TourSchedule WHERE schedule_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, scheduleId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    TourSchedule sched = new TourSchedule();
+                    sched.setScheduleId(rs.getInt("schedule_id"));
+                    sched.setTourId(rs.getInt("tour_id"));
+                    sched.setDepartureDate(rs.getDate("departure_date"));
+                    sched.setReturnDate(rs.getDate("return_date"));
+                    sched.setPrice(rs.getDouble("price"));
+                    sched.setAvailableSlots(rs.getInt("available_slots"));
+                    sched.setTotalSlots(rs.getInt("total_slots"));
+                    sched.setStatus(rs.getString("status"));
+                    return sched;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public boolean updateTourSchedule(TourSchedule sched) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "UPDATE TourSchedule SET tour_id = ?, departure_date = ?, return_date = ?, price = ?, total_slots = ?, available_slots = ?, status = ? WHERE schedule_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sched.getTourId());
+            ps.setDate(2, sched.getDepartureDate());
+            ps.setDate(3, sched.getReturnDate());
+            ps.setDouble(4, sched.getPrice());
+            ps.setInt(5, sched.getTotalSlots());
+            ps.setInt(6, sched.getAvailableSlots());
+            ps.setString(7, sched.getStatus());
+            ps.setInt(8, sched.getScheduleId());
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Tour getTourByIdAdmin(int tourId) {
+        String sql = TOUR_SELECT_QUERY + "WHERE t.tour_id = ?";
+        List<Tour> tours = executeTourQuery(sql, new Object[]{tourId});
+        return tours.isEmpty() ? null : tours.get(0);
+    }
+
     public Tour getTourDetails(int tourId) {
         Tour tour = getTourById(tourId);
         if (tour != null) {

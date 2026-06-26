@@ -84,6 +84,7 @@
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Manage Tours</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/categories"><i class="fa-solid fa-tags me-2 text-primary"></i>Manage Categories</a></li>
+                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/capacity"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Manage Capacity</a></li>
                                     </c:if>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout</a></li>
@@ -186,6 +187,7 @@
                             <th>Price</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            <th class="text-center" style="width: 120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -227,6 +229,11 @@
                                                     <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-pause me-1"></i>Inactive</span>
                                                 </c:otherwise>
                                             </c:choose>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                                <i class="fa-solid fa-calendar-days me-1"></i>Schedules
+                                            </a>
                                         </td>
                                     </tr>
                                 </c:forEach>
