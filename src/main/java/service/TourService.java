@@ -2,6 +2,8 @@ package service;
 
 import dao.TourDAO;
 import model.Tour;
+import model.Category;
+import model.Destination;
 import java.util.List;
 
 public class TourService {
@@ -32,5 +34,29 @@ public class TourService {
 
     public Tour getTourDetails(int tourId) {
         return tourDAO.getTourDetails(tourId);
+    }
+
+    public List<Category> getAllCategories() {
+        return tourDAO.getAllCategories();
+    }
+
+    public List<Destination> getAllDestinations() {
+        return tourDAO.getAllDestinations();
+    }
+
+    public List<Tour> searchToursAdmin(String keyword, String status, Integer categoryId, Integer destinationId) {
+        return tourDAO.searchToursAdmin(keyword, status, categoryId, destinationId);
+    }
+
+    public boolean addTour(Tour tour) {
+        return tourDAO.addTour(tour);
+    }
+
+    public boolean updateTour(Tour tour) {
+        return tourDAO.updateTour(tour);
+    }
+
+    public boolean updateTourStatus(int tourId, String status) {
+        return tourDAO.updateTourStatus(tourId, status);
     }
 }
