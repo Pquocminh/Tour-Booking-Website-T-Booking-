@@ -196,9 +196,15 @@
                                                 <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                             </span>
                                         </div>
-                                        <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn tour-btn">
-                                            Details <i class="fa-solid fa-arrow-right ms-1"></i>
-                                        </a>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-2 fw-semibold" style="border-width: 2px;">
+                                                Details
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/view-tour-schedules?id=${t.tourId}" class="btn btn-sm btn-primary rounded-pill px-3 py-2 text-white fw-semibold" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border: none;">
+                                                Schedules <i class="fa-regular fa-calendar-days ms-1"></i>
+                                            </a>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

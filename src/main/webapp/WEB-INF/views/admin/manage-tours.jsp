@@ -186,13 +186,16 @@
                             <th>Price</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         <c:choose>
                             <c:when test="${empty tours}">
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="9" class="text-center py-5 text-muted">
+
                                         <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
                                         No tours found matching the selected search criteria.
                                     </td>
@@ -228,7 +231,13 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td>
+                                            <a href="${pageContext.request.contextPath}/admin/view-tour-schedules?id=${t.tourId}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="fa-regular fa-calendar-days me-1"></i>Schedules
+                                            </a>
+                                        </td>
                                     </tr>
+
                                 </c:forEach>
                             </c:otherwise>
                         </c:choose>
