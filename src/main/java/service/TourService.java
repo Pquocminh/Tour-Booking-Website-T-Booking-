@@ -73,6 +73,10 @@ public class TourService {
         return tourDAO.updateTourSchedule(schedule);
     }
 
+    public List<TourSchedule> getAllTourSchedules(Integer tourId) {
+        return tourDAO.getAllTourSchedules(tourId);
+    }
+
     public Tour getTourByIdAdmin(int tourId) {
         return tourDAO.getTourByIdAdmin(tourId);
     }

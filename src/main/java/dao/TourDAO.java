@@ -265,6 +265,51 @@ public class TourDAO {
         return list;
     }
 
+    public List<TourSchedule> getAllTourSchedules(Integer tourId) {
+        List<TourSchedule> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT ts.*, t.tour_name FROM TourSchedule ts JOIN Tour t ON ts.tour_id = t.tour_id");
+        if (tourId != null && tourId > 0) {
+            sql.append(" WHERE ts.tour_id = ?");
+        }
+        sql.append(" ORDER BY ts.departure_date DESC");
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if (tourId != null && tourId > 0) {
+                ps.setInt(1, tourId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TourSchedule sched = new TourSchedule();
+                    sched.setScheduleId(rs.getInt("schedule_id"));
+                    sched.setTourId(rs.getInt("tour_id"));
+                    sched.setDepartureDate(rs.getDate("departure_date"));
+                    sched.setReturnDate(rs.getDate("return_date"));
+                    sched.setPrice(rs.getDouble("price"));
+                    sched.setAvailableSlots(rs.getInt("available_slots"));
+                    sched.setTotalSlots(rs.getInt("total_slots"));
+                    sched.setStatus(rs.getString("status"));
+                    sched.setTourName(rs.getString("tour_name"));
+                    list.add(sched);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
     public TourSchedule getTourScheduleById(int scheduleId) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();

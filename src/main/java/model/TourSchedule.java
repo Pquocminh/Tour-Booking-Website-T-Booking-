@@ -10,6 +10,8 @@ public class TourSchedule {
     private double price;
     private int availableSlots;
     private String status;
+    private String tourName;
+
 
     public TourSchedule() {
     }
@@ -88,5 +90,13 @@ public class TourSchedule {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getTourName() {
+        return tourName;
+    }
+
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
     }
 }
