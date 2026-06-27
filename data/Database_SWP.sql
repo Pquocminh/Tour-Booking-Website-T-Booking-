@@ -29,6 +29,7 @@ CREATE TABLE Account (
     email VARCHAR(100) NOT NULL UNIQUE,
     full_name NVARCHAR(100) NOT NULL,
     phone VARCHAR(20),
+    address NVARCHAR(MAX),
     role VARCHAR(20) NOT NULL, -- Customer, Staff, Admin
     status VARCHAR(20) NOT NULL, -- Active, Inactive, Deleted
     created_at DATETIME DEFAULT GETDATE(),
@@ -214,12 +215,12 @@ GO
 -- ========================================================
 
 -- 1. Insert Data for Account
-INSERT INTO Account (username, password_hash, email, full_name, phone, role, status, last_login)
+INSERT INTO Account (username, password_hash, email, full_name, phone, address, role, status, last_login)
 VALUES 
-('admin_tour', 'e10adc3949ba59abbe56e057f20f883e', 'admin@bookingtour.vn', N'Administrator', '0901234567', 'Admin', 'Active', NULL),
-('staff_01', 'e10adc3949ba59abbe56e057f20f883e', 'staff1@bookingtour.vn', N'Sales Staff 01', '0912345678', 'Staff', 'Active', NULL),
-('minhpq', 'e10adc3949ba59abbe56e057f20f883e', 'minhpq.khachhang@gmail.com', N'Pham Quoc Minh', '0923456789', 'Customer', 'Active', NULL),
-('khachhang2', 'e10adc3949ba59abbe56e057f20f883e', 'khachhang2@gmail.com', N'Nguyen Van A', '0934567890', 'Customer', 'Active', NULL);
+('admin_tour', 'e10adc3949ba59abbe56e057f20f883e', 'admin@bookingtour.vn', N'Administrator', '0901234567', NULL, 'Admin', 'Active', NULL),
+('staff_01', 'e10adc3949ba59abbe56e057f20f883e', 'staff1@bookingtour.vn', N'Sales Staff 01', '0912345678', NULL, 'Staff', 'Active', NULL),
+('minhpq', 'e10adc3949ba59abbe56e057f20f883e', 'minhpq.khachhang@gmail.com', N'Pham Quoc Minh', '0923456789', N'Can Tho', 'Customer', 'Active', NULL),
+('khachhang2', 'e10adc3949ba59abbe56e057f20f883e', 'khachhang2@gmail.com', N'Nguyen Van A', '0934567890', N'Ho Chi Minh City', 'Customer', 'Active', NULL);
 GO
 
 -- 2. Insert Data for Category

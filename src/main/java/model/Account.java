@@ -9,6 +9,7 @@ public class Account {
     private String email;
     private String fullName;
     private String phone;
+    private String address;
     private String role;
     private String status;
     private Timestamp createdAt;
@@ -17,13 +18,14 @@ public class Account {
     }
 
     public Account(int accountId, String username, String passwordHash, String email, 
-                   String fullName, String phone, String role, String status, Timestamp createdAt) {
+                   String fullName, String phone, String address, String role, String status, Timestamp createdAt) {
         this.accountId = accountId;
         this.username = username;
         this.passwordHash = passwordHash;
         this.email = email;
         this.fullName = fullName;
         this.phone = phone;
+        this.address = address;
         this.role = role;
         this.status = status;
         this.createdAt = createdAt;
@@ -75,6 +77,14 @@ public class Account {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getRole() {

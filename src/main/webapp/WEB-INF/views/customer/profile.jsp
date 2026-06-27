@@ -127,6 +127,22 @@
                             <i class="fa-regular fa-address-card text-primary me-2"></i>My Profile
                         </h2>
                         
+                        <!-- Alerts -->
+                        <c:if test="${not empty sessionScope.successMessage}">
+                            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                                <i class="fa-regular fa-circle-check me-2"></i>${sessionScope.successMessage}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <c:remove var="successMessage" scope="session" />
+                        </c:if>
+                        <c:if test="${not empty sessionScope.errorMessage}">
+                            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                                <i class="fa-solid fa-circle-exclamation me-2"></i>${sessionScope.errorMessage}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <c:remove var="errorMessage" scope="session" />
+                        </c:if>
+                        
                         <div class="row g-4">
                             <!-- Left Sidebar: Profile Summary (Read-Only) -->
                             <div class="col-md-4">
@@ -206,10 +222,32 @@
                                                 <div class="info-value mt-1" style="font-size: 1.1rem;">@${sessionScope.user.username}</div>
                                             </div>
                                         </div>
+
+                                        <!-- Address -->
+                                        <div class="col-12">
+                                            <div class="p-3 bg-white rounded-3 border border-color shadow-sm h-100">
+                                                <div class="info-label"><i class="fa-solid fa-map-location-dot me-1 text-primary"></i>Address</div>
+                                                <div class="info-value mt-1" style="font-size: 1.1rem;">
+                                                    <c:choose>
+                                                        <c:when test="${not empty sessionScope.user.address && sessionScope.user.address != ''}">
+                                                            ${sessionScope.user.address}
+                                                        </c:when>
+                                                        <c:otherwise><span class="text-muted font-weight-normal" style="font-size: 0.95rem;">Not Provided</span></c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     
-                                    <div class="d-flex justify-content-between align-items-center mt-5">
-                                        <div></div>
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 gap-3">
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary px-4 py-2 font-weight-semibold" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i> Edit Profile
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary px-4 py-2 font-weight-semibold bg-white" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                                <i class="fa-solid fa-key me-1"></i> Change Password
+                                            </button>
+                                        </div>
                                         <a href="${pageContext.request.contextPath}/tours" class="btn tour-btn px-4 py-2 font-weight-semibold">
                                             Back to Tours <i class="fa-solid fa-chevron-right ms-1"></i>
                                         </a>
@@ -223,6 +261,83 @@
             </div>
         </div>
     </main>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header bg-primary text-white" style="border-radius: var(--bs-border-radius-xl) var(--bs-border-radius-xl) 0 0;">
+            <h5 class="modal-title" id="editProfileModalLabel"><i class="fa-solid fa-user-pen me-2"></i>Edit Profile</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="${pageContext.request.contextPath}/profile" method="POST">
+              <div class="modal-body p-4">
+                  <input type="hidden" name="action" value="updateProfile">
+                  
+                  <div class="mb-3">
+                      <label for="fullName" class="form-label font-weight-semibold">Full Name <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" value="${sessionScope.user.fullName}" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="email" class="form-label font-weight-semibold">Email Address <span class="text-danger">*</span></label>
+                      <input type="email" class="form-control form-control-lg" id="email" name="email" value="${sessionScope.user.email}" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="phone" class="form-label font-weight-semibold">Phone Number</label>
+                      <input type="text" class="form-control form-control-lg" id="phone" name="phone" value="${sessionScope.user.phone}">
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="address" class="form-label font-weight-semibold">Address</label>
+                      <textarea class="form-control" id="address" name="address" rows="3">${sessionScope.user.address}</textarea>
+                  </div>
+              </div>
+              <div class="modal-footer border-0 p-4 pt-0">
+                  <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <div class="modal-header bg-dark text-white" style="border-radius: var(--bs-border-radius-xl) var(--bs-border-radius-xl) 0 0;">
+            <h5 class="modal-title" id="changePasswordModalLabel"><i class="fa-solid fa-lock me-2"></i>Change Password</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="${pageContext.request.contextPath}/profile" method="POST">
+              <div class="modal-body p-4">
+                  <input type="hidden" name="action" value="changePassword">
+                  
+                  <div class="mb-3">
+                      <label for="oldPassword" class="form-label font-weight-semibold">Current Password <span class="text-danger">*</span></label>
+                      <input type="password" class="form-control form-control-lg" id="oldPassword" name="oldPassword" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="newPassword" class="form-label font-weight-semibold">New Password <span class="text-danger">*</span></label>
+                      <input type="password" class="form-control form-control-lg" id="newPassword" name="newPassword" required>
+                  </div>
+                  
+                  <div class="mb-3">
+                      <label for="confirmPassword" class="form-label font-weight-semibold">Confirm New Password <span class="text-danger">*</span></label>
+                      <input type="password" class="form-control form-control-lg" id="confirmPassword" name="confirmPassword" required>
+                  </div>
+              </div>
+              <div class="modal-footer border-0 p-4 pt-0">
+                  <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-dark px-4">Update Password</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="text-center text-lg-start">
