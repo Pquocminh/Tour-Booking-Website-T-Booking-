@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Categories | Admin Dashboard</title>
+    <title>Promotion Details | Admin Dashboard</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
     <!-- Custom Style CSS -->
@@ -19,11 +19,11 @@
             padding: 80px 0 50px 0;
             text-align: center;
         }
-        .filter-panel {
+        .detail-panel {
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 20px;
-            padding: 24px;
+            padding: 30px;
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
@@ -41,6 +41,18 @@
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 0.05em;
+        }
+        .info-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 500;
         }
     </style>
 </head>
@@ -101,13 +113,20 @@
     <!-- Dashboard Header Banner -->
     <header class="hero-section">
         <div class="container">
-            <h1 class="hero-title">Category <span>Management</span></h1>
-            <p class="hero-subtitle">View and update tour categories in the system</p>
+            <h1 class="hero-title">Promotion <span>Details</span></h1>
+            <p class="hero-subtitle">Detailed information and mapped tours for the selected promotion</p>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
+
+        <!-- Back Button -->
+        <div class="mb-4">
+            <a href="${pageContext.request.contextPath}/admin/promotions" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i>Back to Promotions
+            </a>
+        </div>
 
         <!-- Notification Alerts -->
         <c:if test="${not empty errorMessage}">
@@ -115,90 +134,95 @@
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>${errorMessage}
             </div>
         </c:if>
-        <c:if test="${not empty sessionScope.successMessage}">
-            <div class="alert alert-success border-0 rounded-3 mb-4" role="alert" style="background-color: #f0fdf4; color: #15803d; font-size: 0.9rem;">
-                <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
+
+        <!-- Promotion Main Info Card -->
+        <section class="detail-panel">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-percent me-2 text-primary"></i>General Information</h4>
+                <c:choose>
+                    <c:when test="${'Active'.equalsIgnoreCase(promotion.status)}">
+                        <span class="badge bg-success-subtle text-success border border-success px-4 py-2 rounded-pill"><i class="fa-solid fa-circle-check me-1"></i>Active</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="badge bg-danger-subtle text-danger border border-danger px-4 py-2 rounded-pill"><i class="fa-solid fa-circle-pause me-1"></i>Inactive</span>
+                    </c:otherwise>
+                </c:choose>
             </div>
-            <c:remove var="successMessage" scope="session" />
-        </c:if>
 
-        <!-- Edit Category Panel (visible only when editing) -->
-        <c:if test="${not empty editCategory}">
-            <section class="filter-panel">
-                <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Edit Category</h4>
-                <form method="POST" action="${pageContext.request.contextPath}/admin/categories">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" value="${editCategory.categoryId}">
-                    
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label text-muted small fw-bold">Category ID</label>
-                            <input type="text" class="form-control rounded-3" value="#${editCategory.categoryId}" readonly disabled>
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label text-muted small fw-bold">Category Name</label>
-                            <input type="text" name="categoryName" class="form-control rounded-3" value="${editCategory.categoryName}" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label text-muted small fw-bold">Description</label>
-                            <textarea name="description" class="form-control rounded-3" rows="3">${editCategory.description}</textarea>
-                        </div>
-                    </div>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <span class="info-label d-block mb-1">Promotion ID</span>
+                    <span class="info-value">#${promotion.promotionId}</span>
+                </div>
+                <div class="col-md-5">
+                    <span class="info-label d-block mb-1">Promotion Name</span>
+                    <span class="info-value text-dark fw-semibold">${promotion.promotionName}</span>
+                </div>
+                <div class="col-md-4">
+                    <span class="info-label d-block mb-1">Discount Rate</span>
+                    <span class="info-value text-primary fw-bold" style="font-size: 1.3rem;">${promotion.discountPercent}% OFF</span>
+                </div>
+                <div class="col-md-6 border-top pt-3">
+                    <span class="info-label d-block mb-1"><i class="fa-regular fa-calendar-check me-1"></i>Start Date</span>
+                    <span class="info-value"><fmt:formatDate value="${promotion.startDate}" pattern="yyyy-MM-dd" /></span>
+                </div>
+                <div class="col-md-6 border-top pt-3">
+                    <span class="info-label d-block mb-1"><i class="fa-regular fa-calendar-xmark me-1"></i>End Date</span>
+                    <span class="info-value"><fmt:formatDate value="${promotion.endDate}" pattern="yyyy-MM-dd" /></span>
+                </div>
+            </div>
+        </section>
 
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="${pageContext.request.contextPath}/admin/categories" class="btn btn-outline-secondary px-4 rounded-3">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary px-4 rounded-3 text-white">
-                            Save Changes
-                        </button>
-                    </div>
-                </form>
-            </section>
-        </c:if>
-
-        <!-- Categories Table List -->
+        <!-- Applying Tours Section -->
         <section class="table-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-tags me-2 text-primary"></i>Categories List</h4>
-                <span class="badge bg-primary rounded-pill py-2 px-3">${categories.size()} Category(ies)</span>
+                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-plane-departure me-2 text-primary"></i>Applied Tours</h4>
+                <span class="badge bg-primary rounded-pill py-2 px-3">${tours.size()} Tour(s)</span>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 100px;">ID</th>
-                            <th>Category Name</th>
-                            <th>Description</th>
-                            <th style="width: 120px;" class="text-center">Actions</th>
+                            <th style="width: 100px;">Tour ID</th>
+                            <th>Tour Name</th>
+                            <th>Category</th>
+                            <th>Destination</th>
+                            <th>Duration</th>
+                            <th>Base Price</th>
+                            <th style="width: 120px;">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:choose>
-                            <c:when test="${empty categories}">
+                            <c:when test="${empty tours}">
                                 <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">
-                                        <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
-                                        No categories found in the system.
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="fa-solid fa-circle-info display-4 mb-3 d-block text-secondary"></i>
+                                        This promotion is not applied to any tour package.
                                     </td>
                                 </tr>
                             </c:when>
                             <c:otherwise>
-                                <c:forEach var="cat" items="${categories}">
+                                <c:forEach var="tour" items="${tours}">
                                     <tr>
-                                        <td class="fw-semibold text-muted">#${cat.categoryId}</td>
-                                        <td>
-                                            <span class="fw-semibold text-dark d-block">${cat.categoryName}</span>
+                                        <td class="fw-semibold text-muted">#${tour.tourId}</td>
+                                        <td class="fw-semibold text-dark">${tour.tourName}</td>
+                                        <td><span class="badge bg-light text-primary border border-primary">${tour.category.categoryName}</span></td>
+                                        <td>${tour.destination.destinationName}</td>
+                                        <td>${tour.durationDays} Days</td>
+                                        <td class="fw-bold text-primary">
+                                            <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                         </td>
                                         <td>
-                                            <span class="text-muted small">${not empty cat.description ? cat.description : 'No description provided.'}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/admin/categories?action=edit&id=${cat.categoryId}" 
-                                               class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                <i class="fa-solid fa-pen-to-square me-1"></i>Edit
-                                            </a>
+                                            <c:choose>
+                                                <c:when test="${'Active'.equalsIgnoreCase(tour.status)}">
+                                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill">Active</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 rounded-pill">Inactive</span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
                                     </tr>
                                 </c:forEach>
