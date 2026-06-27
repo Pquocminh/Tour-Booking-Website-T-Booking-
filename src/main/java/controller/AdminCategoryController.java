@@ -44,7 +44,24 @@ public class AdminCategoryController extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         
-        if ("update".equalsIgnoreCase(action)) {
+        if ("create".equalsIgnoreCase(action)) {
+            String categoryName = request.getParameter("categoryName");
+            String description = request.getParameter("description");
+            if (categoryName == null || categoryName.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Category name is required!");
+            } else {
+                Category cat = new Category();
+                cat.setCategoryName(categoryName);
+                cat.setDescription(description);
+                if (categoryService.addCategory(cat)) {
+                    request.getSession().setAttribute("successMessage", "Category created successfully!");
+                    response.sendRedirect(request.getContextPath() + "/admin/categories");
+                    return;
+                } else {
+                    request.setAttribute("errorMessage", "Failed to create category. Please try again.");
+                }
+            }
+        } else if ("update".equalsIgnoreCase(action)) {
             String idParam = request.getParameter("id");
             String categoryName = request.getParameter("categoryName");
             String description = request.getParameter("description");
@@ -69,6 +86,20 @@ public class AdminCategoryController extends HttpServlet {
             } catch (NumberFormatException e) {
                 request.setAttribute("errorMessage", "Invalid Category ID!");
             }
+        } else if ("delete".equalsIgnoreCase(action)) {
+            String idParam = request.getParameter("id");
+            try {
+                int id = Integer.parseInt(idParam);
+                if (categoryService.deleteCategory(id)) {
+                    request.getSession().setAttribute("successMessage", "Category deleted successfully!");
+                } else {
+                    request.getSession().setAttribute("errorMessage", "Failed to delete category. It might contain tours!");
+                }
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("errorMessage", "Invalid Category ID!");
+            }
+            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            return;
         }
 
         List<Category> categories = categoryService.getAllCategories();
