@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Tours | Admin Dashboard</title>
+    <title>Manage Promotions | Admin Dashboard</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
     <!-- Custom Style CSS -->
@@ -15,13 +15,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .tour-thumbnail {
-            width: 80px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
         .hero-section {
             padding: 80px 0 50px 0;
             text-align: center;
@@ -49,6 +42,14 @@
             font-size: 0.8rem;
             letter-spacing: 0.05em;
         }
+        .tour-list-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 12px;
+            background: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -65,7 +66,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/tours">Tours</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/tours">Tours</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">About Us</a>
@@ -108,139 +109,166 @@
     <!-- Dashboard Header Banner -->
     <header class="hero-section">
         <div class="container">
-            <h1 class="hero-title">Tour <span>Management</span></h1>
-            <p class="hero-subtitle">Search, filter and inspect available tour packages in the system</p>
+            <h1 class="hero-title">Promotion <span>Management</span></h1>
+            <p class="hero-subtitle">Create, list, and delete promotional offers for tours</p>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="container">
 
-        <!-- Search & Filters Panel -->
+        <!-- Notification Alerts -->
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>${errorMessage}
+            </div>
+        </c:if>
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>${sessionScope.errorMessage}
+            </div>
+            <c:remove var="errorMessage" scope="session" />
+        </c:if>
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success border-0 rounded-3 mb-4" role="alert" style="background-color: #f0fdf4; color: #15803d; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
+            </div>
+            <c:remove var="successMessage" scope="session" />
+        </c:if>
+
+        <!-- Create Promotion Panel -->
         <section class="filter-panel">
-            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>Search & Filters</h4>
-            <form method="GET" action="${pageContext.request.contextPath}/admin/tours">
+            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-circle-plus me-2 text-primary"></i>Create New Promotion</h4>
+            <form method="POST" action="${pageContext.request.contextPath}/admin/promotions">
+                <input type="hidden" name="action" value="create">
+                
                 <div class="row g-3">
-                    <!-- Keyword search -->
-                    <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Keyword Search</label>
-                        <input type="text" name="search" class="form-control rounded-3" placeholder="Name, desc..." value="${not empty searchKeyword ? searchKeyword : ''}">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Promotion Name</label>
+                        <input type="text" name="promotionName" class="form-control rounded-3" placeholder="e.g., Summer Special discount" required>
                     </div>
-                    
-                    <!-- Status Filter -->
+                    <div class="col-md-3">
+                        <label class="form-label text-muted small fw-bold">Discount Percent (%)</label>
+                        <input type="number" name="discountPercent" class="form-control rounded-3" min="1" max="100" placeholder="10" required>
+                    </div>
                     <div class="col-md-3">
                         <label class="form-label text-muted small fw-bold">Status</label>
-                        <select name="status" class="form-select rounded-3">
-                            <option value="All" ${selectedStatus == 'All' ? 'selected' : ''}>All Statuses</option>
-                            <option value="Active" ${selectedStatus == 'Active' ? 'selected' : ''}>Active</option>
-                            <option value="Inactive" ${selectedStatus == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                        <select name="status" class="form-select rounded-3" required>
+                            <option value="Active" selected>Active</option>
+                            <option value="Inactive">Inactive</option>
                         </select>
                     </div>
-
-                    <!-- Category Filter -->
-                    <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Category</label>
-                        <select name="category" class="form-select rounded-3">
-                            <option value="">All Categories</option>
-                            <c:forEach var="c" items="${categories}">
-                                <option value="${c.categoryId}" ${selectedCategory == c.categoryId ? 'selected' : ''}>${c.categoryName}</option>
-                            </c:forEach>
-                        </select>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">Start Date</label>
+                        <input type="date" name="startDate" class="form-control rounded-3" required>
                     </div>
-
-                    <!-- Destination Filter -->
-                    <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Destination</label>
-                        <select name="destination" class="form-select rounded-3">
-                            <option value="">All Destinations</option>
-                            <c:forEach var="d" items="${destinations}">
-                                <option value="${d.destinationId}" ${selectedDestination == d.destinationId ? 'selected' : ''}>${d.destinationName}</option>
-                            </c:forEach>
-                        </select>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small fw-bold">End Date</label>
+                        <input type="date" name="endDate" class="form-control rounded-3" required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label text-muted small fw-bold">Apply to Tours</label>
+                        <div class="tour-list-scroll">
+                            <c:choose>
+                                <c:when test="${empty tours}">
+                                    <p class="text-muted small mb-0">No active tours available to apply promotions.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="tour" items="${tours}">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" name="tourIds" value="${tour.tourId}" id="tour_${tour.tourId}">
+                                            <label class="form-check-label small" for="tour_${tour.tourId}">
+                                                <span class="text-primary fw-bold">[#${tour.tourId}]</span> ${tour.tourName} 
+                                                <span class="text-muted">(${tour.durationDays} Days, <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>)</span>
+                                            </label>
+                                        </div>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="${pageContext.request.contextPath}/admin/tours" class="btn btn-outline-secondary px-4 rounded-3">
-                        Clear
-                    </a>
+                    <button type="reset" class="btn btn-outline-secondary px-4 rounded-3">
+                        Reset Form
+                    </button>
                     <button type="submit" class="btn btn-primary px-4 rounded-3 text-white">
-                        Filter
+                        Create Promotion
                     </button>
                 </div>
             </form>
         </section>
 
-        <!-- Tours Table List -->
+        <!-- Promotions Table List -->
         <section class="table-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-list me-2 text-primary"></i>Tours List</h4>
-                <span class="badge bg-primary rounded-pill py-2 px-3">${tours.size()} Package(s)</span>
+                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-percent me-2 text-primary"></i>Promotions List</h4>
+                <span class="badge bg-primary rounded-pill py-2 px-3">${promotions.size()} Promotion(s)</span>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 100px;">Thumbnail</th>
-                            <th>Tour ID & Name</th>
-                            <th>Category</th>
-                            <th>Destination</th>
-                            <th>Departure</th>
-                            <th>Price</th>
-                            <th>Duration</th>
+                            <th style="width: 80px;">ID</th>
+                            <th>Promotion Name</th>
+                            <th>Discount (%)</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
                             <th>Status</th>
-                            <th class="text-center" style="width: 120px;">Actions</th>
+                            <th style="width: 220px;" class="text-center">Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         <c:choose>
-                            <c:when test="${empty tours}">
+                            <c:when test="${empty promotions}">
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="7" class="text-center py-5 text-muted">
                                         <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
-                                        No tours found matching the selected search criteria.
+                                        No promotions found in the system.
                                     </td>
                                 </tr>
                             </c:when>
                             <c:otherwise>
-                                <c:forEach var="t" items="${tours}">
+                                <c:forEach var="promo" items="${promotions}">
                                     <tr>
+                                        <td class="fw-semibold text-muted">#${promo.promotionId}</td>
                                         <td>
-                                            <img src="${not empty t.thumbnailUrl ? pageContext.request.contextPath.concat(t.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&auto=format&fit=crop'}" 
-                                                 alt="Tour Thumbnail" 
-                                                 class="tour-thumbnail"
-                                                 onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=100&auto=format&fit=crop'">
+                                            <span class="fw-semibold text-dark d-block">${promo.promotionName}</span>
                                         </td>
-                                        <td>
-                                            <span class="text-muted small d-block">ID: #${t.tourId}</span>
-                                            <span class="fw-semibold text-dark d-block" title="${t.tourName}">${t.tourName}</span>
-                                        </td>
-                                        <td><span class="badge bg-light text-primary border border-primary">${t.category.categoryName}</span></td>
-                                        <td>${t.destination.destinationName}</td>
-                                        <td>${t.departureLocation}</td>
-                                        <td class="fw-bold text-primary">
-                                            <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
-                                        </td>
-                                        <td>${t.durationDays} Days</td>
+                                        <td class="fw-bold text-primary">${promo.discountPercent}%</td>
+                                        <td><fmt:formatDate value="${promo.startDate}" pattern="yyyy-MM-dd" /></td>
+                                        <td><fmt:formatDate value="${promo.endDate}" pattern="yyyy-MM-dd" /></td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${'Active'.equalsIgnoreCase(t.status)}">
-                                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-check me-1"></i>Active</span>
+                                                <c:when test="${'Active'.equalsIgnoreCase(promo.status)}">
+                                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill">Active</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-pause me-1"></i>Inactive</span>
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 rounded-pill">Inactive</span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
                                         <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                                <i class="fa-solid fa-calendar-days me-1"></i>Schedules
-                                            </a>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="${pageContext.request.contextPath}/admin/promotions?action=view&id=${promo.promotionId}" 
+                                                   class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                    <i class="fa-solid fa-eye me-1"></i>Details
+                                                </a>
+                                                <form method="POST" action="${pageContext.request.contextPath}/admin/promotions" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this promotion? This action cannot be undone.');"
+                                                      style="display:inline-block;">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="${promo.promotionId}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                        <i class="fa-solid fa-trash me-1"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
-
                                 </c:forEach>
                             </c:otherwise>
                         </c:choose>
