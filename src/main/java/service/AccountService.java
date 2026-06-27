@@ -90,4 +90,43 @@ public class AccountService {
         String md5Hash = PasswordUtils.hashMD5(newPassword);
         return accountDAO.updatePassword(email, md5Hash);
     }
+
+    public String updateProfile(Account acc) {
+        if (acc.getFullName() == null || acc.getFullName().trim().isEmpty()) {
+            return "Full Name is required!";
+        }
+        if (acc.getEmail() == null || acc.getEmail().trim().isEmpty()) {
+            return "Email is required!";
+        }
+        if (accountDAO.checkEmailExistsForOtherAccount(acc.getEmail(), acc.getAccountId())) {
+            return "Email is already in use by another account!";
+        }
+        boolean updated = accountDAO.updateProfile(acc);
+        if (updated) {
+            return "success";
+        }
+        return "Failed to update profile. Please try again.";
+    }
+
+    public String changePassword(Account acc, String oldPassword, String newPassword, String confirmPassword) {
+        if (!newPassword.equals(confirmPassword)) {
+            return "New passwords do not match!";
+        }
+        if (oldPassword == null || oldPassword.trim().isEmpty() || newPassword == null || newPassword.trim().isEmpty()) {
+            return "Passwords cannot be empty!";
+        }
+        
+        String hashedOld = PasswordUtils.hashMD5(oldPassword);
+        if (!hashedOld.equals(acc.getPasswordHash())) {
+            return "Incorrect old password!";
+        }
+        
+        String hashedNew = PasswordUtils.hashMD5(newPassword);
+        boolean updated = accountDAO.updatePasswordById(acc.getAccountId(), hashedNew);
+        if (updated) {
+            acc.setPasswordHash(hashedNew);
+            return "success";
+        }
+        return "Failed to change password. Please try again.";
+    }
 }
