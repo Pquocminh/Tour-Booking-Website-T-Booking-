@@ -81,9 +81,12 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2" aria-labelledby="navbarDropdown" style="border-radius: 12px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
                                     <li><span class="dropdown-item-text text-muted" style="font-size: 0.8rem;">Role: ${sessionScope.user.role}</span></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i>My Profile</a></li>
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Manage Tours</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/categories"><i class="fa-solid fa-tags me-2 text-primary"></i>Manage Categories</a></li>
+                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/capacity"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Manage Capacity</a></li>
+                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/schedules"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Manage Schedules</a></li>
                                     </c:if>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Logout</a></li>
@@ -186,7 +189,7 @@
                             <th>Price</th>
                             <th>Duration</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th class="text-center" style="width: 120px;">Actions</th>
                         </tr>
                     </thead>
 
@@ -194,8 +197,7 @@
                         <c:choose>
                             <c:when test="${empty tours}">
                                 <tr>
-                                    <td colspan="9" class="text-center py-5 text-muted">
-
+                                    <td colspan="8" class="text-center py-5 text-muted">
                                         <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
                                         No tours found matching the selected search criteria.
                                     </td>
@@ -231,9 +233,9 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/admin/view-tour-schedules?id=${t.tourId}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                <i class="fa-regular fa-calendar-days me-1"></i>Schedules
+                                        <td class="text-center">
+                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                                <i class="fa-solid fa-calendar-days me-1"></i>Schedules
                                             </a>
                                         </td>
                                     </tr>

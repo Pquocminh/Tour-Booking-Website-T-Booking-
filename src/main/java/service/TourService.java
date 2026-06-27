@@ -61,12 +61,23 @@ public class TourService {
         return tourDAO.updateTourStatus(tourId, status);
     }
 
-    public List<TourSchedule> getTourSchedules(int tourId) {
-        return tourDAO.getTourSchedules(tourId);
+    public List<TourSchedule> getTourSchedulesAdmin(int tourId) {
+        return tourDAO.getAllTourSchedulesByTourId(tourId);
     }
 
-    public List<TourSchedule> getTourSchedulesAdmin(int tourId) {
-        return tourDAO.getTourSchedulesAdmin(tourId);
+    public TourSchedule getTourScheduleById(int scheduleId) {
+        return tourDAO.getTourScheduleById(scheduleId);
+    }
+
+    public boolean updateTourSchedule(TourSchedule schedule) {
+        return tourDAO.updateTourSchedule(schedule);
+    }
+
+    public List<TourSchedule> getAllTourSchedules(Integer tourId) {
+        return tourDAO.getAllTourSchedules(tourId);
+    }
+
+    public Tour getTourByIdAdmin(int tourId) {
+        return tourDAO.getTourByIdAdmin(tourId);
     }
 }
-
