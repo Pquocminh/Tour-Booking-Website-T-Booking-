@@ -23,3 +23,6 @@
 # Maven build folder
 /target/
 /TBooking/target/
+
+# Ignore agent config folder
+.agents/
