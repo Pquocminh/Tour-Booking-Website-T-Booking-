@@ -83,6 +83,45 @@ public class CategoryDAO {
         }
     }
     
+    public boolean addCategory(Category category) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "INSERT INTO Category (category_name, description) VALUES (?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, category.getCategoryName());
+            ps.setString(2, category.getDescription());
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeConnection(conn);
+        }
+    }
+    
+    public boolean deleteCategory(int categoryId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "DELETE FROM Category WHERE category_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Typically fails due to foreign key constraints if tours exist
+        } finally {
+            closeConnection(conn);
+        }
+    }
+    
     private void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {

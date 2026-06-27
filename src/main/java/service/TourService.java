@@ -61,6 +61,11 @@ public class TourService {
         return tourDAO.updateTourStatus(tourId, status);
     }
 
+    public boolean deleteTour(int tourId) {
+        // Soft delete by setting status to Inactive
+        return tourDAO.updateTourStatus(tourId, "Inactive");
+    }
+
     public List<TourSchedule> getTourSchedulesAdmin(int tourId) {
         return tourDAO.getAllTourSchedulesByTourId(tourId);
     }

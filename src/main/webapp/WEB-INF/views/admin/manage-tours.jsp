@@ -175,7 +175,12 @@
         <section class="table-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-list me-2 text-primary"></i>Tours List</h4>
-                <span class="badge bg-primary rounded-pill py-2 px-3">${tours.size()} Package(s)</span>
+                <div>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${tours.size()} Package(s)</span>
+                    <a href="${pageContext.request.contextPath}/admin/tours?action=create" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                        <i class="fa-solid fa-plus me-1"></i> New Tour
+                    </a>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -190,7 +195,7 @@
                             <th>Price</th>
                             <th>Duration</th>
                             <th>Status</th>
-                            <th class="text-center" style="width: 120px;">Actions</th>
+                            <th class="text-center" style="width: 250px;">Actions</th>
                         </tr>
                     </thead>
 
@@ -198,7 +203,7 @@
                         <c:choose>
                             <c:when test="${empty tours}">
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="9" class="text-center py-5 text-muted">
                                         <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
                                         No tours found matching the selected search criteria.
                                     </td>
@@ -235,9 +240,22 @@
                                             </c:choose>
                                         </td>
                                         <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                                <i class="fa-solid fa-calendar-days me-1"></i>Schedules
+                                            <a href="${pageContext.request.contextPath}/admin/tours?action=view&id=${t.tourId}" class="btn btn-outline-info btn-sm rounded-pill px-2 me-1" title="View Details">
+                                                <i class="fa-solid fa-eye"></i>
                                             </a>
+                                            <a href="${pageContext.request.contextPath}/admin/tours?action=edit&id=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-2 me-1" title="Edit Tour">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="Schedules">
+                                                <i class="fa-solid fa-calendar-days"></i>
+                                            </a>
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/tours" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this tour as Inactive?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="${t.tourId}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete (Inactive)">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
 

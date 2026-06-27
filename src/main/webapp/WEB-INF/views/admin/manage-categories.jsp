@@ -161,7 +161,12 @@
         <section class="table-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-tags me-2 text-primary"></i>Categories List</h4>
-                <span class="badge bg-primary rounded-pill py-2 px-3">${categories.size()} Category(ies)</span>
+                <div>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${categories.size()} Category(ies)</span>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                        <i class="fa-solid fa-plus me-1"></i> New Category
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -171,7 +176,7 @@
                             <th style="width: 100px;">ID</th>
                             <th>Category Name</th>
                             <th>Description</th>
-                            <th style="width: 120px;" class="text-center">Actions</th>
+                            <th style="width: 250px;" class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -195,10 +200,50 @@
                                             <span class="text-muted small">${not empty cat.description ? cat.description : 'No description provided.'}</span>
                                         </td>
                                         <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 me-1" 
+                                                    data-bs-toggle="modal" data-bs-target="#viewCategoryModal${cat.categoryId}">
+                                                <i class="fa-solid fa-eye me-1"></i>View
+                                            </button>
                                             <a href="${pageContext.request.contextPath}/admin/categories?action=edit&id=${cat.categoryId}" 
-                                               class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                               class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">
                                                 <i class="fa-solid fa-pen-to-square me-1"></i>Edit
                                             </a>
+                                            <form method="POST" action="${pageContext.request.contextPath}/admin/categories" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="${cat.categoryId}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                    <i class="fa-solid fa-trash me-1"></i>Delete
+                                                </button>
+                                            </form>
+
+                                            <!-- View Modal -->
+                                            <div class="modal fade text-start" id="viewCategoryModal${cat.categoryId}" tabindex="-1" aria-hidden="true">
+                                              <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                  <div class="modal-header border-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-tag me-2"></i>Category Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="text-muted small fw-bold">Category ID</label>
+                                                        <p class="fs-5 fw-semibold text-dark mb-0">#${cat.categoryId}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="text-muted small fw-bold">Category Name</label>
+                                                        <p class="fs-5 fw-semibold text-dark mb-0">${cat.categoryName}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="text-muted small fw-bold">Description</label>
+                                                        <p class="text-dark mb-0">${not empty cat.description ? cat.description : 'No description provided.'}</p>
+                                                    </div>
+                                                  </div>
+                                                  <div class="modal-footer border-0 pt-0">
+                                                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -209,6 +254,35 @@
             </div>
         </section>
     </main>
+
+    <!-- Create Category Modal -->
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+          <form method="POST" action="${pageContext.request.contextPath}/admin/categories">
+            <input type="hidden" name="action" value="create">
+            <div class="modal-header border-0 pb-0">
+              <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-folder-plus me-2"></i>Create New Category</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-bold">Category Name <span class="text-danger">*</span></label>
+                  <input type="text" name="categoryName" class="form-control rounded-3" required placeholder="e.g. Luxury Tours">
+              </div>
+              <div class="mb-3">
+                  <label class="form-label text-muted small fw-bold">Description</label>
+                  <textarea name="description" class="form-control rounded-3" rows="4" placeholder="Briefly describe this category..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary rounded-pill px-4">Create Category</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="text-center p-4 border-top border-secondary text-muted" style="background: rgba(15, 23, 42, 0.95); margin-top: 50px;">

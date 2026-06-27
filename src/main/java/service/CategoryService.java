@@ -19,11 +19,25 @@ public class CategoryService {
         if (category == null || category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
             return false;
         }
-        // Trim category properties
         category.setCategoryName(category.getCategoryName().trim());
         if (category.getDescription() != null) {
             category.setDescription(category.getDescription().trim());
         }
         return categoryDAO.updateCategory(category);
+    }
+    
+    public boolean addCategory(Category category) {
+        if (category == null || category.getCategoryName() == null || category.getCategoryName().trim().isEmpty()) {
+            return false;
+        }
+        category.setCategoryName(category.getCategoryName().trim());
+        if (category.getDescription() != null) {
+            category.setDescription(category.getDescription().trim());
+        }
+        return categoryDAO.addCategory(category);
+    }
+    
+    public boolean deleteCategory(int categoryId) {
+        return categoryDAO.deleteCategory(categoryId);
     }
 }
