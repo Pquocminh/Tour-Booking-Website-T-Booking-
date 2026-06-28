@@ -656,4 +656,100 @@ public class TourDAO {
             }
         }
     }
+
+    public boolean addTourSchedule(TourSchedule sched) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, total_slots, available_slots, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sched.getTourId());
+            ps.setDate(2, sched.getDepartureDate());
+            ps.setDate(3, sched.getReturnDate());
+            ps.setDouble(4, sched.getPrice());
+            ps.setInt(5, sched.getTotalSlots());
+            ps.setInt(6, sched.getAvailableSlots());
+            ps.setString(7, sched.getStatus());
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean deleteTourSchedule(int scheduleId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "DELETE FROM TourSchedule WHERE schedule_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, scheduleId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public List<model.Booking> getBookingsByScheduleId(int scheduleId) {
+        List<model.Booking> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        String sql = "SELECT * FROM Booking WHERE schedule_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, scheduleId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    model.Booking b = new model.Booking();
+                    b.setBookingId(rs.getInt("booking_id"));
+                    b.setCustomerId(rs.getInt("customer_id"));
+                    b.setScheduleId(rs.getInt("schedule_id"));
+                    b.setBookingDate(rs.getTimestamp("booking_date"));
+                    b.setNumberOfPeople(rs.getInt("number_of_people"));
+                    b.setContactName(rs.getString("contact_name"));
+                    b.setContactPhone(rs.getString("contact_phone"));
+                    b.setTotalPrice(rs.getDouble("total_price"));
+                    b.setStatus(rs.getString("status"));
+                    list.add(b);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
 }
+
