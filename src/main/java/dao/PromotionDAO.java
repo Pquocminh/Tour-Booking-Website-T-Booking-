@@ -208,6 +208,62 @@ public class PromotionDAO {
         }
     }
 
+    public boolean updatePromotion(Promotion p, List<Integer> tourIds) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sqlPromo = "UPDATE Promotion SET promotion_name = ?, discount_percent = ?, start_date = ?, end_date = ?, status = ? WHERE promotion_id = ?";
+        String sqlDeleteMapping = "DELETE FROM TourPromotion WHERE promotion_id = ?";
+        String sqlMapping = "INSERT INTO TourPromotion (promotion_id, tour_id) VALUES (?, ?)";
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Update Promotion table
+            try (PreparedStatement ps = conn.prepareStatement(sqlPromo)) {
+                ps.setString(1, p.getPromotionName());
+                ps.setInt(2, p.getDiscountPercent());
+                ps.setDate(3, p.getStartDate());
+                ps.setDate(4, p.getEndDate());
+                ps.setString(5, p.getStatus());
+                ps.setInt(6, p.getPromotionId());
+                ps.executeUpdate();
+            }
+
+            // 2. Delete old mappings
+            try (PreparedStatement psDel = conn.prepareStatement(sqlDeleteMapping)) {
+                psDel.setInt(1, p.getPromotionId());
+                psDel.executeUpdate();
+            }
+
+            // 3. Insert new mappings
+            if (tourIds != null && !tourIds.isEmpty()) {
+                try (PreparedStatement psMap = conn.prepareStatement(sqlMapping)) {
+                    for (int tourId : tourIds) {
+                        psMap.setInt(1, p.getPromotionId());
+                        psMap.setInt(2, tourId);
+                        psMap.addBatch();
+                    }
+                    psMap.executeBatch();
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeConnection(conn);
+        }
+    }
+
     private void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {
