@@ -85,4 +85,17 @@ public class TourService {
     public Tour getTourByIdAdmin(int tourId) {
         return tourDAO.getTourByIdAdmin(tourId);
     }
+
+    public boolean addTourSchedule(TourSchedule schedule) {
+        return tourDAO.addTourSchedule(schedule);
+    }
+
+    public boolean deleteTourSchedule(int scheduleId) {
+        return tourDAO.deleteTourSchedule(scheduleId);
+    }
+
+    public List<model.Booking> getBookingsByScheduleId(int scheduleId) {
+        return tourDAO.getBookingsByScheduleId(scheduleId);
+    }
 }
+
