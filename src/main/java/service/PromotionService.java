@@ -50,4 +50,28 @@ public class PromotionService {
         }
         return promotionDAO.deletePromotion(id);
     }
+
+    public boolean updatePromotion(Promotion p, List<Integer> tourIds) {
+        if (p == null || p.getPromotionId() <= 0 || p.getPromotionName() == null || p.getPromotionName().trim().isEmpty()) {
+            return false;
+        }
+        if (p.getDiscountPercent() <= 0 || p.getDiscountPercent() > 100) {
+            return false;
+        }
+        if (p.getStartDate() == null || p.getEndDate() == null) {
+            return false;
+        }
+        if (p.getStartDate().after(p.getEndDate())) {
+            return false;
+        }
+
+        p.setPromotionName(p.getPromotionName().trim());
+        if (p.getStatus() == null || p.getStatus().trim().isEmpty()) {
+            p.setStatus("Active");
+        } else {
+            p.setStatus(p.getStatus().trim());
+        }
+
+        return promotionDAO.updatePromotion(p, tourIds);
+    }
 }

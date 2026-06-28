@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Promotions | Admin Dashboard</title>
+    <title>Edit Promotion | Admin Dashboard</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
     <!-- Custom Style CSS -->
@@ -19,31 +19,16 @@
             padding: 80px 0 50px 0;
             text-align: center;
         }
-        .filter-panel {
+        .form-panel {
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        }
-        .table-panel {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            padding: 30px;
             margin-bottom: 50px;
-        }
-        .table-custom th {
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
         .tour-list-scroll {
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 10px;
@@ -109,8 +94,8 @@
     <!-- Dashboard Header Banner -->
     <header class="hero-section">
         <div class="container">
-            <h1 class="hero-title">Promotion <span>Management</span></h1>
-            <p class="hero-subtitle">Create, list, and delete promotional offers for tours</p>
+            <h1 class="hero-title">Edit <span>Promotion</span></h1>
+            <p class="hero-subtitle">Update promotional details and select applicable tour packages</p>
         </div>
     </header>
 
@@ -123,48 +108,47 @@
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>${errorMessage}
             </div>
         </c:if>
-        <c:if test="${not empty sessionScope.errorMessage}">
-            <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
-                <i class="fa-solid fa-triangle-exclamation me-2"></i>${sessionScope.errorMessage}
-            </div>
-            <c:remove var="errorMessage" scope="session" />
-        </c:if>
-        <c:if test="${not empty sessionScope.successMessage}">
-            <div class="alert alert-success border-0 rounded-3 mb-4" role="alert" style="background-color: #f0fdf4; color: #15803d; font-size: 0.9rem;">
-                <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
-            </div>
-            <c:remove var="successMessage" scope="session" />
-        </c:if>
 
-        <!-- Create Promotion Panel -->
-        <section class="filter-panel">
-            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-circle-plus me-2 text-primary"></i>Create New Promotion</h4>
+        <!-- Edit Promotion Form -->
+        <section class="form-panel col-lg-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0 fw-bold" style="color: var(--text-main);">
+                    <i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Promotion Details
+                </h4>
+                <span class="badge bg-warning text-dark rounded-pill py-2 px-3">ID: #${promotion.promotionId}</span>
+            </div>
+            
             <form method="POST" action="${pageContext.request.contextPath}/admin/promotions">
-                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="id" value="${promotion.promotionId}">
                 
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <label class="form-label text-muted small fw-bold">Promotion Name</label>
-                        <input type="text" name="promotionName" class="form-control rounded-3" placeholder="e.g., Summer Special discount" required>
+                        <input type="text" name="promotionName" class="form-control rounded-3" value="${promotion.promotionName}" required>
                     </div>
-                    <div class="col-md-3">
+                    
+                    <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">Discount Percent (%)</label>
-                        <input type="number" name="discountPercent" class="form-control rounded-3" min="1" max="100" placeholder="10" required>
+                        <input type="number" name="discountPercent" class="form-control rounded-3" min="1" max="100" value="${promotion.discountPercent}" required>
                     </div>
-                    <div class="col-md-3">
+                    
+                    <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">Status</label>
                         <select name="status" class="form-select rounded-3" required>
-                            <option value="Active" selected>Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="Active" ${'Active'.equalsIgnoreCase(promotion.status) ? 'selected' : ''}>Active</option>
+                            <option value="Inactive" ${'Inactive'.equalsIgnoreCase(promotion.status) ? 'selected' : ''}>Inactive</option>
                         </select>
                     </div>
+                    
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">Start Date</label>
-                        <input type="date" name="startDate" class="form-control rounded-3" required>
+                        <input type="date" name="startDate" class="form-control rounded-3" value="${promotion.startDate}" required>
                     </div>
+                    
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">End Date</label>
-                        <input type="date" name="endDate" class="form-control rounded-3" required>
+                        <input type="date" name="endDate" class="form-control rounded-3" value="${promotion.endDate}" required>
                     </div>
                     
                     <div class="col-12">
@@ -176,8 +160,16 @@
                                 </c:when>
                                 <c:otherwise>
                                     <c:forEach var="tour" items="${tours}">
+                                        <!-- Check if tour is currently mapped to this promotion -->
+                                        <c:set var="isMapped" value="false" />
+                                        <c:forEach var="mappedId" items="${mappedTourIds}">
+                                            <c:if test="${mappedId == tour.tourId}">
+                                                <c:set var="isMapped" value="true" />
+                                            </c:if>
+                                        </c:forEach>
+                                        
                                         <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" name="tourIds" value="${tour.tourId}" id="tour_${tour.tourId}">
+                                            <input class="form-check-input" type="checkbox" name="tourIds" value="${tour.tourId}" id="tour_${tour.tourId}" ${isMapped ? 'checked' : ''}>
                                             <label class="form-check-label small" for="tour_${tour.tourId}">
                                                 <span class="text-primary fw-bold">[#${tour.tourId}]</span> ${tour.tourName} 
                                                 <span class="text-muted">(${tour.durationDays} Days, <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>)</span>
@@ -191,93 +183,14 @@
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <button type="reset" class="btn btn-outline-secondary px-4 rounded-3">
-                        Reset Form
-                    </button>
-                    <button type="submit" class="btn btn-primary px-4 rounded-3 text-white">
-                        Create Promotion
+                    <a href="${pageContext.request.contextPath}/admin/promotions" class="btn btn-outline-secondary px-4 rounded-3">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-warning px-4 rounded-3 text-dark fw-semibold">
+                        Update Promotion
                     </button>
                 </div>
             </form>
-        </section>
-
-        <!-- Promotions Table List -->
-        <section class="table-panel">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-percent me-2 text-primary"></i>Promotions List</h4>
-                <span class="badge bg-primary rounded-pill py-2 px-3">${promotions.size()} Promotion(s)</span>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-custom table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 80px;">ID</th>
-                            <th>Promotion Name</th>
-                            <th>Discount (%)</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                            <th style="width: 220px;" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${empty promotions}">
-                                <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
-                                        <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
-                                        No promotions found in the system.
-                                    </td>
-                                </tr>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="promo" items="${promotions}">
-                                    <tr>
-                                        <td class="fw-semibold text-muted">#${promo.promotionId}</td>
-                                        <td>
-                                            <span class="fw-semibold text-dark d-block">${promo.promotionName}</span>
-                                        </td>
-                                        <td class="fw-bold text-primary">${promo.discountPercent}%</td>
-                                        <td><fmt:formatDate value="${promo.startDate}" pattern="yyyy-MM-dd" /></td>
-                                        <td><fmt:formatDate value="${promo.endDate}" pattern="yyyy-MM-dd" /></td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${'Active'.equalsIgnoreCase(promo.status)}">
-                                                    <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill">Active</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 rounded-pill">Inactive</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="text-center">                                            <div class="d-flex justify-content-center gap-2">
-                                                <a href="${pageContext.request.contextPath}/admin/promotions?action=view&id=${promo.promotionId}" 
-                                                   class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                    <i class="fa-solid fa-eye me-1"></i>Details
-                                                </a>
-                                                <a href="${pageContext.request.contextPath}/admin/promotions?action=edit&id=${promo.promotionId}" 
-                                                   class="btn btn-sm btn-outline-warning rounded-pill px-3">
-                                                    <i class="fa-solid fa-pen me-1"></i>Edit
-                                                </a>
-                                                <form method="POST" action="${pageContext.request.contextPath}/admin/promotions" 
-                                                      onsubmit="return confirm('Are you sure you want to delete this promotion? This action cannot be undone.');"
-                                                      style="display:inline-block;">
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="id" value="${promo.promotionId}">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                        <i class="fa-solid fa-trash me-1"></i>Delete
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
         </section>
     </main>
 
