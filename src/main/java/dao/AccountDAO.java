@@ -237,4 +237,47 @@ public class AccountDAO {
         }
         return true;
     }
+
+    public Account getAccountByUsernameOrEmail(String input) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return null;
+        }
+
+        String sql = "SELECT * FROM Account WHERE username = ? OR email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, input);
+            ps.setString(2, input);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Account acc = new Account();
+                    acc.setAccountId(rs.getInt("account_id"));
+                    acc.setUsername(rs.getString("username"));
+                    acc.setPasswordHash(rs.getString("password_hash"));
+                    acc.setEmail(rs.getString("email"));
+                    acc.setFullName(rs.getString("full_name"));
+                    acc.setPhone(rs.getString("phone"));
+                    acc.setAddress(rs.getString("address"));
+                    acc.setRole(rs.getString("role"));
+                    acc.setStatus(rs.getString("status"));
+                    acc.setCreatedAt(rs.getTimestamp("created_at"));
+                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    return acc;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 }
+

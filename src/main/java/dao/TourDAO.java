@@ -751,5 +751,101 @@ public class TourDAO {
         }
         return list;
     }
+
+    public boolean reserveSlots(model.Booking booking) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        PreparedStatement psSelect = null;
+        PreparedStatement psInsert = null;
+        PreparedStatement psUpdate = null;
+        ResultSet rs = null;
+
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Lock and select the schedule to verify available slots
+            String selectSql = "SELECT available_slots, total_slots, status, price FROM TourSchedule WITH (UPDLOCK) WHERE schedule_id = ?";
+            psSelect = conn.prepareStatement(selectSql);
+            psSelect.setInt(1, booking.getScheduleId());
+            rs = psSelect.executeQuery();
+
+            if (!rs.next()) {
+                conn.rollback();
+                return false;
+            }
+
+            int availableSlots = rs.getInt("available_slots");
+            String status = rs.getString("status");
+
+            // Validate status and slots availability
+            if (!"Open".equalsIgnoreCase(status) || availableSlots < booking.getNumberOfPeople()) {
+                conn.rollback();
+                return false;
+            }
+
+            // 2. Insert booking record
+            String insertSql = "INSERT INTO Booking (customer_id, schedule_id, booking_date, number_of_people, contact_name, contact_phone, total_price, status) VALUES (?, ?, GETDATE(), ?, ?, ?, ?, ?)";
+            psInsert = conn.prepareStatement(insertSql);
+            psInsert.setInt(1, booking.getCustomerId());
+            psInsert.setInt(2, booking.getScheduleId());
+            psInsert.setInt(3, booking.getNumberOfPeople());
+            psInsert.setString(4, booking.getContactName());
+            psInsert.setString(5, booking.getContactPhone());
+            psInsert.setDouble(6, booking.getTotalPrice());
+            psInsert.setString(7, booking.getStatus());
+
+            int bookingRows = psInsert.executeUpdate();
+            if (bookingRows == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            // 3. Update TourSchedule capacity
+            int newAvailableSlots = availableSlots - booking.getNumberOfPeople();
+            String newStatus = (newAvailableSlots == 0) ? "Full" : "Open";
+
+            String updateSql = "UPDATE TourSchedule SET available_slots = ?, status = ? WHERE schedule_id = ?";
+            psUpdate = conn.prepareStatement(updateSql);
+            psUpdate.setInt(1, newAvailableSlots);
+            psUpdate.setString(2, newStatus);
+            psUpdate.setInt(3, booking.getScheduleId());
+
+            int scheduleRows = psUpdate.executeUpdate();
+            if (scheduleRows == 0) {
+                conn.rollback();
+                return false;
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException e) {}
+            try { if (psSelect != null) psSelect.close(); } catch (SQLException e) {}
+            try { if (psInsert != null) psInsert.close(); } catch (SQLException e) {}
+            try { if (psUpdate != null) psUpdate.close(); } catch (SQLException e) {}
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
+
 

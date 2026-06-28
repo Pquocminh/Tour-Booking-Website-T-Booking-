@@ -97,5 +97,10 @@ public class TourService {
     public List<model.Booking> getBookingsByScheduleId(int scheduleId) {
         return tourDAO.getBookingsByScheduleId(scheduleId);
     }
+
+    public boolean reserveSlots(model.Booking booking) {
+        return tourDAO.reserveSlots(booking);
+    }
 }
+
 
