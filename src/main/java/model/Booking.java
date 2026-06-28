@@ -121,4 +121,23 @@ public class Booking {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    private String tourName;
+    private java.sql.Date departureDate;
+
+    public String getTourName() {
+        return tourName;
+    }
+
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
+    }
+
+    public java.sql.Date getDepartureDate() {
+        return departureDate;
+    }
+
+    public void setDepartureDate(java.sql.Date departureDate) {
+        this.departureDate = departureDate;
+    }
 }
