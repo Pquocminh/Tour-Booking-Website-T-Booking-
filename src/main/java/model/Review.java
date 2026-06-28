@@ -100,4 +100,32 @@ public class Review {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    private String tourName;
+    private java.sql.Date departureDate;
+    private Timestamp bookingDate;
+
+    public String getTourName() {
+        return tourName;
+    }
+
+    public void setTourName(String tourName) {
+        this.tourName = tourName;
+    }
+
+    public java.sql.Date getDepartureDate() {
+        return departureDate;
+    }
+
+    public void setDepartureDate(java.sql.Date departureDate) {
+        this.departureDate = departureDate;
+    }
+
+    public Timestamp getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(Timestamp bookingDate) {
+        this.bookingDate = bookingDate;
+    }
 }
