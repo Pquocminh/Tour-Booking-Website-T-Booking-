@@ -202,7 +202,7 @@
                             <th>Price</th>
                             <th class="text-center">Booked / Total Capacity</th>
                             <th>Status</th>
-                            <th style="width: 220px;" class="text-center">Actions</th>
+                            <th style="width: 320px;" class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,6 +250,11 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
+                                                <button class="btn btn-outline-success btn-sm rounded-pill px-3" 
+                                                        ${(!'Open'.equalsIgnoreCase(s.status) || s.availableSlots <= 0) ? 'disabled' : ''}
+                                                        onclick="openReserveModal(${s.scheduleId}, '${s.tourName.replace("'", "\\'")}', ${s.availableSlots})">
+                                                    <i class="fa-solid fa-ticket me-1"></i>Reserve
+                                                </button>
                                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
                                                         onclick="viewDetails(${s.scheduleId})">
                                                     <i class="fa-solid fa-eye me-1"></i>Detail
@@ -260,6 +265,7 @@
                                                 </button>
                                             </div>
                                         </td>
+
                                     </tr>
                                 </c:forEach>
                             </c:otherwise>
@@ -431,6 +437,66 @@
         </div>
     </div>
 
+    <!-- Reserve Slots Modal -->
+    <div class="modal fade" id="reserveSlotsModal" tabindex="-1" aria-labelledby="reserveSlotsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="reserveSlotsModalLabel"><i class="fa-solid fa-ticket text-success me-2"></i>Reserve Tour Slots</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="${pageContext.request.contextPath}/admin/staff/schedules">
+                    <input type="hidden" name="action" value="reserve">
+                    <input type="hidden" id="reserveScheduleId" name="scheduleId">
+                    <input type="hidden" name="tourId" value="${selectedTourId}">
+                    
+                    <div class="modal-body py-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Tour Package</label>
+                            <input type="text" class="form-control rounded-3 bg-light" id="reserveTourName" readonly disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Available Slots</label>
+                            <input type="text" class="form-control rounded-3 bg-light" id="reserveAvailableSlotsInfo" readonly disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="customerIdentifier" class="form-label text-muted small fw-bold">Customer Username or Email</label>
+                            <input type="text" class="form-control rounded-3" id="customerIdentifier" name="customerIdentifier" placeholder="e.g. minhpq" required>
+                            <div class="form-text text-muted small">Enter the username or email of a registered customer.</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="reserveContactName" class="form-label text-muted small fw-bold">Contact Name</label>
+                                <input type="text" class="form-control rounded-3" id="reserveContactName" name="contactName" placeholder="e.g. Pham Quoc Minh" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reserveContactPhone" class="form-label text-muted small fw-bold">Contact Phone</label>
+                                <input type="text" class="form-control rounded-3" id="reserveContactPhone" name="contactPhone" placeholder="e.g. 0923456789" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reserveNumSlots" class="form-label text-muted small fw-bold">Number of slots to reserve</label>
+                            <input type="number" class="form-control rounded-3" id="reserveNumSlots" name="numberOfPeople" min="1" required placeholder="e.g. 2" oninput="validateReserveSlots()">
+                            <div class="alert alert-danger d-none border-0 py-2 small rounded-3 mt-2" id="reserveModalErrorAlert">
+                                <i class="fa-solid fa-circle-exclamation me-1"></i>Cannot reserve more than the available slots.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success px-4 rounded-pill text-white" id="submitReserveBtn">Reserve Slots</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Footer -->
     <footer class="text-center p-4 border-top border-secondary text-muted" style="background: rgba(15, 23, 42, 0.95); margin-top: 50px;">
         &copy; 2026 T-Booking Staff Dashboard. All rights reserved.
@@ -586,6 +652,43 @@
                     detailModal.hide();
                 });
         }
+
+        function openReserveModal(scheduleId, tourName, availableSlots) {
+            document.getElementById('reserveScheduleId').value = scheduleId;
+            document.getElementById('reserveTourName').value = tourName;
+            document.getElementById('reserveAvailableSlotsInfo').value = availableSlots + " slots left";
+            
+            var numSlotsInput = document.getElementById('reserveNumSlots');
+            numSlotsInput.value = '1';
+            numSlotsInput.max = availableSlots;
+            
+            document.getElementById('customerIdentifier').value = '';
+            document.getElementById('reserveContactName').value = '';
+            document.getElementById('reserveContactPhone').value = '';
+            
+            document.getElementById('reserveModalErrorAlert').classList.add('d-none');
+            document.getElementById('submitReserveBtn').disabled = false;
+            
+            var myModal = new bootstrap.Modal(document.getElementById('reserveSlotsModal'));
+            myModal.show();
+        }
+
+        function validateReserveSlots() {
+            var numSlotsInput = document.getElementById('reserveNumSlots');
+            var val = parseInt(numSlotsInput.value);
+            var maxVal = parseInt(numSlotsInput.max);
+            var errorAlert = document.getElementById('reserveModalErrorAlert');
+            var submitBtn = document.getElementById('submitReserveBtn');
+            
+            if (val > maxVal || val <= 0 || isNaN(val)) {
+                errorAlert.classList.remove('d-none');
+                submitBtn.disabled = true;
+            } else {
+                errorAlert.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        }
     </script>
+
 </body>
 </html>

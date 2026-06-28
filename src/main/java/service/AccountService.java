@@ -129,4 +129,9 @@ public class AccountService {
         }
         return "Failed to change password. Please try again.";
     }
+
+    public Account getAccountByUsernameOrEmail(String input) {
+        return accountDAO.getAccountByUsernameOrEmail(input);
+    }
 }
+

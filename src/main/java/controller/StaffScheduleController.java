@@ -13,8 +13,11 @@ import java.util.HashMap;
 import model.Tour;
 import model.TourSchedule;
 import model.Booking;
+import model.Account;
 import service.TourService;
+import service.AccountService;
 import com.google.gson.Gson;
+
 
 @WebServlet(name = "StaffScheduleController", urlPatterns = {"/admin/staff/schedules"})
 public class StaffScheduleController extends HttpServlet {
@@ -103,6 +106,11 @@ public class StaffScheduleController extends HttpServlet {
 
         if ("delete".equalsIgnoreCase(action)) {
             handleDeleteSchedule(request, response, tourIdParam);
+            return;
+        }
+
+        if ("reserve".equalsIgnoreCase(action)) {
+            handleReserveSlots(request, response, tourIdParam);
             return;
         }
 
@@ -206,4 +214,90 @@ public class StaffScheduleController extends HttpServlet {
 
         response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
     }
+
+    private void handleReserveSlots(HttpServletRequest request, HttpServletResponse response, String tourIdParam)
+            throws IOException {
+        String scheduleIdStr = request.getParameter("scheduleId");
+        String customerIdentifier = request.getParameter("customerIdentifier");
+        String contactName = request.getParameter("contactName");
+        String contactPhone = request.getParameter("contactPhone");
+        String numberOfPeopleStr = request.getParameter("numberOfPeople");
+        
+        String redirectUrl = request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : "");
+        
+        if (scheduleIdStr == null || customerIdentifier == null || contactName == null || contactPhone == null || numberOfPeopleStr == null) {
+            request.getSession().setAttribute("errorMessage", "Missing required fields to reserve slots!");
+            response.sendRedirect(redirectUrl);
+            return;
+        }
+        
+        try {
+            int scheduleId = Integer.parseInt(scheduleIdStr.trim());
+            int numberOfPeople = Integer.parseInt(numberOfPeopleStr.trim());
+            
+            if (numberOfPeople <= 0) {
+                request.getSession().setAttribute("errorMessage", "Number of slots must be positive!");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            AccountService accountService = new AccountService();
+            Account customer = accountService.getAccountByUsernameOrEmail(customerIdentifier.trim());
+            
+            if (customer == null) {
+                request.getSession().setAttribute("errorMessage", "Customer account with username or email '" + customerIdentifier + "' not found! Please check and try again.");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            if (!"Customer".equalsIgnoreCase(customer.getRole())) {
+                request.getSession().setAttribute("errorMessage", "Found account is a " + customer.getRole() + ", but bookings can only be reserved for Customer accounts!");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            TourSchedule sched = tourService.getTourScheduleById(scheduleId);
+            if (sched == null) {
+                request.getSession().setAttribute("errorMessage", "Tour schedule not found!");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            if (!"Open".equalsIgnoreCase(sched.getStatus())) {
+                request.getSession().setAttribute("errorMessage", "This schedule is currently " + sched.getStatus() + " and cannot receive reservations.");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            if (sched.getAvailableSlots() < numberOfPeople) {
+                request.getSession().setAttribute("errorMessage", "Not enough available slots! Only " + sched.getAvailableSlots() + " slots left, but tried to reserve " + numberOfPeople + " slots.");
+                response.sendRedirect(redirectUrl);
+                return;
+            }
+            
+            Booking booking = new Booking();
+            booking.setCustomerId(customer.getAccountId());
+            booking.setScheduleId(scheduleId);
+            booking.setNumberOfPeople(numberOfPeople);
+            booking.setContactName(contactName.trim());
+            booking.setContactPhone(contactPhone.trim());
+            booking.setTotalPrice(numberOfPeople * sched.getPrice());
+            booking.setStatus("Confirmed");
+            
+            boolean success = tourService.reserveSlots(booking);
+            if (success) {
+                request.getSession().setAttribute("successMessage", "Reserved " + numberOfPeople + " slots for " + contactName + " (Account: " + customer.getUsername() + ") successfully!");
+            } else {
+                request.getSession().setAttribute("errorMessage", "Failed to reserve slots in the database.");
+            }
+            
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("errorMessage", "Invalid format for schedule ID or number of people.");
+        } catch (Exception e) {
+            request.getSession().setAttribute("errorMessage", "An error occurred: " + e.getMessage());
+        }
+        
+        response.sendRedirect(redirectUrl);
+    }
 }
+
