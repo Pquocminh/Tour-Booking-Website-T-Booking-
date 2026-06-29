@@ -102,6 +102,7 @@ public class Review {
     }
 
     private String tourName;
+    private String customerName;
     private java.sql.Date departureDate;
     private Timestamp bookingDate;
 
@@ -111,6 +112,14 @@ public class Review {
 
     public void setTourName(String tourName) {
         this.tourName = tourName;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     public java.sql.Date getDepartureDate() {

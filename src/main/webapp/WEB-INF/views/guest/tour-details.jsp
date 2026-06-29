@@ -47,7 +47,10 @@
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i>My Profile</a></li>
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Manage Tours</a></li>
-                                        <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/categories"><i class="fa-solid fa-tags me-2 text-primary"></i>Manage Categories</a></li>
+                                          <c:if test="${sessionScope.user.role == 'Admin'}">
+                                              <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/categories"><i class="fa-solid fa-tags me-2 text-primary"></i>Manage Categories</a></li>
+                                          </c:if>
+                                          <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/staff/reviews"><i class="fa-solid fa-star me-2 text-primary"></i>Manage Reviews</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/capacity"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Manage Capacity</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/schedules"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Manage Schedules</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/promotions"><i class="fa-solid fa-percent me-2 text-primary"></i>Manage Promotions</a></li>
@@ -165,6 +168,47 @@
                                             <h5 class="fw-bold mb-2 text-primary">${iti.title}</h5>
                                             <p class="text-muted mb-0" style="white-space: pre-line;">${iti.description}</p>
                                         </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="glass-card p-4 mt-4 mb-4">
+                    <h4 class="details-section-title"><i class="fa-regular fa-star me-2 text-warning"></i>Customer Reviews</h4>
+                    <c:choose>
+                        <c:when test="${empty reviews}">
+                            <div class="p-3 text-center text-muted">
+                                <i class="fa-regular fa-comment-dots display-6 mb-2 text-light"></i>
+                                <p>No reviews yet for this tour. Be the first to leave a review!</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="review-list mt-3">
+                                <c:forEach var="r" items="${reviews}">
+                                    <div class="review-item p-3 mb-3 border rounded shadow-sm bg-white">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0 text-primary">${r.customerName}</h6>
+                                            <div class="text-warning small">
+                                                <c:forEach begin="1" end="${r.rating}">
+                                                    <i class="fa-solid fa-star"></i>
+                                                </c:forEach>
+                                                <c:forEach begin="${r.rating + 1}" end="5">
+                                                    <i class="fa-regular fa-star"></i>
+                                                </c:forEach>
+                                            </div>
+                                        </div>
+                                        <p class="mb-2 text-secondary">${r.comment}</p>
+                                        <div class="text-muted small mb-2"><fmt:formatDate value="${r.createdAt}" pattern="MMM dd, yyyy"/></div>
+                                        
+                                        <c:if test="${not empty r.staffResponse}">
+                                            <div class="mt-2 p-2 bg-light border-start border-3 border-primary rounded">
+                                                <div class="fw-bold text-primary mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-reply me-1"></i>Our Response:</div>
+                                                <p class="mb-0 text-secondary" style="font-size: 0.9rem;">${r.staffResponse}</p>
+                                            </div>
+                                        </c:if>
                                     </div>
                                 </c:forEach>
                             </div>

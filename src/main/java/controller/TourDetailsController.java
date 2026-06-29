@@ -6,7 +6,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import model.Tour;
+import model.Review;
+import dao.ReviewDAO;
 import service.TourService;
 
 @WebServlet(name = "TourDetailsController", urlPatterns = {"/tour-details"})
@@ -29,6 +32,11 @@ public class TourDetailsController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/tours");
                 return;
             }
+            
+            ReviewDAO reviewDAO = new ReviewDAO();
+            List<Review> reviews = reviewDAO.getVisibleReviewsByTourId(tourId);
+            request.setAttribute("reviews", reviews);
+
             request.setAttribute("tour", tour);
             request.getRequestDispatcher("/WEB-INF/views/guest/tour-details.jsp").forward(request, response);
         } catch (NumberFormatException e) {
