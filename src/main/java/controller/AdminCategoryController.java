@@ -17,6 +17,13 @@ public class AdminCategoryController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        jakarta.servlet.http.HttpSession session = request.getSession();
+        model.Account user = (model.Account) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         String action = request.getParameter("action");
         String idParam = request.getParameter("id");
 
@@ -42,6 +49,13 @@ public class AdminCategoryController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        jakarta.servlet.http.HttpSession session = request.getSession();
+        model.Account user = (model.Account) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         String action = request.getParameter("action");
         
         if ("create".equalsIgnoreCase(action)) {

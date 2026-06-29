@@ -202,4 +202,151 @@ public class ReviewDAO {
         }
         return false;
     }
+
+    public List<Review> getAllReviewsAdmin() {
+        List<Review> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+
+        String sql = "SELECT r.*, a.full_name AS customer_name, t.tour_name " +
+                     "FROM Review r " +
+                     "JOIN Account a ON r.customer_id = a.account_id " +
+                     "JOIN Booking b ON r.booking_id = b.booking_id " +
+                     "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
+                     "JOIN Tour t ON s.tour_id = t.tour_id " +
+                     "ORDER BY r.created_at DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Review r = new Review();
+                    r.setReviewId(rs.getInt("review_id"));
+                    r.setBookingId(rs.getInt("booking_id"));
+                    r.setCustomerId(rs.getInt("customer_id"));
+                    r.setRating(rs.getInt("rating"));
+                    r.setComment(rs.getString("comment"));
+                    r.setStaffResponse(rs.getString("staff_response"));
+                    r.setResponseDate(rs.getTimestamp("response_date"));
+                    r.setStatus(rs.getString("status"));
+                    r.setCreatedAt(rs.getTimestamp("created_at"));
+                    r.setCustomerName(rs.getString("customer_name"));
+                    r.setTourName(rs.getString("tour_name"));
+                    list.add(r);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    public boolean updateReviewResponse(int reviewId, String response) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        String sql = "UPDATE Review SET staff_response = ?, response_date = GETDATE() WHERE review_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, response);
+            ps.setInt(2, reviewId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean updateReviewStatus(int reviewId, String status) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        String sql = "UPDATE Review SET status = ? WHERE review_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, reviewId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public List<Review> getVisibleReviewsByTourId(int tourId) {
+        List<Review> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+
+        String sql = "SELECT r.*, a.full_name AS customer_name " +
+                     "FROM Review r " +
+                     "JOIN Account a ON r.customer_id = a.account_id " +
+                     "JOIN Booking b ON r.booking_id = b.booking_id " +
+                     "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
+                     "WHERE s.tour_id = ? AND r.status = 'Visible' " +
+                     "ORDER BY r.created_at DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tourId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Review r = new Review();
+                    r.setReviewId(rs.getInt("review_id"));
+                    r.setBookingId(rs.getInt("booking_id"));
+                    r.setCustomerId(rs.getInt("customer_id"));
+                    r.setRating(rs.getInt("rating"));
+                    r.setComment(rs.getString("comment"));
+                    r.setStaffResponse(rs.getString("staff_response"));
+                    r.setResponseDate(rs.getTimestamp("response_date"));
+                    r.setStatus(rs.getString("status"));
+                    r.setCreatedAt(rs.getTimestamp("created_at"));
+                    r.setCustomerName(rs.getString("customer_name"));
+                    list.add(r);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
 }
+
