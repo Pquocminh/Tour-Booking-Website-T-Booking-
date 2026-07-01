@@ -35,7 +35,11 @@ public class LoginGoogleController extends HttpServlet {
             if (acc != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", acc);
-                response.sendRedirect(request.getContextPath() + "/tours");
+                if ("Admin".equalsIgnoreCase(acc.getRole()) || "Staff".equalsIgnoreCase(acc.getRole())) {
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/tours");
+                }
                 return;
             }
         }

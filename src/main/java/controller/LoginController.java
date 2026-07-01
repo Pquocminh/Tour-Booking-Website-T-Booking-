@@ -18,8 +18,13 @@ public class LoginController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        if (session.getAttribute("user") != null) {
-            response.sendRedirect(request.getContextPath() + "/tours");
+        Account loggedInUser = (Account) session.getAttribute("user");
+        if (loggedInUser != null) {
+            if ("Admin".equalsIgnoreCase(loggedInUser.getRole()) || "Staff".equalsIgnoreCase(loggedInUser.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/tours");
+            }
             return;
         }
         request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
@@ -35,7 +40,11 @@ public class LoginController extends HttpServlet {
         if (acc != null) {
             HttpSession session = request.getSession();
             session.setAttribute("user", acc);
-            response.sendRedirect(request.getContextPath() + "/tours");
+            if ("Admin".equalsIgnoreCase(acc.getRole()) || "Staff".equalsIgnoreCase(acc.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/tours");
+            }
         } else {
             request.setAttribute("error", "Invalid username or password, or account is suspended!");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
