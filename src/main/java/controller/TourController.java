@@ -87,7 +87,7 @@ public class TourController extends HttpServlet {
         
         try {
             int tourId = Integer.parseInt(tourIdParam);
-            Tour tour = tourService.getTourById(tourId);
+            Tour tour = tourService.getTourDetails(tourId);
             
             if (tour == null) {
                 response.sendRedirect(request.getContextPath() + "/tours");
