@@ -81,6 +81,26 @@ public class SystemSettingDAO {
         }
     }
 
+    public String getSettingValueByKey(String key) throws SQLException {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            throw new SQLException("Could not connect to database! Connection is null.");
+        }
+        String sql = "SELECT setting_value FROM SystemSetting WHERE setting_key = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, key);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("setting_value");
+                }
+            }
+        } finally {
+            closeConnection(conn);
+        }
+        return null;
+    }
+
     public List<SystemSetting> getAllSettings() throws SQLException {
         List<SystemSetting> list = new ArrayList<>();
         DBContext db = new DBContext();
