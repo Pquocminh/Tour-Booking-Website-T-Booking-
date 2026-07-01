@@ -1,39 +1,30 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${not empty tour ? 'Edit Tour' : 'Create New Tour'} | Admin Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom Style -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    
-    <style>
-        body { background-color: #f8f9fa; }
-        .form-panel {
-            background: #fff;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-            margin: 40px auto;
-            max-width: 900px;
-        }
-        .section-title {
-            color: var(--text-main);
-            font-weight: 700;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 15px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<jsp:include page="layout/header.jsp">
+    <jsp:param name="pageTitle" value="${not empty tour ? 'Edit Tour' : 'Create New Tour'}" />
+    <jsp:param name="activeMenu" value="tours" />
+</jsp:include>
+<style>
+    body { background-color: #f8f9fa; }
+    .form-panel {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin: 40px auto;
+        max-width: 900px;
+    }
+    .section-title {
+        color: var(--text-main);
+        font-weight: 700;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 15px;
+    }
+</style>
+
+<div class="container-fluid p-0">
         <div class="form-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title mb-0 border-0 pb-0">
@@ -122,8 +113,10 @@
                 </div>
             </form>
         </div>
+
+<jsp:include page="layout/footer.jsp" />
     </div>
     
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+

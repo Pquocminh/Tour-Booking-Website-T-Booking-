@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/TBooking"/>
+<Context antiJARLocking="true" path="/TBooking" reloadable="true" docBase="e:\ki 5\SWP\main\TBooking\src\main\webapp" />

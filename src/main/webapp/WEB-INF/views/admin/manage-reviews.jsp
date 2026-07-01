@@ -1,112 +1,57 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Reviews | Admin Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom Style -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
-    
-    <style>
-        body { background-color: #f8f9fa; }
-        .table-panel {
-            background: #fff;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-            margin-bottom: 30px;
-        }
-        .table thead th {
-            border-bottom: 2px solid #f1f5f9;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        .table tbody td {
-            vertical-align: middle;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .star-rating {
-            color: #ffc107;
-            font-size: 0.9rem;
-        }
-        .comment-box {
-            max-width: 300px;
-            white-space: normal;
-        }
-        .response-box {
-            max-width: 300px;
-            background-color: #f8f9fa;
-            border-left: 3px solid var(--primary-color);
-            padding: 8px 12px;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.85rem;
-        }
-        .toggle-btn {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .toggle-btn:hover {
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-<body>
-    
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/tours">
-                <i class="fa-solid fa-plane-departure me-2"></i>T-Booking Admin
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link fw-medium" href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-chart-pie me-1 text-primary"></i> Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-medium" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-map-location-dot me-1 text-primary"></i> Tours</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-medium" href="${pageContext.request.contextPath}/admin/schedules"><i class="fa-solid fa-calendar-days me-1 text-primary"></i> Schedules</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active fw-bold text-primary" href="${pageContext.request.contextPath}/admin/staff/reviews"><i class="fa-solid fa-star me-1"></i> Reviews</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle bg-primary text-white px-3 rounded-pill fw-medium shadow-sm" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-user-circle me-1"></i> ${sessionScope.user != null ? sessionScope.user.fullName : 'Administrator'} (${sessionScope.user != null ? sessionScope.user.role : 'Admin'})
-                        </a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<jsp:include page="layout/header.jsp">
+    <jsp:param name="pageTitle" value="Manage Reviews" />
+    <jsp:param name="activeMenu" value="reviews" />
+</jsp:include>
+<style>
+    body { background-color: #f8f9fa; }
+    .table-panel {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin-bottom: 30px;
+    }
+    .table thead th {
+        border-bottom: 2px solid #f1f5f9;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .table tbody td {
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .star-rating {
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+    .comment-box {
+        max-width: 300px;
+        white-space: normal;
+    }
+    .response-box {
+        max-width: 300px;
+        background-color: #f8f9fa;
+        border-left: 3px solid var(--primary-color);
+        padding: 8px 12px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.85rem;
+    }
+    .toggle-btn {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toggle-btn:hover {
+        transform: scale(1.05);
+    }
+</style>
 
-    <div class="container-fluid px-4 py-4">
-        <div class="row mb-4 align-items-center">
-            <div class="col-md-6">
-                <h2 class="fw-bold text-dark mb-0">Manage Reviews</h2>
-                <p class="text-muted mb-0">View, respond to, and moderate customer reviews</p>
-            </div>
-        </div>
+<div class="container-fluid p-0">
 
         <!-- Alert Messages -->
         <c:if test="${not empty sessionScope.successMessage}">
@@ -261,8 +206,6 @@
             </div>
         </section>
     </div>
+    </div>
 
-    <!-- Bootstrap Bundle JS -->
-    <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<jsp:include page="layout/footer.jsp" />
