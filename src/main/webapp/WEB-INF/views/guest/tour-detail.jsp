@@ -105,6 +105,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2" aria-labelledby="navbarDropdown" style="max-height: 380px; overflow-y: auto; border-radius: 12px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
                                     <li><span class="dropdown-item-text text-muted" style="font-size: 0.8rem;">Role: ${sessionScope.user.role}</span></li>
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i>My Profile</a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart me-2 text-primary"></i>My Wishlist</a></li>
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Manage Tours</a></li>
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/categories"><i class="fa-solid fa-tags me-2 text-primary"></i>Manage Categories</a></li>
@@ -297,8 +298,15 @@
                 <button class="btn btn-primary booking-button btn-lg rounded-pill" onclick="handleBooking()">
                     <i class="fa-solid fa-calendar-check me-2"></i>Book This Tour
                 </button>
-                <button class="btn btn-outline-primary booking-button btn-lg rounded-pill">
-                    <i class="fa-solid fa-heart me-2"></i>Add to Wishlist
+                <button class="btn btn-outline-primary booking-button btn-lg rounded-pill" onclick="toggleWishlist()">
+                    <c:choose>
+                        <c:when test="${isWishlisted}">
+                            <i class="fa-solid fa-heart me-2 text-danger"></i>Remove from Wishlist
+                        </c:when>
+                        <c:otherwise>
+                            <i class="fa-regular fa-heart me-2"></i>Add to Wishlist
+                        </c:otherwise>
+                    </c:choose>
                 </button>
                 <a href="${pageContext.request.contextPath}/tours" class="btn btn-outline-secondary w-100 mt-2 py-3 rounded-pill">
                     <i class="fa-solid fa-arrow-left me-2"></i>Back to Tours
@@ -350,6 +358,45 @@
                 </c:when>
                 <c:otherwise>
                     alert('Please login to book this tour');
+                    window.location.href = '${pageContext.request.contextPath}/login';
+                </c:otherwise>
+            </c:choose>
+        }
+
+        function toggleWishlist() {
+            <c:choose>
+                <c:when test="${not empty sessionScope.user}">
+                    const tourId = ${tour.tourId};
+                    const isWishlisted = ${isWishlisted};
+                    const action = isWishlisted ? 'delete' : 'add';
+                    
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '${pageContext.request.contextPath}/wishlist';
+                    
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = action;
+                    form.appendChild(actionInput);
+                    
+                    const tourIdInput = document.createElement('input');
+                    tourIdInput.type = 'hidden';
+                    tourIdInput.name = 'tourId';
+                    tourIdInput.value = tourId;
+                    form.appendChild(tourIdInput);
+                    
+                    const redirectInput = document.createElement('input');
+                    redirectInput.type = 'hidden';
+                    redirectInput.name = 'redirectUrl';
+                    redirectInput.value = window.location.href;
+                    form.appendChild(redirectInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                </c:when>
+                <c:otherwise>
+                    alert('Please login to add to wishlist');
                     window.location.href = '${pageContext.request.contextPath}/login';
                 </c:otherwise>
             </c:choose>

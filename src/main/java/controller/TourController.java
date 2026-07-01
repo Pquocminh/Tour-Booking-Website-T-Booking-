@@ -5,10 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import model.Account;
 import model.Tour;
 import service.TourService;
+import service.WishlistService;
 
 @WebServlet(name = "TourController", urlPatterns = {"/tours", "/tour-detail"})
 public class TourController extends HttpServlet {
@@ -95,6 +98,19 @@ public class TourController extends HttpServlet {
             }
             
             request.setAttribute("tour", tour);
+            
+            // Check if this tour is wishlisted by the current logged-in user
+            boolean isWishlisted = false;
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                Account user = (Account) session.getAttribute("user");
+                if (user != null) {
+                    WishlistService wishlistService = new WishlistService();
+                    isWishlisted = wishlistService.isWishlisted(user.getAccountId(), tourId);
+                }
+            }
+            request.setAttribute("isWishlisted", isWishlisted);
+            
             request.getRequestDispatcher("/WEB-INF/views/guest/tour-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
