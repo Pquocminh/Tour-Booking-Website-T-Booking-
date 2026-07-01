@@ -231,7 +231,7 @@
                         </h2>
                     </div>
                     
-                    <form action="#" method="POST" class="mt-4">
+                    <form action="${pageContext.request.contextPath}/booking" method="POST" class="mt-4">
                         <div class="mb-3">
                             <label for="departureDate" class="form-label fw-bold text-main">
                                 <i class="fa-regular fa-calendar-days me-1 text-primary"></i>Select Departure Date
@@ -243,9 +243,9 @@
                                     </div>
                                 </c:when>
                                 <c:otherwise>
-                                    <select class="form-select custom-select" id="departureDate" name="scheduleId" required>
+                                    <select class="form-select custom-select" id="departureDate" name="scheduleId" required onchange="calculateTotalPrice()">
                                         <c:forEach var="sch" items="${tour.schedules}">
-                                            <option value="${sch.scheduleId}">
+                                            <option value="${sch.scheduleId}" data-price="${sch.price}">
                                                 <fmt:formatDate value="${sch.departureDate}" pattern="dd MMM yyyy"/> 
                                                 (Price: <fmt:formatNumber value="${sch.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/> - ${sch.availableSlots} seats left)
                                             </option>
@@ -253,6 +253,22 @@
                                     </select>
                                 </c:otherwise>
                             </c:choose>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="numberOfPeople" class="form-label fw-bold text-main">
+                                <i class="fa-solid fa-users me-1 text-primary"></i>Number of Travelers
+                            </label>
+                            <input type="number" class="form-control custom-select" id="numberOfPeople" name="numberOfPeople" min="1" value="1" required onchange="calculateTotalPrice()" onkeyup="calculateTotalPrice()">
+                        </div>
+
+                        <div class="mb-3 p-3 bg-light rounded border border-primary-subtle">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Total Price:</span>
+                                <span class="fs-4 fw-bold text-primary" id="totalPriceDisplay">
+                                    0 đ
+                                </span>
+                            </div>
                         </div>
                         
                         <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3 btn-book-now" 
@@ -292,5 +308,28 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function calculateTotalPrice() {
+            const selectElement = document.getElementById("departureDate");
+            if (!selectElement || selectElement.options.length === 0) return;
+            
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = parseFloat(selectedOption.getAttribute("data-price") || 0);
+            
+            const numPeopleElement = document.getElementById("numberOfPeople");
+            const numPeople = parseInt(numPeopleElement.value || 0);
+            
+            const total = price * numPeople;
+            
+            // Format number to vnd currency style
+            const formattedTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+            document.getElementById("totalPriceDisplay").innerText = formattedTotal;
+        }
+
+        // Initialize total price on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            calculateTotalPrice();
+        });
+    </script>
 </body>
 </html>
