@@ -120,6 +120,7 @@ CREATE TABLE Booking (
     contact_name NVARCHAR(100),
     contact_phone VARCHAR(20),
     total_price DECIMAL(12,2),
+    deposit_amount DECIMAL(12,2) DEFAULT 0.00,
     status VARCHAR(20),
 
     FOREIGN KEY (customer_id) REFERENCES Account(account_id),
@@ -168,6 +169,18 @@ CREATE TABLE Wishlist (
     PRIMARY KEY (customer_id, tour_id),
     FOREIGN KEY (customer_id) REFERENCES Account(account_id),
     FOREIGN KEY (tour_id) REFERENCES Tour(tour_id)
+);
+
+CREATE TABLE BookingStatusHistory (
+    history_id INT IDENTITY(1,1) PRIMARY KEY,
+    booking_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    changed_by INT NOT NULL,
+    changed_at DATETIME DEFAULT GETDATE(),
+    note NVARCHAR(255),
+
+    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id),
+    FOREIGN KEY (changed_by) REFERENCES Account(account_id)
 );
 
 USE BookingTourWebsite;
@@ -255,10 +268,10 @@ VALUES
 GO
 
 -- 12. Insert Data for Booking
-INSERT INTO Booking (customer_id, schedule_id, number_of_people, contact_name, contact_phone, total_price, status)
+INSERT INTO Booking (customer_id, schedule_id, number_of_people, contact_name, contact_phone, total_price, deposit_amount, status)
 VALUES 
-(3, 1, 2, 'Pham Quoc Minh', '0923456789', 2200000.00, 'Confirmed'),
-(4, 2, 1, 'Alex Jones', '0934567890', 1200000.00, 'Pending');
+(3, 1, 2, 'Pham Quoc Minh', '0923456789', 2200000.00, 660000.00, 'Confirmed'),
+(4, 2, 1, 'Alex Jones', '0934567890', 1200000.00, 360000.00, 'Pending');
 GO
 
 -- 13. Insert Data for Payment
@@ -284,4 +297,12 @@ INSERT INTO Wishlist (customer_id, tour_id)
 VALUES 
 (3, 2),
 (3, 3);
+GO
+
+-- 17. Insert Data for BookingStatusHistory
+INSERT INTO BookingStatusHistory (booking_id, status, changed_by, changed_at, note)
+VALUES 
+(1, 'Pending', 3, '2026-06-14 09:00:00', 'Booking created by customer'),
+(1, 'Confirmed', 1, '2026-06-14 14:30:00', 'Payment verified, booking confirmed by Admin'),
+(2, 'Pending', 4, '2026-06-15 10:15:00', 'Booking created by customer');
 GO

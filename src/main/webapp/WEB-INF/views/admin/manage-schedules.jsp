@@ -94,8 +94,8 @@
                                     <tr>
                                         <td><span class="text-muted small fw-bold">#${s.scheduleId}</span></td>
                                         <td class="fw-semibold text-dark text-truncate" style="max-width: 200px;" title="${s.tourName}">${s.tourName}</td>
-                                        <td><fmt:formatDate value="${s.departureDate}" pattern="dd MMM yyyy"/></td>
-                                        <td><fmt:formatDate value="${s.returnDate}" pattern="dd MMM yyyy"/></td>
+                                        <td><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
+                                        <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
                                         <td class="fw-bold text-primary">
                                             <fmt:formatNumber value="${s.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                         </td>

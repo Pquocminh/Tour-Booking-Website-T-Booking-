@@ -158,8 +158,8 @@
                                                             <div>
                                                                 <h5 class="mb-1" style="font-weight: 700; color: var(--text-main);">${review.tourName}</h5>
                                                                 <div class="text-muted small">
-                                                                    <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${review.bookingDate}" pattern="dd MMM yyyy"/></span>
-                                                                    <span><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${review.departureDate}" pattern="dd MMM yyyy"/></span>
+                                                                    <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${review.bookingDate}" pattern="dd/MM/yyyy"/></span>
+                                                                    <span><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${review.departureDate}" pattern="dd/MM/yyyy"/></span>
                                                                 </div>
                                                             </div>
                                                             <div class="mt-2 mt-md-0 text-md-end">
@@ -168,7 +168,7 @@
                                                                         <i class="${i <= review.rating ? 'fa-solid' : 'fa-regular'} fa-star text-warning"></i>
                                                                     </c:forEach>
                                                                 </div>
-                                                                <div class="text-muted small"><i class="fa-regular fa-clock me-1"></i>Reviewed on: <fmt:formatDate value="${review.createdAt}" pattern="dd MMM yyyy HH:mm"/></div>
+                                                                <div class="text-muted small"><i class="fa-regular fa-clock me-1"></i>Reviewed on: <fmt:formatDate value="${review.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
                                                             </div>
                                                         </div>
                                                         <hr class="my-3 border-color">
@@ -212,8 +212,8 @@
                                                             <div>
                                                                 <h5 class="mb-1" style="font-weight: 700; color: var(--text-main);">${booking.tourName}</h5>
                                                                 <div class="text-muted small">
-                                                                    <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${booking.bookingDate}" pattern="dd MMM yyyy"/></span>
-                                                                    <span class="me-3"><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${booking.departureDate}" pattern="dd MMM yyyy"/></span>
+                                                                    <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy"/></span>
+                                                                    <span class="me-3"><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${booking.departureDate}" pattern="dd/MM/yyyy"/></span>
                                                                     <span><i class="fa-solid fa-wallet me-1"></i>Total Paid: <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencySymbol="₫"/></span>
                                                                 </div>
                                                             </div>

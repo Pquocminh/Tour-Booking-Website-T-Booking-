@@ -170,7 +170,7 @@
                                             <div class="info-value">
                                                 <c:choose>
                                                     <c:when test="${not empty sessionScope.user.createdAt}">
-                                                        <fmt:formatDate value="${sessionScope.user.createdAt}" pattern="dd MMMM yyyy"/>
+                                                        <fmt:formatDate value="${sessionScope.user.createdAt}" pattern="dd/MM/yyyy"/>
                                                     </c:when>
                                                     <c:otherwise>N/A</c:otherwise>
                                                 </c:choose>

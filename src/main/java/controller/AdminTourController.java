@@ -1,31 +1,105 @@
 package controller;
 
+import dao.DashboardDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.List;
-import model.Tour;
+
+import model.Account;
+import model.Booking;
 import model.Category;
 import model.Destination;
-import model.Account;
-import service.TourService;
+import model.Tour;
+import dao.CategoryDAO;
+import dao.TourDAO;
 
-@WebServlet(name = "AdminTourController", urlPatterns = {"/admin/tours"})
+@WebServlet(name = "AdminTourController", urlPatterns = {"/admin/dashboard", "/admin/tours", "/admin/categories"})
 public class AdminTourController extends HttpServlet {
-    private final TourService tourService = new TourService();
+
+    private final DashboardDAO dashboardDAO = new DashboardDAO();
+    private final TourDAO tourDAO = new TourDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String path = request.getServletPath();
+        
+        if ("/admin/dashboard".equals(path)) {
+            handleDashboardGet(request, response);
+        } else if ("/admin/tours".equals(path)) {
+            handleToursGet(request, response);
+        } else if ("/admin/categories".equals(path)) {
+            handleCategoriesGet(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String path = request.getServletPath();
+        
+        if ("/admin/tours".equals(path)) {
+            handleToursPost(request, response);
+        } else if ("/admin/categories".equals(path)) {
+            handleCategoriesPost(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    // ================== DASHBOARD ==================
+    private void handleDashboardGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        
+        if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        int totalUsers = dashboardDAO.getTotalUsers();
+        int totalTours = dashboardDAO.getTotalTours();
+        int totalBookings = dashboardDAO.getTotalBookings();
+        double totalRevenue = dashboardDAO.getTotalRevenue();
+
+        request.setAttribute("totalUsers", totalUsers);
+        request.setAttribute("totalTours", totalTours);
+        request.setAttribute("totalBookings", totalBookings);
+        request.setAttribute("totalRevenue", totalRevenue);
+
+        List<Booking> recentBookings = dashboardDAO.getRecentBookings(5);
+        request.setAttribute("recentBookings", recentBookings);
+
+        String[] revenueData = dashboardDAO.getRevenueLast7Days();
+        request.setAttribute("salesLabels", revenueData[0]);
+        request.setAttribute("salesData", revenueData[1]);
+        
+        request.setAttribute("donutData", dashboardDAO.getBookingStatusDistribution());
+        
+        request.setAttribute("barData1", "[60, 45, 80, 50, 70]");
+        request.setAttribute("barData2", "[40, 30, 50, 30, 50]");
+
+        request.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(request, response);
+    }
+
+    // ================== TOURS ==================
+    private void handleToursGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         String action = request.getParameter("action");
         
         if ("create".equalsIgnoreCase(action)) {
-            request.setAttribute("categories", tourService.getAllCategories());
-            request.setAttribute("destinations", tourService.getAllDestinations());
+            request.setAttribute("categories", tourDAO.getAllCategories());
+            request.setAttribute("destinations", tourDAO.getAllDestinations());
             request.getRequestDispatcher("/WEB-INF/views/admin/edit-tour.jsp").forward(request, response);
             return;
         } else if ("edit".equalsIgnoreCase(action)) {
@@ -33,11 +107,11 @@ public class AdminTourController extends HttpServlet {
             if (idParam != null) {
                 try {
                     int id = Integer.parseInt(idParam);
-                    Tour tour = tourService.getTourByIdAdmin(id);
+                    Tour tour = tourDAO.getTourByIdAdmin(id);
                     if (tour != null) {
                         request.setAttribute("tour", tour);
-                        request.setAttribute("categories", tourService.getAllCategories());
-                        request.setAttribute("destinations", tourService.getAllDestinations());
+                        request.setAttribute("categories", tourDAO.getAllCategories());
+                        request.setAttribute("destinations", tourDAO.getAllDestinations());
                         request.getRequestDispatcher("/WEB-INF/views/admin/edit-tour.jsp").forward(request, response);
                         return;
                     }
@@ -50,7 +124,7 @@ public class AdminTourController extends HttpServlet {
             if (idParam != null) {
                 try {
                     int id = Integer.parseInt(idParam);
-                    Tour tour = tourService.getTourDetails(id);
+                    Tour tour = tourDAO.getTourDetails(id);
                     if (tour != null) {
                         request.setAttribute("tour", tour);
                         request.getRequestDispatcher("/WEB-INF/views/admin/admin-tour-detail.jsp").forward(request, response);
@@ -81,12 +155,9 @@ public class AdminTourController extends HttpServlet {
             } catch (NumberFormatException e) {}
         }
 
-        // Fetch searched / filtered tours
-        List<Tour> tours = tourService.searchToursAdmin(search, status, categoryId, destinationId);
-        
-        // Fetch dropdown options
-        List<Category> categories = tourService.getAllCategories();
-        List<Destination> destinations = tourService.getAllDestinations();
+        List<Tour> tours = tourDAO.searchToursAdmin(search, status, categoryId, destinationId);
+        List<Category> categories = tourDAO.getAllCategories();
+        List<Destination> destinations = tourDAO.getAllDestinations();
 
         request.setAttribute("tours", tours);
         request.setAttribute("categories", categories);
@@ -99,8 +170,7 @@ public class AdminTourController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/admin/manage-tours.jsp").forward(request, response);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    private void handleToursPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
         Account currentUser = (Account) request.getSession().getAttribute("user");
@@ -108,7 +178,7 @@ public class AdminTourController extends HttpServlet {
         if ("delete".equalsIgnoreCase(action)) {
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-                tourService.deleteTour(id);
+                tourDAO.updateTourStatus(id, "Inactive");
                 request.getSession().setAttribute("successMessage", "Tour has been marked as Inactive (Soft Deleted).");
             } catch (Exception e) {}
             response.sendRedirect(request.getContextPath() + "/admin/tours");
@@ -132,16 +202,16 @@ public class AdminTourController extends HttpServlet {
                 if (currentUser != null) {
                     tour.setCreatedBy(currentUser.getAccountId());
                 } else {
-                    tour.setCreatedBy(1); // fallback
+                    tour.setCreatedBy(1);
                 }
 
                 boolean success;
                 if ("update".equalsIgnoreCase(action)) {
-                    success = tourService.updateTour(tour);
+                    success = tourDAO.updateTour(tour);
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour updated successfully!" : "Failed to update tour.");
                 } else {
-                    success = tourService.addTour(tour);
+                    success = tourDAO.addTour(tour);
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour created successfully!" : "Failed to create tour.");
                 }
@@ -151,5 +221,134 @@ public class AdminTourController extends HttpServlet {
         }
         
         response.sendRedirect(request.getContextPath() + "/admin/tours");
+    }
+
+    // ================== CATEGORIES ==================
+    private void handleCategoriesGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        String idParam = request.getParameter("id");
+
+        if ("edit".equalsIgnoreCase(action) && idParam != null) {
+            try {
+                int id = Integer.parseInt(idParam);
+                Category editCategory = categoryDAO.getCategoryById(id);
+                if (editCategory != null) {
+                    request.setAttribute("editCategory", editCategory);
+                } else {
+                    request.setAttribute("errorMessage", "Category not found!");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid Category ID!");
+            }
+        }
+
+        List<Category> categories = categoryDAO.getAllCategories();
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
+    }
+
+    private void handleCategoriesPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        
+        if ("create".equalsIgnoreCase(action)) {
+            String categoryName = request.getParameter("categoryName");
+            String description = request.getParameter("description");
+            if (categoryName == null || categoryName.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Category name is required!");
+            } else {
+                Category cat = new Category();
+                cat.setCategoryName(categoryName.trim());
+                if (description != null) {
+                    cat.setDescription(description.trim());
+                }
+                if (categoryDAO.addCategory(cat)) {
+                    request.getSession().setAttribute("successMessage", "Category created successfully!");
+                    response.sendRedirect(request.getContextPath() + "/admin/categories");
+                    return;
+                } else {
+                    request.setAttribute("errorMessage", "Failed to create category. Please try again.");
+                }
+            }
+        } else if ("update".equalsIgnoreCase(action)) {
+            String idParam = request.getParameter("id");
+            String categoryName = request.getParameter("categoryName");
+            String description = request.getParameter("description");
+
+            if (categoryName == null || categoryName.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Category name is required!");
+                reloadPageWithEditCategory(request, response, idParam);
+                return;
+            }
+
+            try {
+                int id = Integer.parseInt(idParam);
+                Category category = new Category();
+                category.setCategoryId(id);
+                category.setCategoryName(categoryName.trim());
+                if (description != null) {
+                    category.setDescription(description.trim());
+                }
+                boolean success = categoryDAO.updateCategory(category);
+                if (success) {
+                    request.getSession().setAttribute("successMessage", "Category updated successfully!");
+                    response.sendRedirect(request.getContextPath() + "/admin/categories");
+                    return;
+                } else {
+                    request.setAttribute("errorMessage", "Failed to update category. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid Category ID!");
+            }
+        } else if ("delete".equalsIgnoreCase(action)) {
+            String idParam = request.getParameter("id");
+            try {
+                int id = Integer.parseInt(idParam);
+                if (categoryDAO.deleteCategory(id)) {
+                    request.getSession().setAttribute("successMessage", "Category deleted successfully!");
+                } else {
+                    request.getSession().setAttribute("errorMessage", "Failed to delete category. It might contain tours!");
+                }
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("errorMessage", "Invalid Category ID!");
+            }
+            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            return;
+        }
+
+        List<Category> categories = categoryDAO.getAllCategories();
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
+    }
+
+    private void reloadPageWithEditCategory(HttpServletRequest request, HttpServletResponse response, String idParam) 
+            throws ServletException, IOException {
+        if (idParam != null) {
+            try {
+                int id = Integer.parseInt(idParam);
+                Category editCategory = categoryDAO.getCategoryById(id);
+                if (editCategory != null) {
+                    request.setAttribute("editCategory", editCategory);
+                }
+            } catch (NumberFormatException e) {}
+        }
+        List<Category> categories = categoryDAO.getAllCategories();
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
     }
 }

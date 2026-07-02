@@ -93,8 +93,8 @@
                                     <c:forEach var="s" items="${schedules}">
                                         <tr>
                                             <td><span class="text-muted small fw-bold">#${s.scheduleId}</span></td>
-                                            <td class="fw-semibold"><fmt:formatDate value="${s.departureDate}" pattern="dd MMM yyyy"/></td>
-                                            <td><fmt:formatDate value="${s.returnDate}" pattern="dd MMM yyyy"/></td>
+                                            <td class="fw-semibold"><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
+                                            <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
                                             <td class="fw-bold text-primary">
                                                 <fmt:formatNumber value="${s.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
                                             </td>
@@ -150,7 +150,7 @@
                                                         </c:when>
                                                         <c:otherwise>
                                                             <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
-                                                                    onclick="openReleaseModal(${s.scheduleId}, '<fmt:formatDate value="${s.departureDate}" pattern="dd MMM yyyy"/>', ${s.totalSlots}, ${s.availableSlots})">
+                                                                    onclick="openReleaseModal(${s.scheduleId}, '<fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/>', ${s.totalSlots}, ${s.availableSlots})">
                                                                 <i class="fa-solid fa-plus me-1"></i>Release
                                                             </button>
                                                         </c:otherwise>

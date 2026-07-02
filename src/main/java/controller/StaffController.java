@@ -5,27 +5,56 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+
 import model.Tour;
 import model.TourSchedule;
 import model.Booking;
 import model.Account;
-import service.TourService;
-import service.AccountService;
+import model.Review;
+import dao.TourDAO;
+import dao.AccountDAO;
+import dao.ReviewDAO;
 import com.google.gson.Gson;
 
-
-@WebServlet(name = "StaffScheduleController", urlPatterns = {"/admin/staff/schedules"})
-public class StaffScheduleController extends HttpServlet {
-    private final TourService tourService = new TourService();
+@WebServlet(name = "StaffController", urlPatterns = {"/admin/staff/schedules", "/admin/staff/reviews"})
+public class StaffController extends HttpServlet {
+    private final TourDAO tourDAO = new TourDAO();
+    private final ReviewDAO reviewDAO = new ReviewDAO();
     private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String path = request.getServletPath();
+
+        if ("/admin/staff/schedules".equals(path)) {
+            handleSchedulesGet(request, response);
+        } else if ("/admin/staff/reviews".equals(path)) {
+            handleReviewsGet(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String path = request.getServletPath();
+
+        if ("/admin/staff/schedules".equals(path)) {
+            handleSchedulesPost(request, response);
+        } else if ("/admin/staff/reviews".equals(path)) {
+            handleReviewsPost(request, response);
+        }
+    }
+
+    // ================== SCHEDULES ==================
+    private void handleSchedulesGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
 
@@ -36,7 +65,7 @@ public class StaffScheduleController extends HttpServlet {
 
         String tourIdParam = request.getParameter("tourId");
         
-        List<Tour> tours = tourService.searchToursAdmin(null, null, null, null);
+        List<Tour> tours = tourDAO.searchToursAdmin(null, null, null, null);
         request.setAttribute("tours", tours);
 
         Integer tourId = null;
@@ -49,7 +78,7 @@ public class StaffScheduleController extends HttpServlet {
             }
         }
 
-        List<TourSchedule> schedules = tourService.getAllTourSchedules(tourId);
+        List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
         request.getRequestDispatcher("/WEB-INF/views/staff/manage-schedules.jsp").forward(request, response);
@@ -69,7 +98,7 @@ public class StaffScheduleController extends HttpServlet {
 
         try {
             int scheduleId = Integer.parseInt(scheduleIdParam.trim());
-            TourSchedule sched = tourService.getTourScheduleById(scheduleId);
+            TourSchedule sched = tourDAO.getTourScheduleById(scheduleId);
             if (sched == null) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Tour schedule not found");
@@ -77,8 +106,8 @@ public class StaffScheduleController extends HttpServlet {
                 return;
             }
 
-            Tour tour = tourService.getTourByIdAdmin(sched.getTourId());
-            List<Booking> bookings = tourService.getBookingsByScheduleId(scheduleId);
+            Tour tour = tourDAO.getTourByIdAdmin(sched.getTourId());
+            List<Booking> bookings = tourDAO.getBookingsByScheduleId(scheduleId);
 
             Map<String, Object> data = new HashMap<>();
             data.put("schedule", sched);
@@ -93,8 +122,7 @@ public class StaffScheduleController extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    private void handleSchedulesPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
         String tourIdParam = request.getParameter("tourId");
@@ -162,10 +190,10 @@ public class StaffScheduleController extends HttpServlet {
             sched.setReturnDate(returnDate);
             sched.setPrice(price);
             sched.setTotalSlots(totalSlots);
-            sched.setAvailableSlots(totalSlots); // initially all slots are available
+            sched.setAvailableSlots(totalSlots);
             sched.setStatus("Open");
 
-            boolean success = tourService.addTourSchedule(sched);
+            boolean success = tourDAO.addTourSchedule(sched);
             if (success) {
                 request.getSession().setAttribute("successMessage", "Created Tour Schedule successfully!");
             } else {
@@ -194,12 +222,11 @@ public class StaffScheduleController extends HttpServlet {
         try {
             int scheduleId = Integer.parseInt(scheduleIdParam.trim());
             
-            // Check if there are any bookings for this schedule
-            List<Booking> bookings = tourService.getBookingsByScheduleId(scheduleId);
+            List<Booking> bookings = tourDAO.getBookingsByScheduleId(scheduleId);
             if (bookings != null && !bookings.isEmpty()) {
                 request.getSession().setAttribute("errorMessage", "Cannot delete Tour Schedule #" + scheduleId + " because it contains active bookings. Please cancel bookings or the schedule instead to protect data integrity.");
             } else {
-                boolean success = tourService.deleteTourSchedule(scheduleId);
+                boolean success = tourDAO.deleteTourSchedule(scheduleId);
                 if (success) {
                     request.getSession().setAttribute("successMessage", "Deleted Tour Schedule #" + scheduleId + " successfully!");
                 } else {
@@ -241,8 +268,8 @@ public class StaffScheduleController extends HttpServlet {
                 return;
             }
             
-            AccountService accountService = new AccountService();
-            Account customer = accountService.getAccountByUsernameOrEmail(customerIdentifier.trim());
+            AccountDAO accountDAO = new AccountDAO();
+            Account customer = accountDAO.getAccountByUsernameOrEmail(customerIdentifier.trim());
             
             if (customer == null) {
                 request.getSession().setAttribute("errorMessage", "Customer account with username or email '" + customerIdentifier + "' not found! Please check and try again.");
@@ -256,7 +283,7 @@ public class StaffScheduleController extends HttpServlet {
                 return;
             }
             
-            TourSchedule sched = tourService.getTourScheduleById(scheduleId);
+            TourSchedule sched = tourDAO.getTourScheduleById(scheduleId);
             if (sched == null) {
                 request.getSession().setAttribute("errorMessage", "Tour schedule not found!");
                 response.sendRedirect(redirectUrl);
@@ -284,7 +311,7 @@ public class StaffScheduleController extends HttpServlet {
             booking.setTotalPrice(numberOfPeople * sched.getPrice());
             booking.setStatus("Confirmed");
             
-            boolean success = tourService.reserveSlots(booking);
+            boolean success = tourDAO.reserveSlots(booking);
             if (success) {
                 request.getSession().setAttribute("successMessage", "Reserved " + numberOfPeople + " slots for " + contactName + " (Account: " + customer.getUsername() + ") successfully!");
             } else {
@@ -299,5 +326,67 @@ public class StaffScheduleController extends HttpServlet {
         
         response.sendRedirect(redirectUrl);
     }
-}
 
+    // ================== REVIEWS ==================
+    private void handleReviewsGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        
+        if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        List<Review> reviews = reviewDAO.getAllReviewsAdmin();
+        request.setAttribute("reviews", reviews);
+
+        request.getRequestDispatcher("/WEB-INF/views/admin/manage-reviews.jsp").forward(request, response);
+    }
+
+    private void handleReviewsPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        
+        if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        if ("respond".equals(action)) {
+            try {
+                int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+                String responseText = request.getParameter("response");
+
+                boolean success = reviewDAO.updateReviewResponse(reviewId, responseText);
+                if (success) {
+                    session.setAttribute("successMessage", "Đã lưu câu trả lời thành công!");
+                } else {
+                    session.setAttribute("errorMessage", "Không thể lưu câu trả lời. Vui lòng thử lại.");
+                }
+            } catch (NumberFormatException e) {
+                session.setAttribute("errorMessage", "ID đánh giá không hợp lệ.");
+            }
+        } else if ("toggleStatus".equals(action)) {
+            try {
+                int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+                String currentStatus = request.getParameter("currentStatus");
+                
+                String newStatus = "VISIBLE".equalsIgnoreCase(currentStatus) ? "HIDDEN" : "VISIBLE";
+                
+                boolean success = reviewDAO.updateReviewStatus(reviewId, newStatus);
+                if (success) {
+                    session.setAttribute("successMessage", "Đã chuyển trạng thái đánh giá thành " + newStatus + ".");
+                } else {
+                    session.setAttribute("errorMessage", "Không thể thay đổi trạng thái đánh giá.");
+                }
+            } catch (NumberFormatException e) {
+                session.setAttribute("errorMessage", "ID đánh giá không hợp lệ.");
+            }
+        }
+
+        response.sendRedirect(request.getContextPath() + "/admin/staff/reviews");
+    }
+}
