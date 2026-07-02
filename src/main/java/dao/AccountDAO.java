@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccountDAO {
     public Account checkLogin(String loginInput, String passwordHash) {
@@ -278,6 +280,73 @@ public class AccountDAO {
             }
         }
         return null;
+    }
+
+    public List<Account> getAllAccounts(String search, String role, String status) {
+        List<Account> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM Account WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (username LIKE ? OR email LIKE ? OR full_name LIKE ? OR phone LIKE ?)");
+            String searchPattern = "%" + search.trim() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (role != null && !role.trim().isEmpty() && !"All".equalsIgnoreCase(role)) {
+            sql.append(" AND role = ?");
+            params.add(role.trim());
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"All".equalsIgnoreCase(status)) {
+            sql.append(" AND status = ?");
+            params.add(status.trim());
+        }
+
+        sql.append(" ORDER BY account_id ASC");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Account acc = new Account();
+                    acc.setAccountId(rs.getInt("account_id"));
+                    acc.setUsername(rs.getString("username"));
+                    acc.setPasswordHash(rs.getString("password_hash"));
+                    acc.setEmail(rs.getString("email"));
+                    acc.setFullName(rs.getString("full_name"));
+                    acc.setPhone(rs.getString("phone"));
+                    acc.setAddress(rs.getString("address"));
+                    acc.setRole(rs.getString("role"));
+                    acc.setStatus(rs.getString("status"));
+                    acc.setCreatedAt(rs.getTimestamp("created_at"));
+                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    list.add(acc);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
 }
 
