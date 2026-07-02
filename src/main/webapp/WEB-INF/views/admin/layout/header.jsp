@@ -177,6 +177,9 @@
                 <a href="${pageContext.request.contextPath}/admin/categories" class="nav-item-custom ${param.activeMenu == 'categories' ? 'active' : ''}">
                     <i class="fa-solid fa-tags"></i> Categories
                 </a>
+                <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-item-custom ${param.activeMenu == 'accounts' ? 'active' : ''}">
+                    <i class="fa-solid fa-user-gear"></i> Manage Accounts
+                </a>
             </c:if>
             <a href="${pageContext.request.contextPath}/admin/staff/reviews" class="nav-item-custom ${param.activeMenu == 'reviews' ? 'active' : ''}">
                 <i class="fa-solid fa-star"></i> Reviews
