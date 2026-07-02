@@ -389,3 +389,217 @@
 
 
     <jsp:include page="layout/footer.jsp" />
+<script>
+        function openEditModal(scheduleId, tourName, departureDate, returnDate, price, totalSlots, bookedSlots, status) {
+            document.getElementById('editScheduleId').value = scheduleId;
+            document.getElementById('editTourName').value = tourName;
+            document.getElementById('editDepartureDate').value = departureDate;
+            document.getElementById('editReturnDate').value = returnDate;
+            document.getElementById('editPrice').value = price;
+            
+            // Set min constraint on Total Slots to prevent dropping below booked slots
+            var totalSlotsInput = document.getElementById('editTotalSlots');
+            totalSlotsInput.value = totalSlots;
+            
+            var minSlots = Math.max(1, bookedSlots);
+            totalSlotsInput.min = minSlots;
+            
+            totalSlotsInput.addEventListener('input', function() {
+                if (parseInt(this.value) < minSlots) {
+                    this.setCustomValidity('Total capacity cannot be less than the ' + bookedSlots + ' slots already booked!');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+            document.getElementById('editBookedSlotsInfo').innerText = "Already booked: " + bookedSlots;
+
+            // Pre-select status
+            document.getElementById('editStatus').value = status;
+            
+            // Hide error alert initially
+            document.getElementById('modalErrorAlert').classList.add('d-none');
+            document.getElementById('submitUpdateBtn').disabled = false;
+            
+            var myModal = new bootstrap.Modal(document.getElementById('updateScheduleModal'));
+            myModal.show();
+        }
+
+        function confirmCancel(scheduleId) {
+            if (confirm("Are you sure you want to cancel Tour Schedule #" + scheduleId + "? This action cannot be undone.")) {
+                document.getElementById('cancelScheduleId').value = scheduleId;
+                document.getElementById('cancelForm').submit();
+            }
+        }
+
+        function validateDates() {
+            var depDateVal = document.getElementById('editDepartureDate').value;
+            var retDateVal = document.getElementById('editReturnDate').value;
+            var errorAlert = document.getElementById('modalErrorAlert');
+            var submitBtn = document.getElementById('submitUpdateBtn');
+
+            if (depDateVal && retDateVal) {
+                var depDate = new Date(depDateVal);
+                var retDate = new Date(retDateVal);
+                
+                if (depDate > retDate) {
+                    errorAlert.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else {
+                    errorAlert.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        function openReserveModal(scheduleId, tourName, availableSlots) {
+            document.getElementById('reserveScheduleId').value = scheduleId;
+            document.getElementById('reserveTourName').value = tourName;
+            document.getElementById('reserveAvailableSlotsInfo').value = availableSlots + " slots left";
+            
+            var numSlotsInput = document.getElementById('reserveNumSlots');
+            numSlotsInput.value = '1';
+            numSlotsInput.max = availableSlots;
+            
+            document.getElementById('customerIdentifier').value = '';
+            document.getElementById('reserveContactName').value = '';
+            document.getElementById('reserveContactPhone').value = '';
+            
+            document.getElementById('reserveModalErrorAlert').classList.add('d-none');
+            document.getElementById('submitReserveBtn').disabled = false;
+            
+            var myModal = new bootstrap.Modal(document.getElementById('reserveSlotsModal'));
+            myModal.show();
+        }
+
+        function validateReserveSlots() {
+            var numSlotsInput = document.getElementById('reserveNumSlots');
+            var val = parseInt(numSlotsInput.value);
+            var maxVal = parseInt(numSlotsInput.max);
+            var errorAlert = document.getElementById('reserveModalErrorAlert');
+            var submitBtn = document.getElementById('submitReserveBtn');
+            
+            if (val > maxVal || val <= 0 || isNaN(val)) {
+                errorAlert.classList.remove('d-none');
+                submitBtn.disabled = true;
+            } else {
+                errorAlert.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function viewDetails(scheduleId) {
+            // Reset modal view to loading
+            document.getElementById('detailsLoading').classList.remove('d-none');
+            document.getElementById('detailsContent').classList.add('d-none');
+            
+            // Show modal
+            var detailModal = new bootstrap.Modal(document.getElementById('detailScheduleModal'));
+            detailModal.show();
+
+            // Fetch details via AJAX
+            fetch('${pageContext.request.contextPath}/admin/schedules?action=getDetails&scheduleId=' + scheduleId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        detailModal.hide();
+                        return;
+                    }
+
+                    // Populate Tour & Schedule details
+                    var sched = data.schedule;
+                    var tour = data.tour;
+                    var bookings = data.bookings;
+
+                    document.getElementById('detailTourName').innerText = tour.tourName || sched.tourName;
+                    document.getElementById('detailDepartureLocation').innerText = tour.departureLocation || 'N/A';
+                    document.getElementById('detailDuration').innerText = tour.durationDays + ' Days';
+                    document.getElementById('detailPrice').innerText = 'Ä‘' + Number(sched.price).toLocaleString('vi-VN');
+                    
+                    // Format dates
+                    var depDate = new Date(sched.departureDate);
+                    var retDate = new Date(sched.returnDate);
+                    var options = { day: '2-digit', month: 'short', year: 'numeric' };
+                    document.getElementById('detailDepDate').innerText = depDate.toLocaleDateString('en-US', options);
+                    document.getElementById('detailRetDate').innerText = retDate.toLocaleDateString('en-US', options);
+                    
+                    // Status Badge
+                    var statusBadge = '';
+                    if (sched.status === 'Open') {
+                        statusBadge = '<span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill">Open</span>';
+                    } else if (sched.status === 'Full') {
+                        statusBadge = '<span class="badge bg-danger-subtle text-danger border border-danger px-3 py-1 rounded-pill">Full</span>';
+                    } else {
+                        statusBadge = '<span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-1 rounded-pill">' + sched.status + '</span>';
+                    }
+                    document.getElementById('detailStatus').innerHTML = statusBadge;
+
+                    // Capacity Progress
+                    var booked = sched.totalSlots - sched.availableSlots;
+                    document.getElementById('detailBookedSlots').innerText = booked;
+                    document.getElementById('detailTotalSlots').innerText = sched.totalSlots;
+                    document.getElementById('detailAvailableSlots').innerText = sched.availableSlots + ' slots left';
+                    
+                    var percent = Math.round((booked / sched.totalSlots) * 100);
+                    var progressBar = document.getElementById('detailProgressBar');
+                    progressBar.style.width = percent + '%';
+                    progressBar.setAttribute('aria-valuenow', percent);
+                    
+                    // Set color of progress bar
+                    if (percent >= 90) {
+                        progressBar.className = 'progress-bar bg-danger progress-bar-striped progress-bar-animated';
+                    } else if (percent >= 50) {
+                        progressBar.className = 'progress-bar bg-warning progress-bar-striped progress-bar-animated';
+                    } else {
+                        progressBar.className = 'progress-bar bg-success progress-bar-striped progress-bar-animated';
+                    }
+
+                    // Populate Bookings Table
+                    var tableBody = document.getElementById('participantsTableBody');
+                    tableBody.innerHTML = '';
+
+                    if (!bookings || bookings.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted"><i class="fa-solid fa-users-slash me-1"></i>No bookings yet.</td></tr>';
+                    } else {
+                        bookings.forEach(b => {
+                            var bDate = new Date(b.bookingDate);
+                            var bDateStr = bDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                            
+                            var bStatusBadge = '';
+                            if (b.status === 'Confirmed') {
+                                bStatusBadge = '<span class="badge bg-success-subtle text-success border border-success px-2 py-1 rounded-pill">Confirmed</span>';
+                            } else if (b.status === 'Pending') {
+                                bStatusBadge = '<span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-pill">Pending</span>';
+                            } else {
+                                bStatusBadge = '<span class="badge bg-secondary-subtle text-secondary border border-secondary px-2 py-1 rounded-pill">' + b.status + '</span>';
+                            }
+
+                            var row = '<tr>' +
+                                '<td><span class="text-muted fw-bold">#' + b.bookingId + '</span></td>' +
+                                '<td class="fw-semibold">' + b.contactName + '</td>' +
+                                '<td>' + b.contactPhone + '</td>' +
+                                '<td class="text-center fw-bold">' + b.numberOfPeople + '</td>' +
+                                '<td class="text-end fw-bold text-primary">Ä‘' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
+                                '<td>' + bStatusBadge + '</td>' +
+                                '<td>' + bDateStr + '</td>' +
+                                '</tr>';
+                            tableBody.innerHTML += row;
+                        });
+                    }
+
+                    // Hide loading and show content
+                    document.getElementById('detailsLoading').classList.add('d-none');
+                    document.getElementById('detailsContent').classList.remove('d-none');
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('An error occurred while loading details. Please try again.');
+                    detailModal.hide();
+                });
+        }
+    </script>

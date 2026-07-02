@@ -22,11 +22,10 @@ public class TourDAO {
         + "c.category_id, c.category_name, c.description AS cat_desc, "
         + "d.destination_id, d.destination_name, d.province, d.region, "
         + "d.description AS dest_desc, d.image_url AS dest_image, "
-        + "ti.image_url AS thumbnail_url "
+        + "(SELECT TOP 1 image_url FROM TourImage WHERE tour_id = t.tour_id AND is_thumbnail = 1) AS thumbnail_url "
         + "FROM Tour t "
         + "LEFT JOIN Category c ON t.category_id = c.category_id "
-        + "LEFT JOIN Destination d ON t.destination_id = d.destination_id "
-        + "LEFT JOIN TourImage ti ON t.tour_id = ti.tour_id AND ti.is_thumbnail = 1 ";
+        + "LEFT JOIN Destination d ON t.destination_id = d.destination_id ";
     
     public List<Tour> getAvailableTours() {
         String sql = TOUR_SELECT_QUERY + "WHERE t.status = 'Active'";
