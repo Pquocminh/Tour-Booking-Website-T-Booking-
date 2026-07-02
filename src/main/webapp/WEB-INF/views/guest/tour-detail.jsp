@@ -13,66 +13,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .tour-detail-hero {
-            height: 500px;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .tour-detail-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-        }
-        .tour-info-badge {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            margin: 5px 5px 0 0;
-            display: inline-block;
-        }
-        .tour-detail-section {
-            margin-top: 40px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-        .detail-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #007bff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        .price-highlight {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .booking-button {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            margin-top: 20px;
-        }
-        .breadcrumb-custom {
-            background: transparent;
-            padding: 0;
-        }
-    </style>
 </head>
 <body>
 
@@ -88,7 +28,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/tours">Tours</a>
+                        <a class="nav-link" href="${pageContext.request.contextPath}/tours">Tours</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">About Us</a>
@@ -132,233 +72,264 @@
         </div>
     </nav>
 
-    <main class="container my-5">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb breadcrumb-custom">
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/tours" class="text-primary"><i class="fa-solid fa-house me-1"></i>Tours</a></li>
-                <li class="breadcrumb-item active" aria-current="page">${tour.tourName}</li>
-            </ol>
-        </nav>
-
-        <div class="row mt-4">
-            <div class="col-lg-8">
-                <!-- Tour Hero Image -->
-                <div class="tour-detail-hero mb-4" style="background-image: url('${not empty tour.thumbnailUrl ? pageContext.request.contextPath.concat(tour.thumbnailUrl) : "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop"}')">
-                    <div class="position-absolute bottom-0 start-0 p-4">
-                        <div>
-                            <span class="tour-info-badge">
-                                <i class="fa-solid fa-tag text-primary me-1"></i>${tour.category.categoryName}
-                            </span>
-                            <span class="tour-info-badge">
-                                <i class="fa-regular fa-clock text-primary me-1"></i>
-                                <c:choose>
-                                    <c:when test="${tour.durationDays > 1}">
-                                        ${tour.durationDays} Days ${tour.durationDays - 1} Nights
-                                    </c:when>
-                                    <c:otherwise>
-                                        ${tour.durationDays} Day
-                                    </c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-                    </div>
+    <!-- Details Hero Section -->
+    <header class="details-hero" style="background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)), url('${not empty tour.thumbnailUrl ? pageContext.request.contextPath.concat(tour.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&auto=format&fit=crop'}');">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/tours" class="text-white-50">Tours</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">${tour.tourName}</li>
+                </ol>
+            </nav>
+            <span class="badge bg-primary px-3 py-2 mb-3 rounded-pill">
+                <i class="fa-solid fa-tag me-1"></i>${tour.category.categoryName}
+            </span>
+            <h1 class="display-5 fw-bold text-white mb-3">${tour.tourName}</h1>
+            <div class="d-flex flex-wrap gap-4 text-white">
+                <div>
+                    <i class="fa-regular fa-clock me-1 text-primary"></i>
+                    <strong>Duration:</strong> ${tour.durationDays} Days ${tour.durationDays > 1 ? tour.durationDays - 1 : 0} Nights
                 </div>
-
-                <!-- Tour Title Section -->
-                <div class="mb-4">
-                    <h1 class="display-5 fw-bold mb-3">${tour.tourName}</h1>
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <span class="badge bg-success px-3 py-2">
-                            <i class="fa-solid fa-check-circle me-1"></i>Available
-                        </span>
-                        <span class="text-muted">
-                            <i class="fa-solid fa-location-dot me-2"></i>${tour.destination.destinationName}, ${tour.destination.province}
-                        </span>
-                        <span class="text-muted">
-                            <i class="fa-solid fa-location-arrow me-2"></i>Departure: ${tour.departureLocation}
-                        </span>
-                    </div>
+                <div>
+                    <i class="fa-solid fa-location-dot me-1 text-primary"></i>
+                    <strong>Departure:</strong> ${tour.departureLocation}
                 </div>
-
-                <!-- Tour Description -->
-                <div class="tour-detail-section">
-                    <h3 class="mb-3">
-                        <i class="fa-solid fa-circle-info text-primary me-2"></i>Tour Description
-                    </h3>
-                    <p class="lead text-muted">${tour.description}</p>
+                <div>
+                    <i class="fa-solid fa-plane-arrival me-1 text-primary"></i>
+                    <strong>Destination:</strong> ${tour.destination.destinationName}
                 </div>
-
-                <!-- Destination Information -->
-                <div class="tour-detail-section" style="background: white;">
-                    <h3 class="mb-3">
-                        <i class="fa-solid fa-map text-primary me-2"></i>Destination Details
-                    </h3>
-                    <div class="detail-card">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <strong>Destination Name:</strong><br>
-                                <span class="text-primary">${tour.destination.destinationName}</span>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <strong>Province/Region:</strong><br>
-                                <span class="text-primary">${tour.destination.province}</span>
-                            </div>
-                            <div class="col-12">
-                                <strong>About the Destination:</strong><br>
-                                <p class="text-muted mt-2">${tour.destination.description}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tour Duration & Details -->
-                <div class="tour-detail-section" style="background: white;">
-                    <h3 class="mb-3">
-                        <i class="fa-regular fa-calendar text-primary me-2"></i>Tour Details
-                    </h3>
-                    <div class="row">
-                        <div class="col-md-6 detail-card">
-                            <strong>Duration:</strong><br>
-                            <span class="text-primary fs-5">
-                                <c:choose>
-                                    <c:when test="${tour.durationDays > 1}">
-                                        ${tour.durationDays} Days / ${tour.durationDays - 1} Nights
-                                    </c:when>
-                                    <c:otherwise>
-                                        1 Day Tour
-                                    </c:otherwise>
-                                </c:choose>
-                            </span>
-                        </div>
-                        <div class="col-md-6 detail-card">
-                            <strong>Departure Location:</strong><br>
-                            <span class="text-primary fs-5">${tour.departureLocation}</span>
-                        </div>
-                        <div class="col-md-6 detail-card">
-                            <strong>Category:</strong><br>
-                            <span class="text-primary fs-5">${tour.category.categoryName}</span>
-                        </div>
-                        <div class="col-md-6 detail-card">
-                            <strong>Tour Status:</strong><br>
-                            <span class="badge bg-success fs-6">${tour.status}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <!-- Price Card -->
-                <div class="price-highlight mb-4">
-                    <h3 class="mb-2">Tour Price</h3>
-                    <div class="fs-1 fw-bold mb-2">
-                        <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
-                    </div>
-                    <p class="small mb-0">Starting price per person</p>
-                </div>
-
-                <!-- Quick Info Cards -->
-                <div class="card mb-3 border-0 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="fa-solid fa-lightbulb text-warning me-2"></i>Quick Info
-                        </h5>
-                        <ul class="list-unstyled">
-                            <li class="mb-3">
-                                <i class="fa-solid fa-check text-success me-2"></i>
-                                <strong>Duration:</strong>
-                                <c:choose>
-                                    <c:when test="${tour.durationDays > 1}">
-                                        ${tour.durationDays} Days
-                                    </c:when>
-                                    <c:otherwise>
-                                        1 Day
-                                    </c:otherwise>
-                                </c:choose>
-                            </li>
-                            <li class="mb-3">
-                                <i class="fa-solid fa-location-dot text-danger me-2"></i>
-                                <strong>Destination:</strong>
-                                <br>
-                                <span class="text-muted">${tour.destination.destinationName}</span>
-                            </li>
-                            <li class="mb-3">
-                                <i class="fa-solid fa-tag text-info me-2"></i>
-                                <strong>Category:</strong>
-                                <br>
-                                <span class="text-muted">${tour.category.categoryName}</span>
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check-circle text-success me-2"></i>
-                                <strong>Status:</strong> Available
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <button class="btn btn-primary booking-button btn-lg rounded-pill" onclick="handleBooking()">
-                    <i class="fa-solid fa-calendar-check me-2"></i>Book This Tour
-                </button>
-                <button class="btn btn-outline-primary booking-button btn-lg rounded-pill">
-                    <i class="fa-solid fa-heart me-2"></i>Add to Wishlist
-                </button>
-                <a href="${pageContext.request.contextPath}/tours" class="btn btn-outline-secondary w-100 mt-2 py-3 rounded-pill">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Back to Tours
-                </a>
             </div>
         </div>
-    </main>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container my-5">
+        <div class="row">
+            <!-- Left Column: Gallery, Overview, Itinerary -->
+            <div class="col-lg-8 col-md-12 mb-4">
+                
+                <!-- Gallery Section -->
+                <c:if test="${not empty tour.imageUrls}">
+                    <div class="glass-card p-4 mb-4">
+                        <h4 class="details-section-title"><i class="fa-regular fa-images me-2 text-primary"></i>Tour Gallery</h4>
+                        <div id="tourGalleryCarousel" class="carousel slide rounded-3 overflow-hidden shadow-sm" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                <c:forEach var="img" items="${tour.imageUrls}" varStatus="status">
+                                    <button type="button" data-bs-target="#tourGalleryCarousel" data-bs-slide-to="${status.index}" class="${status.first ? 'active' : ''}" aria-current="${status.first ? 'true' : 'false'}" aria-label="Slide ${status.index + 1}"></button>
+                                </c:forEach>
+                            </div>
+                            <div class="carousel-inner">
+                                <c:forEach var="img" items="${tour.imageUrls}" varStatus="status">
+                                    <div class="carousel-item ${status.first ? 'active' : ''}">
+                                        <img src="${pageContext.request.contextPath.concat(img)}" 
+                                             class="d-block w-100 object-fit-cover" 
+                                             style="height: 450px;" 
+                                             alt="Tour image ${status.index + 1}"
+                                             onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop'">
+                                    </div>
+                                </c:forEach>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#tourGalleryCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#tourGalleryCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </c:if>
+
+                <!-- Overview Section -->
+                <div class="glass-card p-4 mb-4">
+                    <h4 class="details-section-title"><i class="fa-regular fa-file-lines me-2 text-primary"></i>Tour Overview</h4>
+                    <p class="lead-text text-secondary-emphasis" style="white-space: pre-line; line-height: 1.7;">${tour.description}</p>
+                </div>
+
+                <!-- Itinerary Section -->
+                <div class="glass-card p-4">
+                    <h4 class="details-section-title"><i class="fa-regular fa-compass me-2 text-primary"></i>Itinerary Plan</h4>
+                    <c:choose>
+                        <c:when test="${empty tour.itineraries}">
+                            <div class="p-3 text-center text-muted">
+                                <i class="fa-solid fa-road-barrier display-6 mb-2"></i>
+                                <p>Itinerary is being updated. Please contact us for details.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="itinerary-timeline mt-4">
+                                <c:forEach var="iti" items="${tour.itineraries}">
+                                    <div class="timeline-item">
+                                        <div class="timeline-badge">
+                                            <span>Day ${iti.dayNumber}</span>
+                                        </div>
+                                        <div class="timeline-content card border-0 shadow-sm p-4">
+                                            <h5 class="fw-bold mb-2 text-primary">${iti.title}</h5>
+                                            <p class="text-muted mb-0" style="white-space: pre-line;">${iti.description}</p>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="glass-card p-4 mt-4 mb-4">
+                    <h4 class="details-section-title"><i class="fa-regular fa-star me-2 text-warning"></i>Customer Reviews</h4>
+                    <c:choose>
+                        <c:when test="${empty reviews}">
+                            <div class="p-3 text-center text-muted">
+                                <i class="fa-regular fa-comment-dots display-6 mb-2 text-light"></i>
+                                <p>No reviews yet for this tour. Be the first to leave a review!</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="review-list mt-3">
+                                <c:forEach var="r" items="${reviews}">
+                                    <div class="review-item p-3 mb-3 border rounded shadow-sm bg-white">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0 text-primary">${r.customerName}</h6>
+                                            <div class="text-warning small">
+                                                <c:forEach begin="1" end="${r.rating}">
+                                                    <i class="fa-solid fa-star"></i>
+                                                </c:forEach>
+                                                <c:forEach begin="${r.rating + 1}" end="5">
+                                                    <i class="fa-regular fa-star"></i>
+                                                </c:forEach>
+                                            </div>
+                                        </div>
+                                        <p class="mb-2 text-secondary">${r.comment}</p>
+                                        <div class="text-muted small mb-2"><fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/></div>
+                                        
+                                        <c:if test="${not empty r.staffResponse}">
+                                            <div class="mt-2 p-2 bg-light border-start border-3 border-primary rounded">
+                                                <div class="fw-bold text-primary mb-1" style="font-size: 0.85rem;"><i class="fa-solid fa-reply me-1"></i>Our Response:</div>
+                                                <p class="mb-0 text-secondary" style="font-size: 0.9rem;">${r.staffResponse}</p>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Booking Sidebar & Destination Card -->
+            <div class="col-lg-4 col-md-12">
+                
+                <!-- Booking Card -->
+                <div class="glass-card p-4 mb-4 border-primary shadow-sm">
+                    <span class="badge bg-success px-3 py-1 mb-2 rounded-pill">Best Price Guarantee</span>
+                    <div class="mb-3">
+                        <span class="text-muted" style="font-size: 0.9rem;">Price starts from</span>
+                        <h2 class="fw-extrabold text-primary mb-0">
+                            <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                        </h2>
+                    </div>
+                    
+                    <form action="${pageContext.request.contextPath}/booking" method="POST" class="mt-4">
+                        <div class="mb-3">
+                            <label for="departureDate" class="form-label fw-bold text-main">
+                                <i class="fa-regular fa-calendar-days me-1 text-primary"></i>Select Departure Date
+                            </label>
+                            <c:choose>
+                                <c:when test="${empty tour.schedules}">
+                                    <div class="alert alert-warning py-2 mb-0" style="font-size: 0.9rem; border-radius: 8px;">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i>No upcoming schedules available.
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <select class="form-select custom-select" id="departureDate" name="scheduleId" required onchange="calculateTotalPrice()">
+                                        <c:forEach var="sch" items="${tour.schedules}">
+                                            <option value="${sch.scheduleId}" data-price="${sch.price}">
+                                                <fmt:formatDate value="${sch.departureDate}" pattern="dd/MM/yyyy"/> 
+                                                (Price: <fmt:formatNumber value="${sch.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/> - ${sch.availableSlots} seats left)
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="numberOfPeople" class="form-label fw-bold text-main">
+                                <i class="fa-solid fa-users me-1 text-primary"></i>Number of Travelers
+                            </label>
+                            <input type="number" class="form-control custom-select" id="numberOfPeople" name="numberOfPeople" min="1" value="1" required onchange="calculateTotalPrice()" onkeyup="calculateTotalPrice()">
+                        </div>
+
+                        <div class="mb-3 p-3 bg-light rounded border border-primary-subtle">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Total Price:</span>
+                                <span class="fs-4 fw-bold text-primary" id="totalPriceDisplay">
+                                    0 đ
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3 btn-book-now" 
+                                ${empty tour.schedules ? 'disabled' : ''}>
+                            <i class="fa-solid fa-cart-shopping me-2"></i>Book Now
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Destination Card -->
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-earth-americas me-2 text-primary"></i>Destination Info</h5>
+                    <div class="dest-card-image overflow-hidden rounded-3 mb-3">
+                        <img src="${not empty tour.destination.imageUrl ? pageContext.request.contextPath.concat(tour.destination.imageUrl) : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=400&auto=format&fit=crop'}" 
+                             class="img-fluid w-100 object-fit-cover" 
+                             style="height: 180px;" 
+                             alt="${tour.destination.destinationName}"
+                             onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop'">
+                    </div>
+                    <h6 class="fw-bold text-main mb-1">${tour.destination.destinationName}</h6>
+                    <p class="text-muted mb-2" style="font-size: 0.85rem;">
+                        <i class="fa-solid fa-map-pin me-1 text-primary"></i>${tour.destination.province} | Region: ${tour.destination.region}
+                    </p>
+                    <p class="text-secondary-emphasis" style="font-size: 0.9rem; line-height: 1.5;">${tour.destination.description}</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
-    <footer class="text-center text-lg-start mt-5">
-        <div class="container p-4">
-            <div class="row">
-                <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-                    <h5 class="text-uppercase text-white font-weight-bold mb-3">T-Booking Tour Website</h5>
-                    <p class="text-muted">
-                        We are proud to offer our customers discovery tours, unique international experiences, and professional corporate visits.
-                    </p>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase text-white mb-3">Quick Links</h5>
-                    <ul class="list-unstyled mb-0">
-                        <li><a href="${pageContext.request.contextPath}/tours">Tour Packages</a></li>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Support Contact</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase text-white mb-3">Contact Us</h5>
-                    <ul class="list-unstyled text-muted">
-                        <li><i class="fa-solid fa-phone me-2"></i>0374099505</li>
-                        <li><i class="fa-solid fa-envelope me-2"></i>pquocminh2005@gmail.com</li>
-                        <li><i class="fa-solid fa-map-marker-alt me-2"></i>Can Tho, Vietnam</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="text-center p-3 border-top border-secondary text-muted">
-            &copy; 2026 T-Booking. All rights reserved.
+    <footer class="footer-custom py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0 text-white-50">&copy; 2026 T-Booking. All rights reserved. Design with passion in Vietnam.</p>
         </div>
     </footer>
 
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
     <script>
-        function handleBooking() {
-            <c:choose>
-                <c:when test="${not empty sessionScope.user}">
-                    alert('Booking feature coming soon!');
-                </c:when>
-                <c:otherwise>
-                    alert('Please login to book this tour');
-                    window.location.href = '${pageContext.request.contextPath}/login';
-                </c:otherwise>
-            </c:choose>
+        function calculateTotalPrice() {
+            const selectElement = document.getElementById("departureDate");
+            if (!selectElement || selectElement.options.length === 0) return;
+            
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = parseFloat(selectedOption.getAttribute("data-price") || 0);
+            
+            const numPeopleElement = document.getElementById("numberOfPeople");
+            const numPeople = parseInt(numPeopleElement.value || 0);
+            
+            const total = price * numPeople;
+            
+            // Format number to vnd currency style
+            const formattedTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
+            document.getElementById("totalPriceDisplay").innerText = formattedTotal;
         }
+
+        // Initialize total price on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            calculateTotalPrice();
+        });
     </script>
 </body>
 </html>
-

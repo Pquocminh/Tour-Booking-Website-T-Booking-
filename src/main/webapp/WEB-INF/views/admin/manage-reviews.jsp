@@ -129,7 +129,7 @@
                                             </c:choose>
                                         </td>
                                         <td>
-                                            <div class="small fw-bold"><fmt:formatDate value="${r.createdAt}" pattern="MMM dd, yyyy"/></div>
+                                            <div class="small fw-bold"><fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/></div>
                                             <div class="small text-muted"><fmt:formatDate value="${r.createdAt}" pattern="HH:mm"/></div>
                                         </td>
                                         <td class="text-center">

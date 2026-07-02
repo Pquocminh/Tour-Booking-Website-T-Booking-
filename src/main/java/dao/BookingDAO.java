@@ -9,8 +9,8 @@ import java.sql.PreparedStatement;
 public class BookingDAO extends DBContext {
 
     public boolean insertBooking(Booking booking) {
-        String insertBookingSql = "INSERT INTO Bookings (CustomerId, ScheduleId, VoucherId, BookingDate, NumberOfPeople, ContactName, ContactPhone, TotalPrice, DepositAmount, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String updateScheduleSql = "UPDATE TourSchedules SET AvailableSlots = AvailableSlots - ? WHERE ScheduleId = ? AND AvailableSlots >= ?";
+        String insertBookingSql = "INSERT INTO Booking (customer_id, schedule_id, voucher_id, booking_date, number_of_people, contact_name, contact_phone, total_price, deposit_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String updateScheduleSql = "UPDATE TourSchedule SET available_slots = available_slots - ? WHERE schedule_id = ? AND available_slots >= ?";
 
         Connection connection = null;
         try {
