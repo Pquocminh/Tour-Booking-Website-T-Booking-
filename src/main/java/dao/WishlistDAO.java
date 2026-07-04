@@ -118,6 +118,38 @@ public class WishlistDAO {
         }
     }
 
+    public boolean removeMultipleToursFromWishlist(int customerId, List<Integer> tourIds) {
+        if (tourIds == null || tourIds.isEmpty()) {
+            return false;
+        }
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        StringBuilder sql = new StringBuilder("DELETE FROM Wishlist WHERE customer_id = ? AND tour_id IN (");
+        for (int i = 0; i < tourIds.size(); i++) {
+            sql.append("?");
+            if (i < tourIds.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(")");
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setInt(1, customerId);
+            for (int i = 0; i < tourIds.size(); i++) {
+                ps.setInt(i + 2, tourIds.get(i));
+            }
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeConnection(conn);
+        }
+    }
+
     private Tour mapTourFromResultSet(ResultSet rs) throws SQLException {
         Tour tour = new Tour();
         tour.setTourId(rs.getInt("tour_id"));

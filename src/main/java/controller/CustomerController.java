@@ -355,10 +355,35 @@ public class CustomerController extends HttpServlet {
         String tourIdStr = request.getParameter("tourId");
         String redirect = request.getParameter("redirect");
 
-        if (tourIdStr != null && !tourIdStr.trim().isEmpty()) {
+        WishlistDAO wishlistDAO = new WishlistDAO();
+
+        if ("removeMultiple".equalsIgnoreCase(action)) {
+            String[] tourIdsStr = request.getParameterValues("tourIds");
+            if (tourIdsStr != null && tourIdsStr.length > 0) {
+                List<Integer> tourIds = new java.util.ArrayList<>();
+                for (String idStr : tourIdsStr) {
+                    try {
+                        tourIds.add(Integer.parseInt(idStr));
+                    } catch (NumberFormatException e) {
+                        // ignore
+                    }
+                }
+                if (!tourIds.isEmpty()) {
+                    boolean success = wishlistDAO.removeMultipleToursFromWishlist(user.getAccountId(), tourIds);
+                    if (success) {
+                        session.setAttribute("successMessage", "Selected tours removed from wishlist successfully!");
+                    } else {
+                        session.setAttribute("errorMessage", "Failed to remove selected tours from wishlist.");
+                    }
+                } else {
+                    session.setAttribute("errorMessage", "No valid tours selected.");
+                }
+            } else {
+                session.setAttribute("errorMessage", "No tours selected.");
+            }
+        } else if (tourIdStr != null && !tourIdStr.trim().isEmpty()) {
             try {
                 int tourId = Integer.parseInt(tourIdStr);
-                WishlistDAO wishlistDAO = new WishlistDAO();
 
                 if ("add".equalsIgnoreCase(action)) {
                     boolean success = wishlistDAO.addTourToWishlist(user.getAccountId(), tourId);

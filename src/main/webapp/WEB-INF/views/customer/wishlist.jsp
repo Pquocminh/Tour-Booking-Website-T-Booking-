@@ -53,6 +53,20 @@
             left: 15px;
             z-index: 10;
         }
+
+        .tour-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            border: 2px solid #fff !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .tour-checkbox:checked {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+        }
     </style>
 </head>
 <body>
@@ -163,12 +177,35 @@
                                 </div>
                             </c:when>
                             <c:otherwise>
+                                <!-- Bulk Action Controls -->
+                                <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded-3 border-0">
+                                    <div class="form-check ms-2">
+                                        <input class="form-check-input" type="checkbox" id="selectAllWishlist" style="width: 20px; height: 20px; cursor: pointer; border: 2px solid #ccc;">
+                                        <label class="form-check-label fw-bold text-dark ms-2" for="selectAllWishlist" style="cursor: pointer; user-select: none; padding-top: 2px;">
+                                            Select All
+                                        </label>
+                                    </div>
+                                    <button type="button" id="btnRemoveSelected" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold" disabled onclick="removeSelectedTours()">
+                                        <i class="fa-solid fa-trash me-2"></i>Remove Selected
+                                    </button>
+                                </div>
+
+                                <!-- Hidden Form for Bulk Deletion -->
+                                <form id="bulkDeleteForm" action="${pageContext.request.contextPath}/wishlist" method="POST" style="display: none;">
+                                    <input type="hidden" name="action" value="removeMultiple">
+                                    <div id="bulkDeleteInputs"></div>
+                                </form>
+
                                 <div class="row g-4">
                                     <c:forEach var="tour" items="${wishlistTours}">
                                         <div class="col-md-6 col-lg-4">
                                             <div class="card wishlist-card h-100 bg-white shadow-sm border-0">
                                                 <!-- Image -->
                                                 <div class="wishlist-img-wrapper">
+                                                    <!-- Checkbox for item selection -->
+                                                    <div class="position-absolute top-0 end-0 m-3" style="z-index: 20;">
+                                                        <input class="form-check-input tour-checkbox" type="checkbox" value="${tour.tourId}">
+                                                    </div>
                                                     <span class="badge bg-primary wishlist-badge rounded-pill px-3 py-2">
                                                         <i class="fa-solid fa-tag me-1"></i>${tour.category.categoryName}
                                                     </span>
@@ -239,5 +276,68 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Wishlist Deletion JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllCheckbox = document.getElementById('selectAllWishlist');
+            const tourCheckboxes = document.querySelectorAll('.tour-checkbox');
+            const removeSelectedBtn = document.getElementById('btnRemoveSelected');
+            
+            if (selectAllCheckbox && removeSelectedBtn) {
+                // Function to update the state of "Remove Selected" button
+                function updateRemoveButtonState() {
+                    const checkedCount = document.querySelectorAll('.tour-checkbox:checked').length;
+                    removeSelectedBtn.disabled = checkedCount === 0;
+                    if (checkedCount === 0) {
+                        selectAllCheckbox.checked = false;
+                        selectAllCheckbox.indeterminate = false;
+                    } else if (checkedCount === tourCheckboxes.length) {
+                        selectAllCheckbox.checked = true;
+                        selectAllCheckbox.indeterminate = false;
+                    } else {
+                        selectAllCheckbox.checked = false;
+                        selectAllCheckbox.indeterminate = true;
+                    }
+                }
+                
+                // Select All click event
+                selectAllCheckbox.addEventListener('change', function() {
+                    tourCheckboxes.forEach(cb => {
+                        cb.checked = selectAllCheckbox.checked;
+                    });
+                    updateRemoveButtonState();
+                });
+                
+                // Individual checkbox click events
+                tourCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', updateRemoveButtonState);
+                });
+            }
+        });
+        
+        function removeSelectedTours() {
+            const checkedCheckboxes = document.querySelectorAll('.tour-checkbox:checked');
+            if (checkedCheckboxes.length === 0) {
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove the selected ' + checkedCheckboxes.length + ' tour(s) from your wishlist?')) {
+                const form = document.getElementById('bulkDeleteForm');
+                const inputsContainer = document.getElementById('bulkDeleteInputs');
+                inputsContainer.innerHTML = ''; // clear previous inputs
+                
+                checkedCheckboxes.forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'tourIds';
+                    input.value = cb.value;
+                    inputsContainer.appendChild(input);
+                });
+                
+                form.submit();
+            }
+        }
+    </script>
 </body>
 </html>
