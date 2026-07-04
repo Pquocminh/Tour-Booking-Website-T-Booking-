@@ -17,11 +17,13 @@ import model.Account;
 import model.Booking;
 import model.Review;
 import model.TourSchedule;
+import model.Tour;
 import dao.AccountDAO;
 import dao.ReviewDAO;
+import dao.WishlistDAO;
 import utils.PasswordUtils;
 
-@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking"})
+@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist"})
 public class CustomerController extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
@@ -38,6 +40,8 @@ public class CustomerController extends HttpServlet {
             handleReviewsGet(request, response);
         } else if ("/booking".equals(path)) {
             handleBookingGet(request, response);
+        } else if ("/wishlist".equals(path)) {
+            handleWishlistGet(request, response);
         }
     }
 
@@ -52,6 +56,8 @@ public class CustomerController extends HttpServlet {
             handleReviewsPost(request, response);
         } else if ("/booking".equals(path)) {
             handleBookingPost(request, response);
+        } else if ("/wishlist".equals(path)) {
+            handleWishlistPost(request, response);
         }
     }
 
@@ -316,6 +322,68 @@ public class CustomerController extends HttpServlet {
             }
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
+        }
+    }
+
+    // ================== WISHLIST ==================
+    private void handleWishlistGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        WishlistDAO wishlistDAO = new WishlistDAO();
+        List<Tour> wishlistTours = wishlistDAO.getWishlistToursByCustomerId(user.getAccountId());
+        request.setAttribute("wishlistTours", wishlistTours);
+
+        request.getRequestDispatcher("/WEB-INF/views/customer/wishlist.jsp").forward(request, response);
+    }
+
+    private void handleWishlistPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        String tourIdStr = request.getParameter("tourId");
+        String redirect = request.getParameter("redirect");
+
+        if (tourIdStr != null && !tourIdStr.trim().isEmpty()) {
+            try {
+                int tourId = Integer.parseInt(tourIdStr);
+                WishlistDAO wishlistDAO = new WishlistDAO();
+
+                if ("add".equalsIgnoreCase(action)) {
+                    boolean success = wishlistDAO.addTourToWishlist(user.getAccountId(), tourId);
+                    if (success) {
+                        session.setAttribute("successMessage", "Tour added to wishlist successfully!");
+                    } else {
+                        session.setAttribute("errorMessage", "Failed to add tour to wishlist.");
+                    }
+                } else if ("remove".equalsIgnoreCase(action)) {
+                    boolean success = wishlistDAO.removeTourFromWishlist(user.getAccountId(), tourId);
+                    if (success) {
+                        session.setAttribute("successMessage", "Tour removed from wishlist successfully!");
+                    } else {
+                        session.setAttribute("errorMessage", "Failed to remove tour from wishlist.");
+                    }
+                }
+            } catch (NumberFormatException e) {
+                session.setAttribute("errorMessage", "Invalid tour ID.");
+            }
+        }
+
+        if ("detail".equalsIgnoreCase(redirect) && tourIdStr != null) {
+            response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + tourIdStr);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/wishlist");
         }
     }
 }

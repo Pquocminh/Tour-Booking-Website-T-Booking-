@@ -45,6 +45,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2" aria-labelledby="navbarDropdown" style="max-height: 380px; overflow-y: auto; border-radius: 12px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
                                     <li><span class="dropdown-item-text text-muted" style="font-size: 0.8rem;">Role: ${sessionScope.user.role}</span></li>
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i>My Profile</a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/customer/reviews"><i class="fa-regular fa-star me-2 text-primary"></i>My Reviews</a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart me-2 text-danger"></i>My Wishlist</a></li>
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
                                         <li><a class="dropdown-item" href="${pageContext.request.contextPath}/admin/tours"><i class="fa-solid fa-user-gear me-2 text-primary"></i>Manage Tours</a></li>
                                           <c:if test="${sessionScope.user.role == 'Admin'}">
@@ -276,6 +278,34 @@
                             <i class="fa-solid fa-cart-shopping me-2"></i>Book Now
                         </button>
                     </form>
+                    
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user && sessionScope.user.role == 'Customer'}">
+                            <form action="${pageContext.request.contextPath}/wishlist" method="POST" class="mt-2">
+                                <input type="hidden" name="tourId" value="${tour.tourId}">
+                                <input type="hidden" name="redirect" value="detail">
+                                <c:choose>
+                                    <c:when test="${isInWishlist}">
+                                        <input type="hidden" name="action" value="remove">
+                                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 fw-semibold">
+                                            <i class="fa-solid fa-heart me-2"></i>Remove from Wishlist
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <input type="hidden" name="action" value="add">
+                                        <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-2 fw-semibold">
+                                            <i class="fa-regular fa-heart me-2"></i>Add to Wishlist
+                                        </button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </form>
+                        </c:when>
+                        <c:when test="${empty sessionScope.user}">
+                            <a href="${pageContext.request.contextPath}/login" class="btn btn-outline-danger w-100 rounded-pill py-2 fw-semibold mt-2">
+                                <i class="fa-regular fa-heart me-2"></i>Add to Wishlist
+                            </a>
+                        </c:when>
+                    </c:choose>
                 </div>
 
                 <!-- Destination Card -->

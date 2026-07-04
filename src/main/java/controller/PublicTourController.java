@@ -5,8 +5,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import dao.WishlistDAO;
 
 import model.Tour;
 import model.Review;
@@ -94,6 +96,18 @@ public class PublicTourController extends HttpServlet {
             request.setAttribute("reviews", reviews);
 
             request.setAttribute("tour", tour);
+
+            HttpSession session = request.getSession(false);
+            boolean isInWishlist = false;
+            if (session != null) {
+                model.Account user = (model.Account) session.getAttribute("user");
+                if (user != null) {
+                    WishlistDAO wishlistDAO = new WishlistDAO();
+                    isInWishlist = wishlistDAO.isInWishlist(user.getAccountId(), tourId);
+                }
+            }
+            request.setAttribute("isInWishlist", isInWishlist);
+
             request.getRequestDispatcher("/WEB-INF/views/guest/tour-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
