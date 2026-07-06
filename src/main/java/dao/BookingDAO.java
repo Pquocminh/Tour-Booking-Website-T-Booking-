@@ -165,4 +165,66 @@ public class BookingDAO extends DBContext {
         }
         return false;
     }
+
+    public boolean cancelBooking(int bookingId) {
+        Booking booking = getBookingById(bookingId);
+        if (booking == null) {
+            return false;
+        }
+        if ("Cancelled".equalsIgnoreCase(booking.getStatus())) {
+            return true; // Already cancelled
+        }
+
+        String updateBookingSql = "UPDATE Booking SET status = 'Cancelled' WHERE booking_id = ?";
+        String updateScheduleSql = "UPDATE TourSchedule SET available_slots = available_slots + ? WHERE schedule_id = ?";
+
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            connection.setAutoCommit(false); // Start transaction
+
+            // 1. Update Booking status to Cancelled
+            try (PreparedStatement psUpdateBooking = connection.prepareStatement(updateBookingSql)) {
+                psUpdateBooking.setInt(1, bookingId);
+                int rowsUpdated = psUpdateBooking.executeUpdate();
+                if (rowsUpdated == 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            // 2. Add slots back to TourSchedule
+            try (PreparedStatement psUpdateSchedule = connection.prepareStatement(updateScheduleSql)) {
+                psUpdateSchedule.setInt(1, booking.getNumberOfPeople());
+                psUpdateSchedule.setInt(2, booking.getScheduleId());
+                int rowsUpdated = psUpdateSchedule.executeUpdate();
+                if (rowsUpdated > 0) {
+                    connection.commit();
+                    return true;
+                } else {
+                    connection.rollback();
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
 }

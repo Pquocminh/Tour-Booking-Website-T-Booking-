@@ -105,9 +105,14 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Update Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal${b.bookingId}">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
+                                        <c:if test="${b.status != 'Cancelled'}">
+                                            <button class="btn btn-sm btn-outline-danger rounded-circle me-1" title="Cancel Booking" data-bs-toggle="modal" data-bs-target="#cancelModal${b.bookingId}">
+                                                <i class="fa-solid fa-ban"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Update Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal${b.bookingId}">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                        </c:if>
                                         <button class="btn btn-sm btn-outline-info rounded-circle me-1" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
@@ -195,6 +200,33 @@
                                     </div>
                                 </div>
                                 <!-- End Modal -->
+                                
+                                <!-- Cancel Booking Modal -->
+                                <c:if test="${b.status != 'Cancelled'}">
+                                    <div class="modal fade" id="cancelModal${b.bookingId}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow">
+                                                <div class="modal-header border-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Cancel Booking #${b.bookingId}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="${pageContext.request.contextPath}/admin/bookings" method="post">
+                                                    <div class="modal-body text-start">
+                                                        <input type="hidden" name="action" value="cancel">
+                                                        <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                                        <p class="mb-0">Are you sure you want to cancel booking <strong>#${b.bookingId}</strong> for <strong>${b.contactName}</strong>?</p>
+                                                        <p class="text-danger small mt-2 mb-0"><i class="fa-solid fa-triangle-exclamation me-1"></i>This will update the booking status to Cancelled and release ${b.numberOfPeople} slots back to the schedule.</p>
+                                                    </div>
+                                                    <div class="modal-footer border-0 pt-0">
+                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">No, Keep It</button>
+                                                        <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Cancel Booking</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:if>
+                                <!-- End Cancel Booking Modal -->
                                 
                             </c:forEach>
                         </c:otherwise>

@@ -47,6 +47,21 @@ public class AdminBookingController extends HttpServlet {
                     request.getSession().setAttribute("errorMessage", "Invalid Booking ID.");
                 }
             }
+        } else if ("cancel".equals(action)) {
+            String bookingIdStr = request.getParameter("bookingId");
+            if (bookingIdStr != null) {
+                try {
+                    int bookingId = Integer.parseInt(bookingIdStr);
+                    boolean success = bookingDAO.cancelBooking(bookingId);
+                    if (success) {
+                        request.getSession().setAttribute("successMessage", "Cancelled Booking #" + bookingId + " successfully and released slots.");
+                    } else {
+                        request.getSession().setAttribute("errorMessage", "Failed to cancel booking.");
+                    }
+                } catch (NumberFormatException e) {
+                    request.getSession().setAttribute("errorMessage", "Invalid Booking ID.");
+                }
+            }
         }
         response.sendRedirect(request.getContextPath() + "/admin/bookings");
     }
