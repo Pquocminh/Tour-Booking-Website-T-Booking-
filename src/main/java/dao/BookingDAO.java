@@ -5,6 +5,9 @@ import model.Booking;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BookingDAO extends DBContext {
 
@@ -77,5 +80,46 @@ public class BookingDAO extends DBContext {
             }
         }
         return false;
+    }
+
+    public List<Booking> getAllBookings() {
+        List<Booking> list = new ArrayList<>();
+        String sql = "SELECT b.*, t.tour_name, ts.departure_date, a.username AS customer_username, a.email AS customer_email " +
+                     "FROM Booking b " +
+                     "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
+                     "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "LEFT JOIN Account a ON b.customer_id = a.account_id " +
+                     "ORDER BY b.booking_date DESC";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                Booking b = new Booking();
+                b.setBookingId(rs.getInt("booking_id"));
+                b.setCustomerId(rs.getInt("customer_id"));
+                b.setScheduleId(rs.getInt("schedule_id"));
+                if (rs.getObject("voucher_id") != null) {
+                    b.setVoucherId(rs.getInt("voucher_id"));
+                }
+                b.setBookingDate(rs.getTimestamp("booking_date"));
+                b.setNumberOfPeople(rs.getInt("number_of_people"));
+                b.setContactName(rs.getString("contact_name"));
+                b.setContactPhone(rs.getString("contact_phone"));
+                b.setTotalPrice(rs.getDouble("total_price"));
+                b.setDepositAmount(rs.getDouble("deposit_amount"));
+                b.setStatus(rs.getString("status"));
+                
+                b.setTourName(rs.getString("tour_name"));
+                b.setDepartureDate(rs.getDate("departure_date"));
+                b.setCustomerUsername(rs.getString("customer_username"));
+                b.setCustomerEmail(rs.getString("customer_email"));
+                
+                list.add(b);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }
