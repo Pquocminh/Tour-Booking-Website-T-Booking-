@@ -26,4 +26,28 @@ public class AdminBookingController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/admin/manage-bookings.jsp").forward(request, response);
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("updateStatus".equals(action)) {
+            String bookingIdStr = request.getParameter("bookingId");
+            String status = request.getParameter("status");
+
+            if (bookingIdStr != null && status != null) {
+                try {
+                    int bookingId = Integer.parseInt(bookingIdStr);
+                    boolean success = bookingDAO.updateBookingStatus(bookingId, status);
+                    if (success) {
+                        request.getSession().setAttribute("successMessage", "Updated Booking #" + bookingId + " status to " + status + ".");
+                    } else {
+                        request.getSession().setAttribute("errorMessage", "Failed to update booking status.");
+                    }
+                } catch (NumberFormatException e) {
+                    request.getSession().setAttribute("errorMessage", "Invalid Booking ID.");
+                }
+            }
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/bookings");
+    }
 }

@@ -105,6 +105,9 @@
                                         </c:choose>
                                     </td>
                                     <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Update Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal${b.bookingId}">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
                                         <button class="btn btn-sm btn-outline-info rounded-circle me-1" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
@@ -156,6 +159,42 @@
                                     </div>
                                 </div>
                                 <!-- End View Details Modal -->
+                                
+                                <!-- Update Status Modal -->
+                                <div class="modal fade" id="updateStatusModal${b.bookingId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow">
+                                            <div class="modal-header border-0 pb-0">
+                                                <h5 class="modal-title fw-bold">Update Status for Booking #${b.bookingId}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form action="${pageContext.request.contextPath}/admin/bookings" method="post">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="action" value="updateStatus">
+                                                    <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted small fw-bold text-uppercase">Current Status</label>
+                                                        <input type="text" class="form-control bg-light border-0" value="${b.status}" readonly>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted small fw-bold text-uppercase">New Status</label>
+                                                        <select name="status" class="form-select border-0 bg-light" required>
+                                                            <option value="Pending" ${b.status == 'Pending' ? 'selected' : ''}>Pending</option>
+                                                            <option value="Confirmed" ${b.status == 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                                            <option value="Completed" ${b.status == 'Completed' ? 'selected' : ''}>Completed</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0 pt-0">
+                                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- End Modal -->
                                 
                             </c:forEach>
                         </c:otherwise>

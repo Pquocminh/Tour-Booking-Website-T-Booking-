@@ -122,4 +122,47 @@ public class BookingDAO extends DBContext {
         }
         return list;
     }
+
+    public Booking getBookingById(int bookingId) {
+        String sql = "SELECT * FROM Booking WHERE booking_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Booking b = new Booking();
+                    b.setBookingId(rs.getInt("booking_id"));
+                    b.setCustomerId(rs.getInt("customer_id"));
+                    b.setScheduleId(rs.getInt("schedule_id"));
+                    if (rs.getObject("voucher_id") != null) {
+                        b.setVoucherId(rs.getInt("voucher_id"));
+                    }
+                    b.setBookingDate(rs.getTimestamp("booking_date"));
+                    b.setNumberOfPeople(rs.getInt("number_of_people"));
+                    b.setContactName(rs.getString("contact_name"));
+                    b.setContactPhone(rs.getString("contact_phone"));
+                    b.setTotalPrice(rs.getDouble("total_price"));
+                    b.setDepositAmount(rs.getDouble("deposit_amount"));
+                    b.setStatus(rs.getString("status"));
+                    return b;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateBookingStatus(int bookingId, String status) {
+        String sql = "UPDATE Booking SET status = ? WHERE booking_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
