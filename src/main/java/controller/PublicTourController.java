@@ -46,6 +46,9 @@ public class PublicTourController extends HttpServlet {
     private void viewTourList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Tour> tours = tourDAO.getAvailableTours();
+        if (tours == null || tours.isEmpty()) {
+            request.setAttribute("message", "Currently, there aren't any tours being sold.");
+        }
         request.setAttribute("tours", tours);
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
     }
@@ -53,6 +56,9 @@ public class PublicTourController extends HttpServlet {
     private void searchTours(HttpServletRequest request, HttpServletResponse response, String keyword)
             throws ServletException, IOException {
         List<Tour> tours = tourDAO.searchTours(keyword.trim());
+        if (tours == null || tours.isEmpty()) {
+            request.setAttribute("message", "No tours found matching your search.");
+        }
         request.setAttribute("tours", tours);
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("isSearchResult", true);
@@ -62,6 +68,9 @@ public class PublicTourController extends HttpServlet {
     private void filterByCategory(HttpServletRequest request, HttpServletResponse response, int categoryId)
             throws ServletException, IOException {
         List<Tour> tours = tourDAO.searchToursByCategory(categoryId);
+        if (tours == null || tours.isEmpty()) {
+            request.setAttribute("message", "No tours available in this category.");
+        }
         request.setAttribute("tours", tours);
         request.setAttribute("filterType", "category");
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
@@ -70,6 +79,9 @@ public class PublicTourController extends HttpServlet {
     private void filterByDestination(HttpServletRequest request, HttpServletResponse response, int destinationId)
             throws ServletException, IOException {
         List<Tour> tours = tourDAO.searchToursByDestination(destinationId);
+        if (tours == null || tours.isEmpty()) {
+            request.setAttribute("message", "No tours available for this destination.");
+        }
         request.setAttribute("tours", tours);
         request.setAttribute("filterType", "destination");
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
