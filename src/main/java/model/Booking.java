@@ -124,6 +124,8 @@ public class Booking {
 
     private String tourName;
     private java.sql.Date departureDate;
+    private String customerUsername;
+    private String customerEmail;
 
     public String getTourName() {
         return tourName;
@@ -139,5 +141,21 @@ public class Booking {
 
     public void setDepartureDate(java.sql.Date departureDate) {
         this.departureDate = departureDate;
+    }
+
+    public String getCustomerUsername() {
+        return customerUsername;
+    }
+
+    public void setCustomerUsername(String customerUsername) {
+        this.customerUsername = customerUsername;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
     }
 }

@@ -190,6 +190,9 @@
             <a href="${pageContext.request.contextPath}/admin/schedules" class="nav-item-custom ${param.activeMenu == 'schedules' ? 'active' : ''}">
                 <i class="fa-solid fa-calendar"></i> Schedules
             </a>
+            <a href="${pageContext.request.contextPath}/admin/bookings" class="nav-item-custom ${param.activeMenu == 'bookings' ? 'active' : ''}">
+                <i class="fa-solid fa-list-check"></i> Bookings
+            </a>
             <a href="${pageContext.request.contextPath}/admin/promotions" class="nav-item-custom ${param.activeMenu == 'promotions' ? 'active' : ''}">
                 <i class="fa-solid fa-percent"></i> Promotions
             </a>
