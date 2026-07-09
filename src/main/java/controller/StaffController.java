@@ -81,7 +81,7 @@ public class StaffController extends HttpServlet {
         List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
-        request.getRequestDispatcher("/WEB-INF/views/staff/manage-schedules.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/staff/schedules.jsp").forward(request, response);
     }
 
     private void handleGetDetails(HttpServletRequest request, HttpServletResponse response)
@@ -341,7 +341,7 @@ public class StaffController extends HttpServlet {
         List<Review> reviews = reviewDAO.getAllReviewsAdmin();
         request.setAttribute("reviews", reviews);
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-reviews.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/reviews.jsp").forward(request, response);
     }
 
     private void handleReviewsPost(HttpServletRequest request, HttpServletResponse response)
@@ -390,3 +390,4 @@ public class StaffController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/staff/reviews");
     }
 }
+

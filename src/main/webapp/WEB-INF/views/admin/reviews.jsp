@@ -1,55 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
     <jsp:param name="pageTitle" value="Manage Reviews" />
     <jsp:param name="activeMenu" value="reviews" />
 </jsp:include>
-<style>
-    body { background-color: #f8f9fa; }
-    .table-panel {
-        background: #fff;
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        margin-bottom: 30px;
-    }
-    .table thead th {
-        border-bottom: 2px solid #f1f5f9;
-        color: var(--text-muted);
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-    }
-    .table tbody td {
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    .star-rating {
-        color: #ffc107;
-        font-size: 0.9rem;
-    }
-    .comment-box {
-        max-width: 300px;
-        white-space: normal;
-    }
-    .response-box {
-        max-width: 300px;
-        background-color: #f8f9fa;
-        border-left: 3px solid var(--primary-color);
-        padding: 8px 12px;
-        border-radius: 0 8px 8px 0;
-        font-size: 0.85rem;
-    }
-    .toggle-btn {
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .toggle-btn:hover {
-        transform: scale(1.05);
-    }
-</style>
+
 
 <div class="container-fluid p-0">
 
@@ -209,3 +165,4 @@
     </div>
 
 <jsp:include page="layout/footer.jsp" />
+

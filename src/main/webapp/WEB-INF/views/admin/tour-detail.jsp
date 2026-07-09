@@ -1,40 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
     <jsp:param name="pageTitle" value="Tour Details" />
     <jsp:param name="activeMenu" value="tours" />
 </jsp:include>
-<style>
-    body { background-color: #f8f9fa; }
-    .detail-panel {
-        background: #fff;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        margin: 40px auto;
-        max-width: 900px;
-    }
-    .cover-img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-        border-radius: 15px;
-        margin-bottom: 30px;
-    }
-    .info-label {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-    }
-    .info-value {
-        font-size: 1.1rem;
-        color: var(--text-main);
-        font-weight: 500;
-    }
-</style>
+
 
 <div class="container-fluid p-0">
         <div class="detail-panel">
@@ -122,3 +93,4 @@
     </div>
 
 <jsp:include page="layout/footer.jsp" />
+

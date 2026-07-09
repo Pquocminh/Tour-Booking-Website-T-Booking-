@@ -1,0 +1,376 @@
+﻿/* Admin Global Styles */
+
+/* Extracted from header.jsp */
+
+        :root {
+            --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --primary-blue: #3b82f6;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            width: 100%;
+            max-width: 1600px;
+            min-height: 90vh;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.05);
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 260px;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            margin-bottom: 40px;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .logo i { margin-right: 10px; }
+        
+        .nav-item-custom {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-gray);
+            font-weight: 600;
+            border-radius: 15px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .nav-item-custom i {
+            width: 24px;
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+        .nav-item-custom:hover {
+            color: var(--primary-blue);
+            background: rgba(255,255,255,0.5);
+        }
+        .nav-item-custom.active {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+
+        /* --- Main Content Area --- */
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .top-header h2 {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .search-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+            width: 300px;
+        }
+        .search-bar input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            margin-left: 10px;
+            color: var(--text-gray);
+        }
+        .profile-btn {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+            font-weight: 600;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+        .profile-btn img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\admin-tour-detail.jsp */
+
+    body { background-color: #f8f9fa; }
+    .detail-panel {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin: 40px auto;
+        max-width: 900px;
+    }
+    .cover-img {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    .info-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+    .info-value {
+        font-size: 1.1rem;
+        color: var(--text-main);
+        font-weight: 500;
+    }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\edit-tour.jsp */
+
+    body { background-color: #f8f9fa; }
+    .form-panel {
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin: 40px auto;
+        max-width: 900px;
+    }
+    .section-title {
+        color: var(--text-main);
+        font-weight: 700;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 15px;
+    }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\manage-accounts.jsp */
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid var(--primary-blue);
+    }
+    .filter-panel, .table-panel {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        margin-bottom: 30px;
+    }
+    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .table-custom th { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0 15px 10px; border-bottom: 1px solid #f1f5f9; }
+    .table-custom td { padding: 15px; background: #f8fafc; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+    .table-custom td:first-child { border-radius: 12px 0 0 12px; }
+    .table-custom td:last-child { border-radius: 0 12px 12px 0; }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\manage-bookings.jsp */
+
+    .table-panel {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        margin-bottom: 30px;
+    }
+    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .table-custom th { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0 15px 10px; border-bottom: 1px solid #f1f5f9; }
+    .table-custom td { padding: 15px; background: #f8fafc; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+    .table-custom td:first-child { border-radius: 12px 0 0 12px; }
+    .table-custom td:last-child { border-radius: 0 12px 12px 0; }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\manage-categories.jsp */
+
+        .filter-panel, .table-panel {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            margin-bottom: 30px;
+        }
+        .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .table-custom th { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0 15px 10px; border-bottom: 1px solid #f1f5f9; }
+        .table-custom td { padding: 15px; background: #f8fafc; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+        .table-custom td:first-child { border-radius: 12px 0 0 12px; }
+        .table-custom td:last-child { border-radius: 0 12px 12px 0; }
+    
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\manage-reviews.jsp */
+
+    body { background-color: #f8f9fa; }
+    .table-panel {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        margin-bottom: 30px;
+    }
+    .table thead th {
+        border-bottom: 2px solid #f1f5f9;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .table tbody td {
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .star-rating {
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+    .comment-box {
+        max-width: 300px;
+        white-space: normal;
+    }
+    .response-box {
+        max-width: 300px;
+        background-color: #f8f9fa;
+        border-left: 3px solid var(--primary-color);
+        padding: 8px 12px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.85rem;
+    }
+    .toggle-btn {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toggle-btn:hover {
+        transform: scale(1.05);
+    }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\admin\manage-tours.jsp */
+
+    .tour-thumbnail {
+        width: 80px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .filter-panel, .table-panel {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        margin-bottom: 30px;
+    }
+    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .table-custom th { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0 15px 10px; border-bottom: 1px solid #f1f5f9; }
+    .table-custom td { padding: 15px; background: #f8fafc; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+    .table-custom td:first-child { border-radius: 12px 0 0 12px; }
+    .table-custom td:last-child { border-radius: 0 12px 12px 0; }
+
+
+/* Extracted from src\main\webapp\WEB-INF\views\staff\manage-schedules.jsp */
+
+        .hero-section {
+            padding: 80px 0 50px 0;
+            text-align: center;
+        }
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .table-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            margin-bottom: 50px;
+        }
+        .table-custom th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        .details-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.25rem;
+        }
+        .details-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+    
+

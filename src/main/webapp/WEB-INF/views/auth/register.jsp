@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,51 +13,7 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        .register-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 50px 0;
-            background: radial-gradient(circle at top right, rgba(9, 165, 233, 0.1) 0%, transparent 60%);
-        }
-        
-        .register-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
-            padding: 40px;
-            width: 100%;
-            max-width: 480px;
-            transition: all 0.4s ease;
-        }
-        
-        .register-logo {
-            font-weight: 800;
-            font-size: 2rem;
-            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 25px;
-            display: block;
-            text-decoration: none;
-        }
-        
-        .form-floating > .form-control:focus ~ label,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            color: #4f46e5;
-        }
-        
-        .form-control:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
-        }
-    </style>
+    
 </head>
 <body>
 
@@ -157,3 +113,4 @@
     </script>
 </body>
 </html>
+

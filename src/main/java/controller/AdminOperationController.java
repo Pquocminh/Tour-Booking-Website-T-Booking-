@@ -206,7 +206,7 @@ public class AdminOperationController extends HttpServlet {
         List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-schedules.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/schedules.jsp").forward(request, response);
     }
 
     private void handleSchedulesPost(HttpServletRequest request, HttpServletResponse response, String action, String tourIdParam)
@@ -343,7 +343,7 @@ public class AdminOperationController extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-capacity.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/capacity.jsp").forward(request, response);
     }
 
     private void handleCapacityPost(HttpServletRequest request, HttpServletResponse response, String action, String tourIdParam)
@@ -409,3 +409,4 @@ public class AdminOperationController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/capacity" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
     }
 }
+
