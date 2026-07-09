@@ -42,6 +42,40 @@ public class PromotionDAO {
         return list;
     }
 
+    public List<Promotion> getActivePromotions() {
+        List<Promotion> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        // Get promotions that are Active, started already, and haven't ended yet
+        String sql = "SELECT promotion_id, promotion_name, discount_percent, start_date, end_date, status " +
+                     "FROM Promotion " +
+                     "WHERE status = 'Active' " +
+                     "AND CAST(GETDATE() AS DATE) >= start_date " +
+                     "AND CAST(GETDATE() AS DATE) <= end_date " +
+                     "ORDER BY discount_percent DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Promotion p = new Promotion();
+                p.setPromotionId(rs.getInt("promotion_id"));
+                p.setPromotionName(rs.getString("promotion_name"));
+                p.setDiscountPercent(rs.getInt("discount_percent"));
+                p.setStartDate(rs.getDate("start_date"));
+                p.setEndDate(rs.getDate("end_date"));
+                p.setStatus(rs.getString("status"));
+                list.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn);
+        }
+        return list;
+    }
+
     public Promotion getPromotionById(int promotionId) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
