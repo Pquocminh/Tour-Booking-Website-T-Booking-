@@ -180,6 +180,22 @@
                 <!-- Reviews Section -->
                 <div class="glass-card p-4 mt-4 mb-4">
                     <h4 class="details-section-title"><i class="fa-regular fa-star me-2 text-warning"></i>Customer Reviews</h4>
+                    
+                    <c:if test="${not empty reviews}">
+                        <div class="d-flex align-items-center mb-4 p-3 rounded-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="display-4 fw-bold me-3 text-dark">
+                                <fmt:formatNumber value="${averageRating}" maxFractionDigits="1" minFractionDigits="1"/>
+                            </div>
+                            <div>
+                                <div class="text-warning fs-5 mb-1">
+                                    <c:forEach begin="1" end="5" var="i">
+                                        <i class="fa-solid fa-star ${i <= averageRating ? '' : (i - 0.5 <= averageRating ? 'fa-star-half-stroke' : 'fa-regular')}"></i>
+                                    </c:forEach>
+                                </div>
+                                <span class="text-muted small fw-medium">Based on ${reviews.size()} review(s)</span>
+                            </div>
+                        </div>
+                    </c:if>
                     <c:choose>
                         <c:when test="${empty reviews}">
                             <div class="p-3 text-center text-muted">
