@@ -111,6 +111,16 @@ public class PublicTourController extends HttpServlet {
             List<Review> reviews = reviewDAO.getVisibleReviewsByTourId(tourId);
             request.setAttribute("reviews", reviews);
 
+            double averageRating = 0;
+            if (!reviews.isEmpty()) {
+                int totalStars = 0;
+                for (Review r : reviews) {
+                    totalStars += r.getRating();
+                }
+                averageRating = (double) totalStars / reviews.size();
+            }
+            request.setAttribute("averageRating", averageRating);
+
             request.setAttribute("tour", tour);
 
             HttpSession session = request.getSession(false);
