@@ -46,6 +46,7 @@ public class AdminAccountController extends HttpServlet {
         request.setAttribute("selectedRole", role);
         request.setAttribute("selectedStatus", status);
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-accounts.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/accounts.jsp").forward(request, response);
     }
 }
+

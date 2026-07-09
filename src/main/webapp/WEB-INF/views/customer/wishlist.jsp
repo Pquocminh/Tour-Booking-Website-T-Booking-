@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -14,60 +14,7 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        .profile-container {
-            padding: 60px 0 80px 0;
-            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
-        }
-        
-        .border-color {
-            border-color: rgba(226, 232, 240, 0.8) !important;
-        }
-
-        .wishlist-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        .wishlist-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
-        }
-
-        .wishlist-img-wrapper {
-            position: relative;
-            height: 200px;
-        }
-
-        .wishlist-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .wishlist-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
-        }
-
-        .tour-checkbox {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            border: 2px solid #fff !important;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            background-color: rgba(255, 255, 255, 0.95);
-        }
-        
-        .tour-checkbox:checked {
-            background-color: var(--bs-primary) !important;
-            border-color: var(--bs-primary) !important;
-        }
-    </style>
+    
 </head>
 <body>
 
@@ -341,3 +288,4 @@
     </script>
 </body>
 </html>
+

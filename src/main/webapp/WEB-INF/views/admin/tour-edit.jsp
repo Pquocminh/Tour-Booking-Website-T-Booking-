@@ -1,28 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
     <jsp:param name="pageTitle" value="${not empty tour ? 'Edit Tour' : 'Create New Tour'}" />
     <jsp:param name="activeMenu" value="tours" />
 </jsp:include>
-<style>
-    body { background-color: #f8f9fa; }
-    .form-panel {
-        background: #fff;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        margin: 40px auto;
-        max-width: 900px;
-    }
-    .section-title {
-        color: var(--text-main);
-        font-weight: 700;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 15px;
-    }
-</style>
+
 
 <div class="container-fluid p-0">
         <div class="form-panel">
@@ -118,5 +101,6 @@
     </div>
     
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+
 
 

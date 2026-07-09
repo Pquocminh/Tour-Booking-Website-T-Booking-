@@ -1,31 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
     <jsp:param name="pageTitle" value="Manage Tours" />
     <jsp:param name="activeMenu" value="tours" />
 </jsp:include>
-<style>
-    .tour-thumbnail {
-        width: 80px;
-        height: 50px;
-        object-fit: cover;
-        border-radius: 8px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    .filter-panel, .table-panel {
-        background: white;
-        border-radius: 24px;
-        padding: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        margin-bottom: 30px;
-    }
-    .table-custom { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-    .table-custom th { color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; padding: 0 15px 10px; border-bottom: 1px solid #f1f5f9; }
-    .table-custom td { padding: 15px; background: #f8fafc; font-size: 0.9rem; font-weight: 600; color: #1e293b; }
-    .table-custom td:first-child { border-radius: 12px 0 0 12px; }
-    .table-custom td:last-child { border-radius: 0 12px 12px 0; }
-</style>
+
 
 <!-- Main Content -->
 <div class="container-fluid p-0">
@@ -183,3 +163,4 @@
     </div>
 
 <jsp:include page="layout/footer.jsp" />
+

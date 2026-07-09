@@ -100,7 +100,7 @@ public class AdminTourController extends HttpServlet {
         if ("create".equalsIgnoreCase(action)) {
             request.setAttribute("categories", tourDAO.getAllCategories());
             request.setAttribute("destinations", tourDAO.getAllDestinations());
-            request.getRequestDispatcher("/WEB-INF/views/admin/edit-tour.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/admin/tour-edit.jsp").forward(request, response);
             return;
         } else if ("edit".equalsIgnoreCase(action)) {
             String idParam = request.getParameter("id");
@@ -112,7 +112,7 @@ public class AdminTourController extends HttpServlet {
                         request.setAttribute("tour", tour);
                         request.setAttribute("categories", tourDAO.getAllCategories());
                         request.setAttribute("destinations", tourDAO.getAllDestinations());
-                        request.getRequestDispatcher("/WEB-INF/views/admin/edit-tour.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/views/admin/tour-edit.jsp").forward(request, response);
                         return;
                     }
                 } catch (NumberFormatException e) {}
@@ -127,7 +127,7 @@ public class AdminTourController extends HttpServlet {
                     Tour tour = tourDAO.getTourDetails(id);
                     if (tour != null) {
                         request.setAttribute("tour", tour);
-                        request.getRequestDispatcher("/WEB-INF/views/admin/admin-tour-detail.jsp").forward(request, response);
+                        request.getRequestDispatcher("/WEB-INF/views/admin/tour-detail.jsp").forward(request, response);
                         return;
                     }
                 } catch (NumberFormatException e) {}
@@ -167,7 +167,7 @@ public class AdminTourController extends HttpServlet {
         request.setAttribute("selectedCategory", categoryId);
         request.setAttribute("selectedDestination", destinationId);
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-tours.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/tours.jsp").forward(request, response);
     }
 
     private void handleToursPost(HttpServletRequest request, HttpServletResponse response)
@@ -252,7 +252,7 @@ public class AdminTourController extends HttpServlet {
 
         List<Category> categories = categoryDAO.getAllCategories();
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/categories.jsp").forward(request, response);
     }
 
     private void handleCategoriesPost(HttpServletRequest request, HttpServletResponse response)
@@ -333,7 +333,7 @@ public class AdminTourController extends HttpServlet {
 
         List<Category> categories = categoryDAO.getAllCategories();
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/categories.jsp").forward(request, response);
     }
 
     private void reloadPageWithEditCategory(HttpServletRequest request, HttpServletResponse response, String idParam) 
@@ -349,6 +349,7 @@ public class AdminTourController extends HttpServlet {
         }
         List<Category> categories = categoryDAO.getAllCategories();
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-categories.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/categories.jsp").forward(request, response);
     }
 }
+

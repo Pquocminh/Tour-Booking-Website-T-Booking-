@@ -64,7 +64,7 @@ public class AdminMarketingController extends HttpServlet {
                     List<Tour> tours = promotionDAO.getToursByPromotionId(id);
                     request.setAttribute("promotion", promotion);
                     request.setAttribute("tours", tours);
-                    request.getRequestDispatcher("/WEB-INF/views/admin/promotion-details.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/views/admin/promotion-detail.jsp").forward(request, response);
                     return;
                 } else {
                     request.setAttribute("errorMessage", "Promotion not found!");
@@ -86,7 +86,7 @@ public class AdminMarketingController extends HttpServlet {
                     request.setAttribute("promotion", promotion);
                     request.setAttribute("tours", tours);
                     request.setAttribute("mappedTourIds", mappedTourIds);
-                    request.getRequestDispatcher("/WEB-INF/views/admin/edit-promotion.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/views/admin/promotion-edit.jsp").forward(request, response);
                     return;
                 } else {
                     request.setAttribute("errorMessage", "Promotion not found!");
@@ -100,7 +100,7 @@ public class AdminMarketingController extends HttpServlet {
         List<Tour> tours = tourDAO.getAvailableTours();
         request.setAttribute("promotions", promotions);
         request.setAttribute("tours", tours);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-promotions.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/promotions.jsp").forward(request, response);
     }
 
     private void handlePromotionsPost(HttpServletRequest request, HttpServletResponse response)
@@ -276,7 +276,7 @@ public class AdminMarketingController extends HttpServlet {
         List<Tour> tours = tourDAO.getAvailableTours();
         request.setAttribute("promotions", promotions);
         request.setAttribute("tours", tours);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-promotions.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/promotions.jsp").forward(request, response);
     }
 
     private void reloadPromotionEditPage(int id, HttpServletRequest request, HttpServletResponse response)
@@ -292,7 +292,7 @@ public class AdminMarketingController extends HttpServlet {
             request.setAttribute("promotion", promotion);
             request.setAttribute("tours", tours);
             request.setAttribute("mappedTourIds", mappedTourIds);
-            request.getRequestDispatcher("/WEB-INF/views/admin/edit-promotion.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/admin/promotion-edit.jsp").forward(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/promotions");
         }
@@ -312,7 +312,7 @@ public class AdminMarketingController extends HttpServlet {
             request.setAttribute("errorMessage", "Database error: " + e.getMessage());
             e.printStackTrace();
         }
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-discount-policies.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/discount-policies.jsp").forward(request, response);
     }
 
     private void handleDiscountPoliciesPost(HttpServletRequest request, HttpServletResponse response)
@@ -448,6 +448,7 @@ public class AdminMarketingController extends HttpServlet {
         settings.put("group_discount_percent", request.getParameter("groupDiscountPercent"));
 
         request.setAttribute("settings", settings);
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-discount-policies.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/discount-policies.jsp").forward(request, response);
     }
 }
+

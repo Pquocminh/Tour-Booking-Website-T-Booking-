@@ -23,7 +23,7 @@ public class AdminBookingController extends HttpServlet {
         List<Booking> bookings = bookingDAO.getAllBookings();
         request.setAttribute("bookings", bookings);
         
-        request.getRequestDispatcher("/WEB-INF/views/admin/manage-bookings.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin/bookings.jsp").forward(request, response);
     }
 
     @Override
@@ -66,3 +66,4 @@ public class AdminBookingController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/bookings");
     }
 }
+

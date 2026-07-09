@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -14,148 +14,7 @@
     <!-- Chart.js (optional, but good to have globally for dashboard) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --primary-blue: #3b82f6;
-            --text-dark: #1e293b;
-            --text-gray: #64748b;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-        }
-
-        .app-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
-            width: 100%;
-            max-width: 1600px;
-            min-height: 90vh;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.05);
-        }
-
-        /* --- Sidebar --- */
-        .sidebar {
-            width: 260px;
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.8);
-            background: rgba(255, 255, 255, 0.95);
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary-blue);
-            margin-bottom: 40px;
-            padding-left: 10px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-        .logo i { margin-right: 10px; }
-        
-        .nav-item-custom {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: var(--text-gray);
-            font-weight: 600;
-            border-radius: 15px;
-            margin-bottom: 8px;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        .nav-item-custom i {
-            width: 24px;
-            font-size: 1.1rem;
-            margin-right: 10px;
-        }
-        .nav-item-custom:hover {
-            color: var(--primary-blue);
-            background: rgba(255,255,255,0.5);
-        }
-        .nav-item-custom.active {
-            background: var(--primary-blue);
-            color: white;
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
-        }
-        
-
-        /* --- Main Content Area --- */
-        .main-content {
-            flex: 1;
-            padding: 30px 40px;
-            overflow-y: auto;
-        }
-
-        /* Header */
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .top-header h2 {
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .search-bar {
-            background: white;
-            border-radius: 20px;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-            width: 300px;
-        }
-        .search-bar input {
-            border: none;
-            outline: none;
-            background: transparent;
-            width: 100%;
-            margin-left: 10px;
-            color: var(--text-gray);
-        }
-        .profile-btn {
-            background: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-            font-weight: 600;
-            color: var(--text-dark);
-            text-decoration: none;
-        }
-        .profile-btn img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css">
 </head>
 <body>
 
@@ -234,3 +93,4 @@
             </div>
             
             <!-- Dynamic Content Starts Here -->
+
