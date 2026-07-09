@@ -10,7 +10,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
     <!-- Custom Style CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=2">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -82,6 +82,24 @@
             <p class="hero-subtitle">
                 Experience journeys filled with laughter, valuable knowledge, and the most memorable moments with family and friends.
             </p>
+
+            <!-- Active Promotions Banner -->
+            <c:if test="${not empty activePromotions}">
+                <div class="promo-vouchers-container">
+                    <!-- Display up to 3 promotions horizontally -->
+                    <c:forEach var="promo" items="${activePromotions}" end="2">
+                        <div class="promo-voucher" onclick="document.getElementById('tours-list').scrollIntoView({behavior: 'smooth'})" title="Scroll down to view tours">
+                            <div class="promo-title"><i class="fa-solid fa-fire text-danger me-2"></i>${promo.promotionName}</div>
+                            <div class="promo-discount">
+                                Giảm đến <span>${promo.discountPercent}%</span>
+                            </div>
+                            <div class="promo-dates">
+                                Từ <fmt:formatDate value="${promo.startDate}" pattern="dd/MM/yyyy"/> đến <fmt:formatDate value="${promo.endDate}" pattern="dd/MM/yyyy"/>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:if>
 
             <!-- Search Form -->
             <div class="search-form-wrapper mt-4">

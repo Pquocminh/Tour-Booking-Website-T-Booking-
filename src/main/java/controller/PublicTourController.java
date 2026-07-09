@@ -11,6 +11,8 @@ import java.util.List;
 import dao.WishlistDAO;
 
 import model.Tour;
+import dao.PromotionDAO;
+import model.Promotion;
 import model.Review;
 import dao.ReviewDAO;
 import dao.TourDAO;
@@ -18,6 +20,7 @@ import dao.TourDAO;
 @WebServlet(name = "PublicTourController", urlPatterns = {"/tours", "/tour-detail"})
 public class PublicTourController extends HttpServlet {
     private final TourDAO tourDAO = new TourDAO();
+    private final PromotionDAO promotionDAO = new PromotionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,6 +53,7 @@ public class PublicTourController extends HttpServlet {
             request.setAttribute("message", "Currently, there aren't any tours being sold.");
         }
         request.setAttribute("tours", tours);
+        request.setAttribute("activePromotions", promotionDAO.getActivePromotions());
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
     }
     
