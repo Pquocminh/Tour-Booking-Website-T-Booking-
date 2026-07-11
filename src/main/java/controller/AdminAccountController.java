@@ -207,10 +207,35 @@ public class AdminAccountController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/accounts");
     }
 
+    /**
+     * Handles account updates via POST.
+     * Sequence Diagram Steps:
+     * 1.1. handleAccountUpdatePost(request, response)
+     * 1.1.1. getSession()
+     * 1.1.2. getAttribute("user")
+     *   alt user == null || !user.role.equals("Admin") -> Redirect to Login Page
+     * 1.1.3. Get and validate parameters
+     *   alt inputs invalid -> Redirect to /admin/accounts (error message)
+     * 1.1.4. updateAccount(acc)
+     *   alt success == true -> Redirect to /admin/accounts (success message)
+     *   alt success == false -> Redirect to /admin/accounts (database error message)
+     */
     private void handleAccountUpdatePost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // 1.1.1. getSession()
         HttpSession session = request.getSession();
 
+        // 1.1.2. getAttribute("user")
+        Account currentUser = (Account) session.getAttribute("user");
+
+        // alt user == null || !user.role.equals("Admin")
+        if (currentUser == null || !"Admin".equalsIgnoreCase(currentUser.getRole())) {
+            // 2. Redirect to Login Page
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // 1.1.3. Get and validate parameters
         String idStr = request.getParameter("id");
         String email = request.getParameter("email");
         String fullName = request.getParameter("fullName");
@@ -223,6 +248,7 @@ public class AdminAccountController extends HttpServlet {
             email == null || email.trim().isEmpty() ||
             role == null || role.trim().isEmpty() ||
             status == null || status.trim().isEmpty()) {
+            // alt inputs invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Required fields are missing.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
@@ -251,6 +277,7 @@ public class AdminAccountController extends HttpServlet {
                 accountDAO.updatePasswordById(id, passwordHash);
             }
 
+            // inputs valid -> Construct Account object
             Account acc = new Account();
             acc.setAccountId(id);
             acc.setEmail(email.trim());
@@ -260,13 +287,19 @@ public class AdminAccountController extends HttpServlet {
             acc.setRole(role.trim());
             acc.setStatus(status.trim());
 
+            // 1.1.4. updateAccount(acc)
             boolean success = accountDAO.updateAccount(acc);
+            
+            // alt success == true
             if (success) {
+                // 4. Redirect to /admin/accounts (success message)
                 session.setAttribute("successMessage", "Account updated successfully.");
             } else {
+                // alt success == false -> 5. Redirect to /admin/accounts (database error message)
                 session.setAttribute("errorMessage", "Failed to update account due to a database error.");
             }
         } catch (NumberFormatException e) {
+            // alt inputs invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Invalid account ID format.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/accounts");

@@ -417,15 +417,32 @@ public class AccountDAO {
         return null;
     }
 
+    /**
+     * Updates an account's details.
+     * Sequence Diagram Steps:
+     * 1.1.4.1. getConnection()
+     * 1.1.4.2. prepareStatement(sql)
+     * 1.1.4.3. executeUpdate()
+     *   1.1.4.3.1. Send UPDATE Account to database
+     * 1.1.4.4. close()
+     */
     public boolean updateAccount(Account acc) {
         DBContext db = new DBContext();
+        
+        // 1.1.4.1. getConnection()
         Connection conn = db.getConnection();
         if (conn == null) {
+            System.err.println("[AccountDAO] Error: Database connection is null.");
             return false;
         }
 
+        // Database Query as specified: UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE account_id = ?;
         String sql = "UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE account_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        PreparedStatement ps = null;
+        
+        try {
+            // 1.1.4.2. prepareStatement(sql)
+            ps = conn.prepareStatement(sql);
             ps.setString(1, acc.getFullName());
             ps.setString(2, acc.getPhone());
             ps.setString(3, acc.getEmail());
@@ -433,15 +450,29 @@ public class AccountDAO {
             ps.setString(5, acc.getRole());
             ps.setString(6, acc.getStatus());
             ps.setInt(7, acc.getAccountId());
-            return ps.executeUpdate() > 0;
+            
+            System.out.println("[AccountDAO] Executing SQL: " + sql + " for ID: " + acc.getAccountId());
+            
+            // 1.1.4.3. executeUpdate() -> 1.1.4.3.1. Send UPDATE Account
+            int rowsUpdated = ps.executeUpdate();
+            
+            System.out.println("[AccountDAO] Rows updated: " + rowsUpdated);
+            return rowsUpdated > 0;
         } catch (SQLException e) {
+            System.err.println("[AccountDAO] SQLException occurred during updateAccount:");
             e.printStackTrace();
         } finally {
+            // 1.1.4.4. close()
             try {
+                if (ps != null) {
+                    ps.close();
+                }
                 if (conn != null && !conn.isClosed()) {
                     conn.close();
                 }
+                System.out.println("[AccountDAO] Database connection and resources closed successfully.");
             } catch (SQLException e) {
+                System.err.println("[AccountDAO] Error closing database resources:");
                 e.printStackTrace();
             }
         }
