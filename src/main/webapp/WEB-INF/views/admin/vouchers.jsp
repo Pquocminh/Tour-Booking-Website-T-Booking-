@@ -6,6 +6,36 @@
     <jsp:param name="activeMenu" value="vouchers" />
 </jsp:include>
 
+<style>
+    .voucher-code-badge {
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        background: rgba(79, 70, 229, 0.08);
+        color: var(--primary);
+        border: 1px dashed rgba(79, 70, 229, 0.3);
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+    .voucher-code-badge:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    .table-custom tbody tr {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .table-custom tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        background-color: rgba(79, 70, 229, 0.02) !important;
+    }
+</style>
+
 <!-- Main Content -->
 <div class="container-fluid p-0">
 
@@ -86,7 +116,7 @@
         <!-- Vouchers Table List -->
         <section class="table-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-tags me-2 text-primary"></i>Vouchers List</h4>
+                <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-tags me-2 text-primary"></i>View Vouchers List</h4>
                 <span class="badge bg-primary rounded-pill py-2 px-3">${vouchers.size()} Voucher(s)</span>
             </div>
 
@@ -119,7 +149,7 @@
                                     <tr>
                                         <td class="fw-semibold text-muted">#${v.voucherId}</td>
                                         <td>
-                                            <span class="fw-bold text-dark fs-6 bg-light p-1 rounded-1 border">${v.voucherCode}</span>
+                                            <span class="voucher-code-badge">${v.voucherCode}</span>
                                         </td>
                                         <td class="fw-bold text-primary">${v.discountPercent}%</td>
                                         <td class="small text-muted">
