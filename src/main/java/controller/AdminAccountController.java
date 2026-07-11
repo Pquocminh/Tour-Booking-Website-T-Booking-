@@ -55,11 +55,36 @@ public class AdminAccountController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/admin/accounts.jsp").forward(request, response);
     }
 
+    /**
+     * Handles account details page request via GET.
+     * Sequence Diagram Steps:
+     * 1.1. handleAccountDetailGet(request, response)
+     * 1.1.1. getSession()
+     * 1.1.2. getAttribute("user")
+     *   alt user == null || !user.role.equals("Admin") -> Redirect to Login Page
+     * 1.1.3. getParameter("id")
+     *   alt id is valid -> deleteAccount(id) (in this case, getAccountById)
+     *   alt id is invalid/empty -> Redirect to /admin/accounts (invalid ID message)
+     */
     private void handleAccountDetailGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // 1.1.1. getSession()
+        HttpSession session = request.getSession();
+
+        // 1.1.2. getAttribute("user")
+        Account currentUser = (Account) session.getAttribute("user");
+
+        // alt user == null || !user.role.equals("Admin")
+        if (currentUser == null || !"Admin".equalsIgnoreCase(currentUser.getRole())) {
+            // 2. Redirect to Login Page
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // 1.1.3. getParameter("id")
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.trim().isEmpty()) {
-            HttpSession session = request.getSession();
+            // alt id is invalid/empty -> 5. Redirect to /admin/accounts (invalid ID message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
@@ -67,18 +92,22 @@ public class AdminAccountController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idStr);
+            
+            // 1.1.4. getAccountById(id)
             Account account = accountDAO.getAccountById(id);
-            if (account == null) {
-                HttpSession session = request.getSession();
+            
+            // alt account != null
+            if (account != null) {
+                request.setAttribute("account", account);
+                // 1.1.5. forward(request, response) -> 3. Render account details page
+                request.getRequestDispatcher("/WEB-INF/views/admin/account-details.jsp").forward(request, response);
+            } else {
+                // account == null -> 4. Redirect to /admin/accounts (error message)
                 session.setAttribute("errorMessage", "Account not found.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
-                return;
             }
-
-            request.setAttribute("account", account);
-            request.getRequestDispatcher("/WEB-INF/views/admin/account-details.jsp").forward(request, response);
         } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
+            // alt id is invalid/empty -> 5. Redirect to /admin/accounts (invalid ID message)
             session.setAttribute("errorMessage", "Invalid account ID format.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
         }
