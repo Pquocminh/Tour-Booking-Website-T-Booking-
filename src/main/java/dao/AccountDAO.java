@@ -349,41 +349,68 @@ public class AccountDAO {
         return list;
     }
 
+    /**
+     * Retrieves an account by its ID.
+     * Sequence Diagram Steps:
+     * 1.1.4.1. getConnection()
+     * 1.1.4.2. prepareStatement(sql)
+     * 1.1.4.3. executeQuery()
+     *   1.1.4.3.1. Send SELECT Account by ID
+     * 1.1.4.4. close()
+     */
     public Account getAccountById(int accountId) {
         DBContext db = new DBContext();
+        
+        // 1.1.4.1. getConnection()
         Connection conn = db.getConnection();
         if (conn == null) {
+            System.err.println("[AccountDAO] Error: Database connection is null.");
             return null;
         }
 
-        String sql = "SELECT * FROM Account WHERE account_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        // Database Query as specified: SELECT account_id, username, email, full_name, phone, address, role, status, created_at FROM Account WHERE account_id = ?;
+        String sql = "SELECT account_id, username, email, full_name, phone, address, role, status, created_at FROM Account WHERE account_id = ?";
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            // 1.1.4.2. prepareStatement(sql)
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, accountId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Account acc = new Account();
-                    acc.setAccountId(rs.getInt("account_id"));
-                    acc.setUsername(rs.getString("username"));
-                    acc.setPasswordHash(rs.getString("password_hash"));
-                    acc.setEmail(rs.getString("email"));
-                    acc.setFullName(rs.getString("full_name"));
-                    acc.setPhone(rs.getString("phone"));
-                    acc.setAddress(rs.getString("address"));
-                    acc.setRole(rs.getString("role"));
-                    acc.setStatus(rs.getString("status"));
-                    acc.setCreatedAt(rs.getTimestamp("created_at"));
-                    acc.setLastLogin(rs.getTimestamp("last_login"));
-                    return acc;
-                }
+            
+            // 1.1.4.3. executeQuery() -> 1.1.4.3.1. Send SELECT Account by ID
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                Account acc = new Account();
+                acc.setAccountId(rs.getInt("account_id"));
+                acc.setUsername(rs.getString("username"));
+                acc.setEmail(rs.getString("email"));
+                acc.setFullName(rs.getString("full_name"));
+                acc.setPhone(rs.getString("phone"));
+                acc.setAddress(rs.getString("address"));
+                acc.setRole(rs.getString("role"));
+                acc.setStatus(rs.getString("status"));
+                acc.setCreatedAt(rs.getTimestamp("created_at"));
+                return acc;
             }
         } catch (SQLException e) {
+            System.err.println("[AccountDAO] SQLException occurred during getAccountById:");
             e.printStackTrace();
         } finally {
+            // 1.1.4.4. close()
             try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
                 if (conn != null && !conn.isClosed()) {
                     conn.close();
                 }
             } catch (SQLException e) {
+                System.err.println("[AccountDAO] Error closing database resources:");
                 e.printStackTrace();
             }
         }
