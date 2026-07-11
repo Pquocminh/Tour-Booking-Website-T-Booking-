@@ -26,7 +26,7 @@ import dao.VoucherDAO;
 import model.Payment;
 import utils.PasswordUtils;
 
-@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist"})
+@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment"})
 public class CustomerController extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
@@ -45,6 +45,8 @@ public class CustomerController extends HttpServlet {
             handleBookingGet(request, response);
         } else if ("/wishlist".equals(path)) {
             handleWishlistGet(request, response);
+        } else if ("/payment".equals(path)) {
+            handlePaymentGet(request, response);
         }
     }
 
@@ -61,6 +63,8 @@ public class CustomerController extends HttpServlet {
             handleBookingPost(request, response);
         } else if ("/wishlist".equals(path)) {
             handleWishlistPost(request, response);
+        } else if ("/payment".equals(path)) {
+            handlePaymentPost(request, response);
         }
     }
 
@@ -503,5 +507,57 @@ public class CustomerController extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/wishlist");
         }
+    }
+
+    // ================== PAYMENT ==================
+    private void handlePaymentGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        try {
+            int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+            BookingDAO bookingDAO = new BookingDAO();
+            Booking booking = bookingDAO.getBookingById(bookingId);
+
+            if (booking != null && booking.getCustomerId() == user.getAccountId() && "Pending".equalsIgnoreCase(booking.getStatus())) {
+                request.setAttribute("booking", booking);
+                request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/booking");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/booking");
+        }
+    }
+
+    private void handlePaymentPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        try {
+            int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+            BookingDAO bookingDAO = new BookingDAO();
+            boolean success = bookingDAO.updateBookingStatus(bookingId, "Pending Confirmation");
+            
+            if (success) {
+                session.setAttribute("successMessage", "Payment confirmation submitted successfully.");
+            } else {
+                session.setAttribute("errorMessage", "Failed to submit payment confirmation.");
+            }
+        } catch (NumberFormatException e) {
+            session.setAttribute("errorMessage", "Invalid booking ID.");
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/booking");
     }
 }

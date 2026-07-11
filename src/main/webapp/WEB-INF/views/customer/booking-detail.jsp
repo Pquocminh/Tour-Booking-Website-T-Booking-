@@ -207,16 +207,21 @@
                                     </div>
                                 </div>
 
-                                <!-- Cancel booking button (if pending) -->
-                                <c:if test="${booking.status == 'Pending'}">
-                                    <form action="${pageContext.request.contextPath}/booking" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? This will restore the available slots.');" class="w-100">
-                                        <input type="hidden" name="action" value="cancel">
-                                        <input type="hidden" name="bookingId" value="${booking.bookingId}">
-                                        <button type="submit" class="btn btn-danger w-100 rounded-pill py-3 px-4 shadow-sm">
-                                            <i class="fa-regular fa-circle-xmark me-2"></i>Cancel Booking
-                                        </button>
-                                    </form>
-                                </c:if>
+                                 <!-- Actions for Pending Booking -->
+                                 <c:if test="${booking.status == 'Pending'}">
+                                     <div class="d-flex flex-column gap-2 w-100">
+                                         <a href="${pageContext.request.contextPath}/payment?bookingId=${booking.bookingId}" class="btn btn-success w-100 rounded-pill py-3 px-4 shadow-sm text-white text-center fw-bold">
+                                             <i class="fa-solid fa-credit-card me-2"></i>Pay Now
+                                         </a>
+                                         <form action="${pageContext.request.contextPath}/booking" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? This will restore the available slots.');" class="w-100">
+                                             <input type="hidden" name="action" value="cancel">
+                                             <input type="hidden" name="bookingId" value="${booking.bookingId}">
+                                             <button type="submit" class="btn btn-outline-danger w-100 rounded-pill py-3 px-4 shadow-sm">
+                                                 <i class="fa-regular fa-circle-xmark me-2"></i>Cancel Booking
+                                             </button>
+                                         </form>
+                                     </div>
+                                 </c:if>
                             </div>
                         </div>
 

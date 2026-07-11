@@ -179,6 +179,9 @@
                                                                 <i class="fa-regular fa-eye me-1"></i>View
                                                             </a>
                                                             <c:if test="${b.status == 'Pending'}">
+                                                                <a href="${pageContext.request.contextPath}/payment?bookingId=${b.bookingId}" class="btn btn-sm btn-success rounded-pill px-3 text-white">
+                                                                    <i class="fa-solid fa-credit-card me-1"></i>Pay Now
+                                                                </a>
                                                                 <form action="${pageContext.request.contextPath}/booking" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? This will restore the available slots.');" style="display:inline;">
                                                                     <input type="hidden" name="action" value="cancel">
                                                                     <input type="hidden" name="bookingId" value="${b.bookingId}">
