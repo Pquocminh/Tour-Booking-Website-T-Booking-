@@ -421,25 +421,56 @@ public class AccountDAO {
         return false;
     }
 
+    /**
+     * Deletes an account by its ID.
+     * Sequence Diagram Steps:
+     * 1.1.4.1. getConnection()
+     * 1.1.4.2. prepareStatement(sql)
+     * 1.1.4.3. executeUpdate()
+     *   1.1.4.3.1. Send DELETE Account to database
+     * 1.1.4.4. close()
+     */
     public boolean deleteAccount(int accountId) {
         DBContext db = new DBContext();
+        
+        // 1.1.4.1. getConnection()
         Connection conn = db.getConnection();
         if (conn == null) {
+            System.err.println("[AccountDAO] Error: Database connection is null.");
             return false;
         }
 
+        // Database Query as specified: DELETE FROM Account WHERE account_id = ?;
         String sql = "DELETE FROM Account WHERE account_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        PreparedStatement ps = null;
+        
+        try {
+            // 1.1.4.2. prepareStatement(sql)
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, accountId);
-            return ps.executeUpdate() > 0;
+            
+            System.out.println("[AccountDAO] Executing SQL: " + sql + " with ID: " + accountId);
+            
+            // 1.1.4.3. executeUpdate() -> 1.1.4.3.1. Send DELETE Account
+            int rowsDeleted = ps.executeUpdate();
+            
+            System.out.println("[AccountDAO] Rows deleted: " + rowsDeleted);
+            return rowsDeleted > 0;
         } catch (SQLException e) {
+            System.err.println("[AccountDAO] SQLException occurred during deleteAccount:");
             e.printStackTrace();
         } finally {
+            // 1.1.4.4. close()
             try {
+                if (ps != null) {
+                    ps.close();
+                }
                 if (conn != null && !conn.isClosed()) {
                     conn.close();
                 }
+                System.out.println("[AccountDAO] Database connection and resources closed successfully.");
             } catch (SQLException e) {
+                System.err.println("[AccountDAO] Error closing database resources:");
                 e.printStackTrace();
             }
         }

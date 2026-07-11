@@ -243,12 +243,38 @@ public class AdminAccountController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/accounts");
     }
 
+    /**
+     * Handles account deletion requests via POST.
+     * Sequence Diagram Steps:
+     * 1.1. handleAccountDeletePost(request, response)
+     * 1.1.1. getSession()
+     * 1.1.2. getAttribute("user")
+     *   alt user == null || !user.role.equals("Admin") -> Redirect to Login Page
+     * 1.1.3. Get and validate id parameter
+     *   alt id invalid -> Redirect with error message
+     * 1.1.4. deleteAccount(id)
+     *   alt success == true -> Redirect with success message
+     *   alt success == false -> Redirect with database error message
+     */
     private void handleAccountDeletePost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // 1.1.1. getSession()
         HttpSession session = request.getSession();
-        String idStr = request.getParameter("id");
+        
+        // 1.1.2. getAttribute("user")
+        Account currentUser = (Account) session.getAttribute("user");
 
+        // alt user == null || !user.role.equals("Admin")
+        if (currentUser == null || !"Admin".equalsIgnoreCase(currentUser.getRole())) {
+            // 2. Redirect to Login Page
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // 1.1.3. Get and validate id parameter
+        String idStr = request.getParameter("id");
         if (idStr == null || idStr.trim().isEmpty()) {
+            // alt id invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
@@ -256,6 +282,8 @@ public class AdminAccountController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idStr);
+            
+            // Further validation: check if account exists
             Account existingAcc = accountDAO.getAccountById(id);
             if (existingAcc == null) {
                 session.setAttribute("errorMessage", "Account not found.");
@@ -263,21 +291,26 @@ public class AdminAccountController extends HttpServlet {
                 return;
             }
 
-            // Prevent deleting oneself
-            Account currentUser = (Account) session.getAttribute("user");
-            if (currentUser != null && currentUser.getAccountId() == id) {
+            // Safety check: Prevent deleting oneself
+            if (currentUser.getAccountId() == id) {
                 session.setAttribute("errorMessage", "You cannot delete your own account.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
                 return;
             }
 
+            // 1.1.4. deleteAccount(id)
             boolean success = accountDAO.deleteAccount(id);
+            
+            // alt success == true
             if (success) {
+                // 4. Redirect to /admin/accounts (success message)
                 session.setAttribute("successMessage", "Account deleted successfully.");
             } else {
+                // alt success == false -> 5. Redirect to /admin/accounts (database error message)
                 session.setAttribute("errorMessage", "Failed to delete account due to a database error.");
             }
         } catch (NumberFormatException e) {
+            // alt id invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Invalid account ID format.");
         }
         response.sendRedirect(request.getContextPath() + "/admin/accounts");
