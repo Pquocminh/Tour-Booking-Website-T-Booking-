@@ -158,4 +158,59 @@ public class Booking {
     public void setCustomerEmail(String customerEmail) {
         this.customerEmail = customerEmail;
     }
+
+    private String tourDescription;
+    private int durationDays;
+    private String departureLocation;
+    private java.sql.Date returnDate;
+    private String voucherCode;
+    private double discountPercent;
+
+    public String getTourDescription() {
+        return tourDescription;
+    }
+
+    public void setTourDescription(String tourDescription) {
+        this.tourDescription = tourDescription;
+    }
+
+    public int getDurationDays() {
+        return durationDays;
+    }
+
+    public void setDurationDays(int durationDays) {
+        this.durationDays = durationDays;
+    }
+
+    public String getDepartureLocation() {
+        return departureLocation;
+    }
+
+    public void setDepartureLocation(String departureLocation) {
+        this.departureLocation = departureLocation;
+    }
+
+    public java.sql.Date getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(java.sql.Date returnDate) {
+        this.returnDate = returnDate;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public double getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(double discountPercent) {
+        this.discountPercent = discountPercent;
+    }
 }

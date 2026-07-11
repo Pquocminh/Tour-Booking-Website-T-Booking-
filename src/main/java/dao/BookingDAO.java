@@ -266,4 +266,49 @@ public class BookingDAO extends DBContext {
         }
         return list;
     }
+
+    public Booking getBookingDetailById(int bookingId) {
+        String sql = "SELECT b.*, t.tour_name, t.description AS tour_description, t.duration_days, t.departure_location, ts.departure_date, ts.return_date, v.voucher_code, v.discount_percent " +
+                     "FROM Booking b " +
+                     "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
+                     "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
+                     "LEFT JOIN Voucher v ON bv.voucher_id = v.voucher_id " +
+                     "WHERE b.booking_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Booking b = new Booking();
+                    b.setBookingId(rs.getInt("booking_id"));
+                    b.setCustomerId(rs.getInt("customer_id"));
+                    b.setScheduleId(rs.getInt("schedule_id"));
+                    if (rs.getObject("voucher_id") != null) {
+                        b.setVoucherId(rs.getInt("voucher_id"));
+                    }
+                    b.setBookingDate(rs.getTimestamp("booking_date"));
+                    b.setNumberOfPeople(rs.getInt("number_of_people"));
+                    b.setContactName(rs.getString("contact_name"));
+                    b.setContactPhone(rs.getString("contact_phone"));
+                    b.setTotalPrice(rs.getDouble("total_price"));
+                    b.setDepositAmount(rs.getDouble("deposit_amount"));
+                    b.setStatus(rs.getString("status"));
+                    
+                    b.setTourName(rs.getString("tour_name"));
+                    b.setTourDescription(rs.getString("tour_description"));
+                    b.setDurationDays(rs.getInt("duration_days"));
+                    b.setDepartureLocation(rs.getString("departure_location"));
+                    b.setDepartureDate(rs.getDate("departure_date"));
+                    b.setReturnDate(rs.getDate("return_date"));
+                    b.setVoucherCode(rs.getString("voucher_code"));
+                    b.setDiscountPercent(rs.getDouble("discount_percent"));
+                    return b;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
