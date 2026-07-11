@@ -21,6 +21,9 @@ import model.Tour;
 import dao.AccountDAO;
 import dao.ReviewDAO;
 import dao.WishlistDAO;
+import dao.PaymentDAO;
+import dao.VoucherDAO;
+import model.Payment;
 import utils.PasswordUtils;
 
 @WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist"})
@@ -239,9 +242,64 @@ public class CustomerController extends HttpServlet {
         String action = request.getParameter("action");
         if ("success".equals(action)) {
             request.getRequestDispatcher("/WEB-INF/views/guest/booking-success.jsp").forward(request, response);
+        } else if ("detail".equals(action)) {
+            handleBookingDetailGet(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/tours");
+            HttpSession session = request.getSession();
+            Account user = (Account) session.getAttribute("user");
+            if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+            BookingDAO bookingDAO = new BookingDAO();
+            List<Booking> bookings = bookingDAO.getBookingsByCustomerId(user.getAccountId());
+            request.setAttribute("bookings", bookings);
+            request.getRequestDispatcher("/WEB-INF/views/customer/booking-list.jsp").forward(request, response);
         }
+    }
+
+    private void handleBookingDetailGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        String idParam = request.getParameter("bookingId");
+        try {
+            int bookingId = Integer.parseInt(idParam);
+            BookingDAO bookingDAO = new BookingDAO();
+            Booking booking = bookingDAO.getBookingById(bookingId);
+            if (booking != null && booking.getCustomerId() == user.getAccountId()) {
+                TourDAO tourDAO = new TourDAO();
+                TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
+                if (schedule != null) {
+                    Tour tour = tourDAO.getTourById(schedule.getTourId());
+                    request.setAttribute("tour", tour);
+                    request.setAttribute("schedule", schedule);
+                }
+                
+                if (booking.getVoucherId() != null) {
+                    VoucherDAO voucherDAO = new VoucherDAO();
+                    model.Voucher voucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                    request.setAttribute("voucher", voucher);
+                }
+                
+                PaymentDAO paymentDAO = new PaymentDAO();
+                List<Payment> payments = paymentDAO.getPaymentsByBookingId(bookingId);
+                
+                request.setAttribute("booking", booking);
+                request.setAttribute("payments", payments);
+                request.getRequestDispatcher("/WEB-INF/views/customer/booking-detail.jsp").forward(request, response);
+                return;
+            } else {
+                session.setAttribute("errorMessage", "Booking not found or access denied.");
+            }
+        } catch (NumberFormatException e) {
+            session.setAttribute("errorMessage", "Invalid booking ID.");
+        }
+        response.sendRedirect(request.getContextPath() + "/booking");
     }
 
     private void handleBookingPost(HttpServletRequest request, HttpServletResponse response)
@@ -249,6 +307,12 @@ public class CustomerController extends HttpServlet {
         Account user = (Account) request.getSession().getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        if ("cancel".equalsIgnoreCase(action)) {
+            handleBookingCancelPost(request, response);
             return;
         }
 
@@ -323,6 +387,35 @@ public class CustomerController extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
         }
+    }
+
+    private void handleBookingCancelPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        String idParam = request.getParameter("bookingId");
+        try {
+            int bookingId = Integer.parseInt(idParam);
+            BookingDAO bookingDAO = new BookingDAO();
+            Booking booking = bookingDAO.getBookingById(bookingId);
+            if (booking != null && booking.getCustomerId() == user.getAccountId()) {
+                if ("Pending".equalsIgnoreCase(booking.getStatus())) {
+                    boolean success = bookingDAO.cancelBooking(bookingId);
+                    if (success) {
+                        session.setAttribute("successMessage", "Booking cancelled successfully.");
+                    } else {
+                        session.setAttribute("errorMessage", "Failed to cancel booking.");
+                    }
+                } else {
+                    session.setAttribute("errorMessage", "Only pending bookings can be cancelled.");
+                }
+            } else {
+                session.setAttribute("errorMessage", "Booking not found or access denied.");
+            }
+        } catch (NumberFormatException e) {
+            session.setAttribute("errorMessage", "Invalid booking ID.");
+        }
+        response.sendRedirect(request.getContextPath() + "/booking");
     }
 
     // ================== WISHLIST ==================

@@ -227,4 +227,43 @@ public class BookingDAO extends DBContext {
         }
         return false;
     }
+
+    public List<Booking> getBookingsByCustomerId(int customerId) {
+        List<Booking> list = new ArrayList<>();
+        String sql = "SELECT b.*, t.tour_name, ts.departure_date " +
+                     "FROM Booking b " +
+                     "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
+                     "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "WHERE b.customer_id = ? " +
+                     "ORDER BY b.booking_date DESC";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Booking b = new Booking();
+                    b.setBookingId(rs.getInt("booking_id"));
+                    b.setCustomerId(rs.getInt("customer_id"));
+                    b.setScheduleId(rs.getInt("schedule_id"));
+                    if (rs.getObject("voucher_id") != null) {
+                        b.setVoucherId(rs.getInt("voucher_id"));
+                    }
+                    b.setBookingDate(rs.getTimestamp("booking_date"));
+                    b.setNumberOfPeople(rs.getInt("number_of_people"));
+                    b.setContactName(rs.getString("contact_name"));
+                    b.setContactPhone(rs.getString("contact_phone"));
+                    b.setTotalPrice(rs.getDouble("total_price"));
+                    b.setDepositAmount(rs.getDouble("deposit_amount"));
+                    b.setStatus(rs.getString("status"));
+                    
+                    b.setTourName(rs.getString("tour_name"));
+                    b.setDepartureDate(rs.getDate("departure_date"));
+                    list.add(b);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
