@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -54,6 +54,9 @@
             </a>
             <a href="${pageContext.request.contextPath}/admin/promotions" class="nav-item-custom ${param.activeMenu == 'promotions' ? 'active' : ''}">
                 <i class="fa-solid fa-percent"></i> Promotions
+            </a>
+            <a href="${pageContext.request.contextPath}/admin/vouchers" class="nav-item-custom ${param.activeMenu == 'vouchers' ? 'active' : ''}">
+                <i class="fa-solid fa-tags"></i> Vouchers
             </a>
             
 
