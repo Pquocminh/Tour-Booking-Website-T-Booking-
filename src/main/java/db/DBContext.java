@@ -16,7 +16,7 @@ public class DBContext {
             conn = DriverManager.getConnection(
                 "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false",
                 "sa",
-                "123456"
+                "123"
             );
         } catch (Exception e) {
             e.printStackTrace();

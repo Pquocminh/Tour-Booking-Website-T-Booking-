@@ -348,5 +348,102 @@ public class AccountDAO {
         }
         return list;
     }
+
+    public Account getAccountById(int accountId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return null;
+        }
+
+        String sql = "SELECT * FROM Account WHERE account_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Account acc = new Account();
+                    acc.setAccountId(rs.getInt("account_id"));
+                    acc.setUsername(rs.getString("username"));
+                    acc.setPasswordHash(rs.getString("password_hash"));
+                    acc.setEmail(rs.getString("email"));
+                    acc.setFullName(rs.getString("full_name"));
+                    acc.setPhone(rs.getString("phone"));
+                    acc.setAddress(rs.getString("address"));
+                    acc.setRole(rs.getString("role"));
+                    acc.setStatus(rs.getString("status"));
+                    acc.setCreatedAt(rs.getTimestamp("created_at"));
+                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    return acc;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public boolean updateAccount(Account acc) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        String sql = "UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE account_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, acc.getFullName());
+            ps.setString(2, acc.getPhone());
+            ps.setString(3, acc.getEmail());
+            ps.setString(4, acc.getAddress());
+            ps.setString(5, acc.getRole());
+            ps.setString(6, acc.getStatus());
+            ps.setInt(7, acc.getAccountId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public boolean deleteAccount(int accountId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        String sql = "DELETE FROM Account WHERE account_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 }
 
