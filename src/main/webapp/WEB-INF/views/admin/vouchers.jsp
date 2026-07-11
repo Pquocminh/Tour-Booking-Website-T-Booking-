@@ -173,6 +173,10 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
+                                                <a href="${pageContext.request.contextPath}/admin/vouchers?action=detail&id=${v.voucherId}" 
+                                                   class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                    <i class="fa-solid fa-eye me-1"></i>View
+                                                </a>
                                                 <c:choose>
                                                     <c:when test="${sessionScope.user.role == 'Admin'}">
                                                         <a href="${pageContext.request.contextPath}/admin/vouchers?action=edit&id=${v.voucherId}" 
