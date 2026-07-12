@@ -22,6 +22,28 @@ public class AdminVoucherController extends HttpServlet {
         String action = request.getParameter("action");
         String idParam = request.getParameter("id");
 
+        if ("detail".equalsIgnoreCase(action) && idParam != null) {
+            model.Account user = (model.Account) request.getSession().getAttribute("user");
+            if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
+                request.getSession().setAttribute("errorMessage", "Access Denied.");
+                response.sendRedirect(request.getContextPath() + "/admin/vouchers");
+                return;
+            }
+            try {
+                int id = Integer.parseInt(idParam);
+                Voucher voucher = voucherDAO.getVoucherById(id);
+                if (voucher != null) {
+                    request.setAttribute("voucher", voucher);
+                    request.getRequestDispatcher("/WEB-INF/views/admin/voucher-detail.jsp").forward(request, response);
+                    return;
+                } else {
+                    request.setAttribute("errorMessage", "Voucher not found!");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid Voucher ID!");
+            }
+        }
+
         if ("edit".equalsIgnoreCase(action) && idParam != null) {
             model.Account user = (model.Account) request.getSession().getAttribute("user");
             if (user == null || !"Admin".equalsIgnoreCase(user.getRole())) {
