@@ -26,11 +26,12 @@ import dao.VoucherDAO;
 import model.Payment;
 import utils.PasswordUtils;
 
-@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment", "/bills"})
+@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment", "/bills", "/bill-detail"})
 public class CustomerController extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
     private final ReviewDAO reviewDAO = new ReviewDAO();
+    private final BookingDAO bookingDAO = new BookingDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -49,6 +50,8 @@ public class CustomerController extends HttpServlet {
             handlePaymentGet(request, response);
         } else if ("/bills".equals(path)) {
             handleBillsGet(request, response);
+        } else if ("/bill-detail".equals(path)) {
+            handleBillDetailGet(request, response);
         }
     }
 
@@ -667,5 +670,28 @@ public class CustomerController extends HttpServlet {
         List<Booking> bills = bookingDAO.getBookingsByCustomerId(user.getAccountId());
         request.setAttribute("bills", bills);
         request.getRequestDispatcher("/WEB-INF/views/customer/bill-list.jsp").forward(request, response);
+    }
+
+    private void handleBillDetailGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        String idParam = request.getParameter("bookingId");
+        try {
+            int bookingId = Integer.parseInt(idParam);
+            Booking booking = bookingDAO.getBookingDetails(bookingId);
+            if (booking != null && booking.getCustomerId() == user.getAccountId()) {
+                request.setAttribute("bill", booking);
+                request.getRequestDispatcher("/WEB-INF/views/customer/bill-detail.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/bills");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/bills");
+        }
     }
 }

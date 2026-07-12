@@ -170,7 +170,7 @@
                                                     </td>
                                                     <td style="padding: 16px; text-align: center; border-top-right-radius: 12px; border-bottom-right-radius: 12px; border: none; white-space: nowrap;">
                                                         <div class="d-flex justify-content-center gap-2">
-                                                            <a href="${pageContext.request.contextPath}/booking?action=detail&bookingId=${b.bookingId}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                            <a href="${pageContext.request.contextPath}/bill-detail?bookingId=${b.bookingId}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                                                 <i class="fa-regular fa-eye me-1"></i>View
                                                             </a>
                                                             <c:if test="${b.status == 'Pending'}">
