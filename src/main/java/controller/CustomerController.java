@@ -26,7 +26,7 @@ import dao.VoucherDAO;
 import model.Payment;
 import utils.PasswordUtils;
 
-@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment"})
+@WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment", "/bills"})
 public class CustomerController extends HttpServlet {
 
     private final AccountDAO accountDAO = new AccountDAO();
@@ -47,6 +47,8 @@ public class CustomerController extends HttpServlet {
             handleWishlistGet(request, response);
         } else if ("/payment".equals(path)) {
             handlePaymentGet(request, response);
+        } else if ("/bills".equals(path)) {
+            handleBillsGet(request, response);
         }
     }
 
@@ -651,5 +653,19 @@ public class CustomerController extends HttpServlet {
         }
         
         response.sendRedirect(request.getContextPath() + "/booking");
+    }
+
+    private void handleBillsGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        BookingDAO bookingDAO = new BookingDAO();
+        List<Booking> bills = bookingDAO.getBookingsByCustomerId(user.getAccountId());
+        request.setAttribute("bills", bills);
+        request.getRequestDispatcher("/WEB-INF/views/customer/bill-list.jsp").forward(request, response);
     }
 }

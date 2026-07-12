@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookings | T-Booking</title>
+    <title>My Bills | T-Booking</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/bootstrap.css">
     <!-- Custom Style CSS -->
@@ -45,8 +45,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-2" aria-labelledby="navbarDropdown" style="max-height: 380px; overflow-y: auto; border-radius: 12px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
                                     <li><span class="dropdown-item-text text-muted" style="font-size: 0.8rem;">Role: ${sessionScope.user.role}</span></li>
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-id-card me-2 text-primary"></i>My Profile</a></li>
-                                    <li><a class="dropdown-item active" href="${pageContext.request.contextPath}/booking"><i class="fa-solid fa-receipt me-2 text-white"></i>My Bookings</a></li>
-                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/bills"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i>My Bills</a></li>
+                                    <li><a class="dropdown-item" href="${pageContext.request.contextPath}/booking"><i class="fa-solid fa-receipt me-2 text-primary"></i>My Bookings</a></li>
+                                    <li><a class="dropdown-item active" href="${pageContext.request.contextPath}/bills"><i class="fa-solid fa-file-invoice-dollar me-2 text-white"></i>My Bills</a></li>
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/customer/reviews"><i class="fa-regular fa-star me-2 text-primary"></i>My Reviews</a></li>
                                     <li><a class="dropdown-item" href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart me-2 text-danger"></i>My Wishlist</a></li>
                                     <c:if test="${sessionScope.user.role == 'Admin' || sessionScope.user.role == 'Staff'}">
@@ -102,22 +102,18 @@
                     <div class="card glass-card border-0 p-4 p-md-5">
                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                             <h2 class="section-title mb-0">
-                                <i class="fa-solid fa-receipt text-primary me-2"></i>My Bookings
+                                <i class="fa-solid fa-file-invoice-dollar text-primary me-2"></i>My Bills
                             </h2>
-                            <a href="${pageContext.request.contextPath}/tours" class="btn btn-primary rounded-pill px-4">
-                                <i class="fa-solid fa-plus me-2"></i>Book New Tour
-                            </a>
                         </div>
 
                         <c:choose>
-                            <c:when test="${empty bookings}">
+                            <c:when test="${empty bills}">
                                 <div class="text-center py-5">
                                     <div class="mb-4">
                                         <i class="fa-regular fa-folder-open text-muted" style="font-size: 4rem;"></i>
                                     </div>
-                                    <h4 class="text-muted">No Bookings Found</h4>
-                                    <p class="text-muted mb-4">You haven't booked any tours yet. Start exploring our exciting packages now!</p>
-                                    <a href="${pageContext.request.contextPath}/tours" class="btn btn-outline-primary rounded-pill px-4">Browse Tours</a>
+                                    <h4 class="text-muted">No Bills Found</h4>
+                                    <p class="text-muted mb-4">You don't have any bills/invoices yet.</p>
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -125,21 +121,21 @@
                                     <table class="table align-middle" style="border-collapse: separate; border-spacing: 0 10px;">
                                         <thead>
                                             <tr class="text-muted" style="border-bottom: 2px solid rgba(0,0,0,0.05);">
-                                                <th scope="col" style="padding-bottom: 12px; font-weight: 600;">ID</th>
+                                                <th scope="col" style="padding-bottom: 12px; font-weight: 600;">Bill ID</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600;">Tour Name</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600;">Booking Date</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600;">Departure Date</th>
-                                                <th scope="col" style="padding-bottom: 12px; font-weight: 600; text-align: center;">Guests</th>
+                                                <th scope="col" style="padding-bottom: 12px; font-weight: 600; text-align: right;">Deposit Amount</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600; text-align: right;">Total Price</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600; text-align: center;">Status</th>
                                                 <th scope="col" style="padding-bottom: 12px; font-weight: 600; text-align: center;">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <c:forEach var="b" items="${bookings}">
+                                            <c:forEach var="b" items="${bills}">
                                                 <tr style="background: rgba(255,255,255,0.4); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;">
                                                     <td style="padding: 16px; font-weight: 600; border-top-left-radius: 12px; border-bottom-left-radius: 12px; border: none;">
-                                                        #B${b.bookingId}
+                                                        #BILL${b.bookingId}
                                                     </td>
                                                     <td style="padding: 16px; font-weight: 500; color: var(--text-main); border: none;">
                                                         <c:out value="${b.tourName}" />
@@ -150,10 +146,8 @@
                                                     <td style="padding: 16px; color: #666; border: none;">
                                                         <fmt:formatDate value="${b.departureDate}" pattern="dd/MM/yyyy" />
                                                     </td>
-                                                    <td style="padding: 16px; text-align: center; border: none;">
-                                                        <span class="badge rounded-pill bg-light text-dark px-3 py-2 border">
-                                                            ${b.numberOfPeople} <i class="fa-solid fa-users ms-1 text-muted"></i>
-                                                        </span>
+                                                    <td style="padding: 16px; text-align: right; font-weight: 600; color: #555; border: none;">
+                                                        <fmt:formatNumber value="${b.depositAmount}" type="currency" currencySymbol="$" maxFractionDigits="2" />
                                                     </td>
                                                     <td style="padding: 16px; text-align: right; font-weight: 700; color: var(--primary); border: none;">
                                                         <fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="$" maxFractionDigits="2" />
@@ -163,8 +157,8 @@
                                                             <c:when test="${b.status == 'Pending'}">
                                                                 <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="fa-regular fa-clock me-1"></i>Pending</span>
                                                             </c:when>
-                                                            <c:when test="${b.status == 'Approved' || b.status == 'Confirmed'}">
-                                                                <span class="badge bg-success text-white px-3 py-2 rounded-pill"><i class="fa-regular fa-circle-check me-1"></i>Confirmed</span>
+                                                            <c:when test="${b.status == 'Approved' || b.status == 'Confirmed' || b.status == 'Paid'}">
+                                                                <span class="badge bg-success text-white px-3 py-2 rounded-pill"><i class="fa-regular fa-circle-check me-1"></i>${b.status}</span>
                                                             </c:when>
                                                             <c:when test="${b.status == 'Cancelled'}">
                                                                 <span class="badge bg-danger text-white px-3 py-2 rounded-pill"><i class="fa-regular fa-circle-xmark me-1"></i>Cancelled</span>
@@ -183,13 +177,6 @@
                                                                 <a href="${pageContext.request.contextPath}/payment?bookingId=${b.bookingId}" class="btn btn-sm btn-success rounded-pill px-3 text-white">
                                                                     <i class="fa-solid fa-credit-card me-1"></i>Pay Now
                                                                 </a>
-                                                                <form action="${pageContext.request.contextPath}/booking" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? This will restore the available slots.');" style="display:inline;">
-                                                                    <input type="hidden" name="action" value="cancel">
-                                                                    <input type="hidden" name="bookingId" value="${b.bookingId}">
-                                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                                        <i class="fa-regular fa-circle-xmark me-1"></i>Cancel
-                                                                    </button>
-                                                                </form>
                                                             </c:if>
                                                         </div>
                                                     </td>
