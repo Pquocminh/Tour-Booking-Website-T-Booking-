@@ -66,6 +66,34 @@ public class VoucherDAO {
         return null;
     }
 
+    public Voucher getVoucherByCode(String voucherCode) {
+        String sql = "SELECT * FROM Voucher WHERE voucher_code = ?";
+        DBContext db = new DBContext();
+        try (Connection conn = db.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, voucherCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Voucher(
+                            rs.getInt("voucher_id"),
+                            rs.getString("voucher_code"),
+                            rs.getDouble("discount_percent"),
+                            rs.getDouble("minimum_order_value"),
+                            rs.getDouble("max_discount_amount"),
+                            rs.getInt("quantity"),
+                            rs.getDate("start_date"),
+                            rs.getDate("end_date"),
+                            rs.getString("status")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     public boolean addVoucher(Voucher voucher) {
         String sql = "INSERT INTO Voucher (voucher_code, discount_percent, minimum_order_value, max_discount_amount, quantity, start_date, end_date, status) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
