@@ -76,6 +76,20 @@
                             <p class="text-muted">Please transfer the deposit or full amount to the bank account below and confirm your payment.</p>
                         </div>
 
+                        <!-- Messages -->
+                        <c:if test="${not empty successMessage}">
+                            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+                                <i class="fa-solid fa-circle-check me-2"></i>${successMessage}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </c:if>
+                        <c:if test="${not empty errorMessage}">
+                            <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                                <i class="fa-solid fa-circle-xmark me-2"></i>${errorMessage}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </c:if>
+
                         <!-- Booking Details Summary -->
                         <div class="p-4 rounded-4 bg-white bg-opacity-50 border mb-4">
                             <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-info text-primary me-2"></i>Booking Summary</h5>
@@ -88,6 +102,18 @@
                                     <span class="text-muted d-block">Number of Guests</span>
                                     <span class="fw-bold">${booking.numberOfPeople} People</span>
                                 </div>
+                                <c:if test="${not empty appliedVoucher}">
+                                    <div class="col-md-6">
+                                        <span class="text-muted d-block">Applied Voucher</span>
+                                        <span class="fw-bold text-success">${appliedVoucher.voucherCode} (${appliedVoucher.discountPercent}%)</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <span class="text-muted d-block">Discount Amount</span>
+                                        <span class="fw-bold text-success">
+                                            -<fmt:formatNumber value="${discountAmount}" type="currency" currencySymbol="$" maxFractionDigits="2" />
+                                        </span>
+                                    </div>
+                                </c:if>
                                 <div class="col-md-6">
                                     <span class="text-muted d-block">Total Price</span>
                                     <span class="fw-bold text-danger" style="font-size: 1.2rem;">
@@ -101,6 +127,19 @@
                                     </span>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Voucher Code Form -->
+                        <div class="p-4 rounded-4 bg-white bg-opacity-50 border mb-4">
+                            <h5 class="fw-bold mb-3"><i class="fa-solid fa-tag text-primary me-2"></i>Apply Voucher</h5>
+                            <form action="${pageContext.request.contextPath}/payment" method="post">
+                                <input type="hidden" name="action" value="applyVoucher">
+                                <input type="hidden" name="bookingId" value="${booking.bookingId}">
+                                <div class="input-group">
+                                    <input type="text" name="voucherCode" class="form-control rounded-start-pill ps-3" placeholder="Enter voucher code" value="${appliedVoucher != null ? appliedVoucher.voucherCode : ''}" required>
+                                    <button class="btn btn-primary rounded-end-pill px-4" type="submit">Apply</button>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Bank Information -->

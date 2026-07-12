@@ -311,4 +311,20 @@ public class BookingDAO extends DBContext {
         }
         return null;
     }
+
+    public boolean applyVoucherToBooking(int bookingId, int voucherId, double newTotalPrice, double newDepositAmount) {
+        String sql = "UPDATE Booking SET voucher_id = ?, total_price = ?, deposit_amount = ? WHERE booking_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, voucherId);
+            ps.setDouble(2, newTotalPrice);
+            ps.setDouble(3, newDepositAmount);
+            ps.setInt(4, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
+

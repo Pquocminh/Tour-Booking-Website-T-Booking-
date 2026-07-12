@@ -64,7 +64,12 @@ public class CustomerController extends HttpServlet {
         } else if ("/wishlist".equals(path)) {
             handleWishlistPost(request, response);
         } else if ("/payment".equals(path)) {
-            handlePaymentPost(request, response);
+            String action = request.getParameter("action");
+            if ("applyVoucher".equals(action)) {
+                handleApplyVoucherPost(request, response);
+            } else {
+                handlePaymentPost(request, response);
+            }
         }
     }
 
@@ -525,6 +530,93 @@ public class CustomerController extends HttpServlet {
             Booking booking = bookingDAO.getBookingById(bookingId);
 
             if (booking != null && booking.getCustomerId() == user.getAccountId() && "Pending".equalsIgnoreCase(booking.getStatus())) {
+                request.setAttribute("booking", booking);
+                if (booking.getVoucherId() != null) {
+                    VoucherDAO voucherDAO = new VoucherDAO();
+                    model.Voucher voucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                    request.setAttribute("appliedVoucher", voucher);
+                    
+                    TourDAO tourDAO = new TourDAO();
+                    TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
+                    double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
+                    double discount = originalTotalPrice - booking.getTotalPrice();
+                    request.setAttribute("discountAmount", discount);
+                }
+                request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/booking");
+            }
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/booking");
+        }
+    }
+
+    private void handleApplyVoucherPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("user");
+        if (user == null || !"Customer".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        try {
+            int bookingId = Integer.parseInt(request.getParameter("bookingId"));
+            String voucherCode = request.getParameter("voucherCode");
+
+            BookingDAO bookingDAO = new BookingDAO();
+            Booking booking = bookingDAO.getBookingById(bookingId);
+
+            if (booking != null && booking.getCustomerId() == user.getAccountId() && "Pending".equalsIgnoreCase(booking.getStatus())) {
+                VoucherDAO voucherDAO = new VoucherDAO();
+                model.Voucher voucher = voucherDAO.getVoucherByCode(voucherCode);
+
+                TourDAO tourDAO = new TourDAO();
+                TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
+                double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
+
+                java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
+
+                if (voucher != null 
+                        && "Active".equalsIgnoreCase(voucher.getStatus())
+                        && !currentDate.before(voucher.getStartDate())
+                        && !currentDate.after(voucher.getEndDate())
+                        && voucher.getQuantity() > 0
+                        && originalTotalPrice >= voucher.getMinimumOrderValue()) {
+
+                    double discount = originalTotalPrice * (voucher.getDiscountPercent() / 100.0);
+                    if (discount > voucher.getMaxDiscountAmount()) {
+                        discount = voucher.getMaxDiscountAmount();
+                    }
+
+                    double newTotalPrice = originalTotalPrice - discount;
+
+                    double depositPercent = 30.0;
+                    try {
+                        SystemSettingDAO sysDao = new SystemSettingDAO();
+                        String depositSettingStr = sysDao.getSettingValueByKey("deposit_percent");
+                        if (depositSettingStr != null && !depositSettingStr.trim().isEmpty()) {
+                            depositPercent = Double.parseDouble(depositSettingStr);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    double newDepositAmount = newTotalPrice * (depositPercent / 100.0);
+
+                    boolean success = bookingDAO.applyVoucherToBooking(bookingId, voucher.getVoucherId(), newTotalPrice, newDepositAmount);
+                    if (success) {
+                        booking = bookingDAO.getBookingById(bookingId);
+                        request.setAttribute("successMessage", "Voucher applied successfully.");
+                        request.setAttribute("appliedVoucher", voucher);
+                        request.setAttribute("discountAmount", discount);
+                    } else {
+                        request.setAttribute("errorMessage", "Failed to apply voucher due to a database error.");
+                    }
+                } else {
+                    request.setAttribute("errorMessage", "Invalid or expired voucher.");
+                }
+
                 request.setAttribute("booking", booking);
                 request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
             } else {
