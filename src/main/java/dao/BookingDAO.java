@@ -312,6 +312,56 @@ public class BookingDAO extends DBContext {
         return null;
     }
 
+    public Booking getBookingDetails(int bookingId) {
+        String sql = "SELECT b.*, t.tour_name, ts.departure_date " +
+                     "FROM Booking b " +
+                     "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
+                     "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "WHERE b.booking_id = ?";
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            if (conn != null) {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, bookingId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            Booking b = new Booking();
+                            b.setBookingId(rs.getInt("booking_id"));
+                            b.setCustomerId(rs.getInt("customer_id"));
+                            b.setScheduleId(rs.getInt("schedule_id"));
+                            if (rs.getObject("voucher_id") != null) {
+                                b.setVoucherId(rs.getInt("voucher_id"));
+                            }
+                            b.setBookingDate(rs.getTimestamp("booking_date"));
+                            b.setNumberOfPeople(rs.getInt("number_of_people"));
+                            b.setContactName(rs.getString("contact_name"));
+                            b.setContactPhone(rs.getString("contact_phone"));
+                            b.setTotalPrice(rs.getDouble("total_price"));
+                            b.setDepositAmount(rs.getDouble("deposit_amount"));
+                            b.setStatus(rs.getString("status"));
+                            
+                            b.setTourName(rs.getString("tour_name"));
+                            b.setDepartureDate(rs.getDate("departure_date"));
+                            return b;
+                        }
+                    }
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (java.sql.SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
     public boolean applyVoucherToBooking(int bookingId, int voucherId, double newTotalPrice, double newDepositAmount) {
         String sql = "UPDATE Booking SET voucher_id = ?, total_price = ?, deposit_amount = ? WHERE booking_id = ?";
         try (Connection conn = getConnection();
