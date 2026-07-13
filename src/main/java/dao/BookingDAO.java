@@ -35,7 +35,7 @@ public class BookingDAO extends DBContext {
             }
 
             // 2. Insert Booking
-            try (PreparedStatement psInsert = connection.prepareStatement(insertBookingSql)) {
+            try (PreparedStatement psInsert = connection.prepareStatement(insertBookingSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 psInsert.setInt(1, booking.getCustomerId());
                 psInsert.setInt(2, booking.getScheduleId());
                 if (booking.getVoucherId() != null) {
@@ -53,6 +53,11 @@ public class BookingDAO extends DBContext {
                 
                 int rowsInserted = psInsert.executeUpdate();
                 if (rowsInserted > 0) {
+                    try (ResultSet generatedKeys = psInsert.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            booking.setBookingId(generatedKeys.getInt(1));
+                        }
+                    }
                     connection.commit();
                     return true;
                 } else {

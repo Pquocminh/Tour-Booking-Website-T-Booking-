@@ -393,7 +393,7 @@ public class CustomerController extends HttpServlet {
             boolean success = bookingDAO.insertBooking(booking);
 
             if (success) {
-                response.sendRedirect(request.getContextPath() + "/booking?action=success");
+                response.sendRedirect(request.getContextPath() + "/payment?bookingId=" + booking.getBookingId());
             } else {
                 request.setAttribute("errorMessage", "Failed to book tour. Please try again.");
                 request.getRequestDispatcher("/tour-detail?id=" + schedule.getTourId()).forward(request, response);
