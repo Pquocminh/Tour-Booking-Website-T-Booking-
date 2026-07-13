@@ -322,6 +322,7 @@ public class AdminOperationController extends HttpServlet {
     private void handleCapacityGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String tourIdParam = request.getParameter("tourId");
+        String detailScheduleIdParam = request.getParameter("detailScheduleId");
         
         List<Tour> tours = tourDAO.searchToursAdmin(null, null, null, null);
         request.setAttribute("tours", tours);
@@ -340,6 +341,25 @@ public class AdminOperationController extends HttpServlet {
                 }
             } catch (NumberFormatException e) {
                 request.setAttribute("errorMessage", "Invalid Tour ID format!");
+            }
+        } else {
+            List<TourSchedule> schedules = tourDAO.getAllTourSchedules(null);
+            request.setAttribute("schedules", schedules);
+        }
+
+        if (detailScheduleIdParam != null && !detailScheduleIdParam.trim().isEmpty()) {
+            try {
+                int detailScheduleId = Integer.parseInt(detailScheduleIdParam.trim());
+                TourSchedule detailSchedule = tourDAO.getTourScheduleById(detailScheduleId);
+                if (detailSchedule != null) {
+                    Tour detailTour = tourDAO.getTourByIdAdmin(detailSchedule.getTourId());
+                    List<Booking> detailBookings = tourDAO.getBookingsByScheduleId(detailScheduleId);
+                    request.setAttribute("detailSchedule", detailSchedule);
+                    request.setAttribute("detailTour", detailTour);
+                    request.setAttribute("detailBookings", detailBookings);
+                }
+            } catch (NumberFormatException e) {
+                // ignore
             }
         }
 
