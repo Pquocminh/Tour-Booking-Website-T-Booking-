@@ -159,6 +159,15 @@ public class AdminTourController extends HttpServlet {
         List<Category> categories = tourDAO.getAllCategories();
         List<Destination> destinations = tourDAO.getAllDestinations();
 
+        java.util.Map<Integer, Boolean> tourHasSchedules = new java.util.HashMap<>();
+        if (tours != null) {
+            for (Tour t : tours) {
+                List<model.TourSchedule> scheds = tourDAO.getAllTourSchedules(t.getTourId());
+                tourHasSchedules.put(t.getTourId(), scheds != null && !scheds.isEmpty());
+            }
+        }
+
+        request.setAttribute("tourHasSchedules", tourHasSchedules);
         request.setAttribute("tours", tours);
         request.setAttribute("categories", categories);
         request.setAttribute("destinations", destinations);

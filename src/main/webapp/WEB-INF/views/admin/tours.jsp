@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -140,9 +140,18 @@
                                             <a href="${pageContext.request.contextPath}/admin/tours?action=edit&id=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-2 me-1" title="Edit Tour">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </a>
-                                            <a href="${pageContext.request.contextPath}/admin/capacity?tourId=${t.tourId}" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="Schedules">
-                                                <i class="fa-solid fa-calendar-days"></i>
-                                            </a>
+                                            <c:choose>
+                                                <c:when test="${tourHasSchedules[t.tourId]}">
+                                                    <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="Schedules">
+                                                        <i class="fa-solid fa-calendar-days"></i>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}&openCreate=true" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="New Schedule">
+                                                        <i class="fa-solid fa-calendar-days"></i>
+                                                    </a>
+                                                </c:otherwise>
+                                            </c:choose>
                                             <form method="POST" action="${pageContext.request.contextPath}/admin/tours" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this tour as Inactive?');">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="id" value="${t.tourId}">

@@ -251,6 +251,12 @@
                         </h2>
                     </div>
                     
+                    <c:if test="${not empty sessionScope.errorMessage}">
+                        <div class="alert alert-danger border-0 rounded-3 mb-3 small" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.85rem;">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>${sessionScope.errorMessage}
+                        </div>
+                        <c:remove var="errorMessage" scope="session" />
+                    </c:if>
                     <form action="${pageContext.request.contextPath}/booking" method="POST" class="mt-4">
                         <div class="mb-3">
                             <label for="departureDate" class="form-label fw-bold text-main">

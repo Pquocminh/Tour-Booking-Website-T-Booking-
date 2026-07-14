@@ -356,8 +356,8 @@ public class CustomerController extends HttpServlet {
             }
 
             if (schedule.getAvailableSlots() < numberOfPeople) {
-                request.setAttribute("errorMessage", "Not enough available slots for your group.");
-                request.getRequestDispatcher("/tour-detail?id=" + schedule.getTourId()).forward(request, response);
+                request.getSession().setAttribute("errorMessage", "Not enough available slots! Only " + schedule.getAvailableSlots() + " seats left, but tried to book " + numberOfPeople + " seats.");
+                response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
                 return;
             }
 
@@ -395,8 +395,8 @@ public class CustomerController extends HttpServlet {
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/payment?bookingId=" + booking.getBookingId());
             } else {
-                request.setAttribute("errorMessage", "Failed to book tour. Please try again.");
-                request.getRequestDispatcher("/tour-detail?id=" + schedule.getTourId()).forward(request, response);
+                request.getSession().setAttribute("errorMessage", "Failed to book tour. Please try again.");
+                response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
             }
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
