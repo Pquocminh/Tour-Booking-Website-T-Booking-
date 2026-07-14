@@ -543,15 +543,22 @@ public class CustomerController extends HttpServlet {
                     
                     TourDAO tourDAO = new TourDAO();
                     TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
-                    double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
-                    double discount = originalTotalPrice - booking.getTotalPrice();
-                    request.setAttribute("discountAmount", discount);
+                    if (schedule != null) {
+                        double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
+                        double discount = originalTotalPrice - booking.getTotalPrice();
+                        request.setAttribute("discountAmount", discount);
+                    } else {
+                        request.setAttribute("errorMessage", "Tour itinerary information not found. Please contact support.");
+                        request.setAttribute("discountAmount", 0.0);
+                    }
                 }
                 request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/booking");
             }
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "An error occurred while loading the payment page.");
             response.sendRedirect(request.getContextPath() + "/booking");
         }
     }
@@ -565,21 +572,60 @@ public class CustomerController extends HttpServlet {
             return;
         }
 
+        Booking booking = null;
         try {
             int bookingId = Integer.parseInt(request.getParameter("bookingId"));
             String voucherCode = request.getParameter("voucherCode");
 
             BookingDAO bookingDAO = new BookingDAO();
-            Booking booking = bookingDAO.getBookingById(bookingId);
+            booking = bookingDAO.getBookingById(bookingId);
 
             if (booking != null && booking.getCustomerId() == user.getAccountId() && "Pending".equalsIgnoreCase(booking.getStatus())) {
+                
+                // 1. Kiểm tra mã voucher rỗng
+                if (voucherCode == null || voucherCode.trim().isEmpty()) {
+                    request.setAttribute("errorMessage", "The voucher code cannot be left blank.");
+                    
+                    // Nạp lại thông tin voucher đã áp dụng hiện tại nếu có
+                    if (booking.getVoucherId() != null) {
+                        VoucherDAO voucherDAO = new VoucherDAO();
+                        model.Voucher voucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                        request.setAttribute("appliedVoucher", voucher);
+                        
+                        TourDAO tourDAO = new TourDAO();
+                        TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
+                        if (schedule != null) {
+                            double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
+                            double discount = originalTotalPrice - booking.getTotalPrice();
+                            request.setAttribute("discountAmount", discount);
+                        }
+                    }
+                    request.setAttribute("booking", booking);
+                    request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
+                    return;
+                }
+
+                // 2. Tìm voucher trong database
                 VoucherDAO voucherDAO = new VoucherDAO();
-                model.Voucher voucher = voucherDAO.getVoucherByCode(voucherCode);
+                model.Voucher voucher = voucherDAO.getVoucherByCode(voucherCode.trim());
 
                 TourDAO tourDAO = new TourDAO();
                 TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
-                double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
+                
+                // 3. Kiểm tra null lịch trình tour
+                if (schedule == null) {
+                    request.setAttribute("errorMessage", "Tour itinerary information not found. Please contact support.");
+                    // Vẫn nạp lại thông tin voucher đã áp dụng cũ nếu có
+                    if (booking.getVoucherId() != null) {
+                        model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                        request.setAttribute("appliedVoucher", oldVoucher);
+                    }
+                    request.setAttribute("booking", booking);
+                    request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
+                    return;
+                }
 
+                double originalTotalPrice = schedule.getPrice() * booking.getNumberOfPeople();
                 java.sql.Date currentDate = new java.sql.Date(System.currentTimeMillis());
 
                 if (voucher != null 
@@ -616,10 +662,24 @@ public class CustomerController extends HttpServlet {
                         request.setAttribute("appliedVoucher", voucher);
                         request.setAttribute("discountAmount", discount);
                     } else {
-                        request.setAttribute("errorMessage", "Failed to apply voucher due to a database error.");
+                        request.setAttribute("errorMessage", "Voucher application failed due to a database error.");
+                        // Nạp lại thông tin cũ
+                        if (booking.getVoucherId() != null) {
+                            model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                            request.setAttribute("appliedVoucher", oldVoucher);
+                            double oldDiscount = originalTotalPrice - booking.getTotalPrice();
+                            request.setAttribute("discountAmount", oldDiscount);
+                        }
                     }
                 } else {
-                    request.setAttribute("errorMessage", "Invalid or expired voucher.");
+                    request.setAttribute("errorMessage", "The voucher code is invalid or has expired.");
+                    // Nạp lại thông tin cũ
+                    if (booking.getVoucherId() != null) {
+                        model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
+                        request.setAttribute("appliedVoucher", oldVoucher);
+                        double oldDiscount = originalTotalPrice - booking.getTotalPrice();
+                        request.setAttribute("discountAmount", oldDiscount);
+                    }
                 }
 
                 request.setAttribute("booking", booking);
@@ -627,8 +687,21 @@ public class CustomerController extends HttpServlet {
             } else {
                 response.sendRedirect(request.getContextPath() + "/booking");
             }
-        } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/booking");
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (booking != null) {
+                request.setAttribute("errorMessage", "A system error occurred while applying the voucher: " + e.getMessage());
+                request.setAttribute("booking", booking);
+                try {
+                    request.getRequestDispatcher("/WEB-INF/views/customer/payment.jsp").forward(request, response);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/booking");
+                }
+            } else {
+                session.setAttribute("errorMessage", "Invalid request or non-existent booking.");
+                response.sendRedirect(request.getContextPath() + "/booking");
+            }
         }
     }
 
