@@ -93,8 +93,8 @@ public class AdminVoucherController extends HttpServlet {
             String endDateParam = request.getParameter("endDate");
             String status = request.getParameter("status");
 
-            if (voucherCode == null || voucherCode.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Voucher code is required!");
+            if (voucherCode == null || voucherCode.trim().length() < 6) {
+                request.setAttribute("errorMessage", "Voucher code must be at least 6 characters long!");
                 reloadVouchersDashboard(request, response);
                 return;
             }
@@ -161,8 +161,8 @@ public class AdminVoucherController extends HttpServlet {
             try {
                 int id = Integer.parseInt(idParam);
                 
-                if (voucherCode == null || voucherCode.trim().isEmpty()) {
-                    request.setAttribute("errorMessage", "Voucher code is required!");
+                if (voucherCode == null || voucherCode.trim().length() < 6) {
+                    request.setAttribute("errorMessage", "Voucher code must be at least 6 characters long!");
                     reloadVoucherEditPage(id, request, response);
                     return;
                 }
