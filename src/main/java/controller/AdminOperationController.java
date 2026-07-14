@@ -211,6 +211,72 @@ public class AdminOperationController extends HttpServlet {
 
     private void handleSchedulesPost(HttpServletRequest request, HttpServletResponse response, String action, String tourIdParam)
             throws IOException {
+        if ("create".equalsIgnoreCase(action)) {
+            String formTourIdParam = request.getParameter("formTourId");
+            String departureDateStr = request.getParameter("departureDate");
+            String returnDateStr = request.getParameter("returnDate");
+            String priceParam = request.getParameter("price");
+            String totalSlotsParam = request.getParameter("totalSlots");
+
+            if (formTourIdParam == null || departureDateStr == null || returnDateStr == null || priceParam == null || totalSlotsParam == null) {
+                request.getSession().setAttribute("errorMessage", "Missing required fields to create schedule!");
+                response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                return;
+            }
+
+            try {
+                int tourId = Integer.parseInt(formTourIdParam.trim());
+                Date departureDate = Date.valueOf(departureDateStr.trim());
+                Date returnDate = Date.valueOf(returnDateStr.trim());
+                double price = Double.parseDouble(priceParam.trim());
+                int totalSlots = Integer.parseInt(totalSlotsParam.trim());
+
+                if (departureDate.after(returnDate)) {
+                    request.getSession().setAttribute("errorMessage", "Departure date cannot be after return date!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
+                if (price < 0) {
+                    request.getSession().setAttribute("errorMessage", "Price cannot be negative!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
+                if (totalSlots <= 0) {
+                    request.getSession().setAttribute("errorMessage", "Total capacity must be greater than 0!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
+                TourSchedule sched = new TourSchedule();
+                sched.setTourId(tourId);
+                sched.setDepartureDate(departureDate);
+                sched.setReturnDate(returnDate);
+                sched.setPrice(price);
+                sched.setTotalSlots(totalSlots);
+                sched.setAvailableSlots(totalSlots);
+                sched.setStatus("Open");
+
+                boolean success = tourDAO.addTourSchedule(sched);
+                if (success) {
+                    request.getSession().setAttribute("successMessage", "Tour schedule created successfully!");
+                } else {
+                    request.getSession().setAttribute("errorMessage", "Failed to create tour schedule in database!");
+                }
+
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("errorMessage", "Invalid price or total capacity format!");
+            } catch (IllegalArgumentException e) {
+                request.getSession().setAttribute("errorMessage", "Invalid date format!");
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage", "An error occurred: " + e.getMessage());
+            }
+
+            response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
+            return;
+        }
+
         if ("cancel".equalsIgnoreCase(action)) {
             String scheduleIdParam = request.getParameter("scheduleId");
             if (scheduleIdParam == null) {

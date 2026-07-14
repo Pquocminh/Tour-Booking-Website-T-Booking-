@@ -59,7 +59,12 @@
                 <div>
                     <h4 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Schedules List</h4>
                 </div>
-                <span class="badge bg-primary rounded-pill py-2 px-3 align-self-start">${schedules.size()} Schedule(s)</span>
+                <div class="d-flex gap-2 align-self-start">
+                    <button class="btn btn-success text-white rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                        <i class="fa-solid fa-plus me-2"></i>Create New Schedule
+                    </button>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center">${schedules.size()} Schedule(s)</span>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -388,6 +393,67 @@
     </div>
 
 
+    <!-- Create Schedule Modal -->
+    <div class="modal fade" id="createScheduleModal" tabindex="-1" aria-labelledby="createScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="createScheduleModalLabel"><i class="fa-solid fa-calendar-plus text-success me-2"></i>Create Tour Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="${pageContext.request.contextPath}/admin/schedules">
+                    <input type="hidden" name="action" value="create">
+                    <input type="hidden" name="tourId" value="${selectedTourId}">
+                    
+                    <div class="modal-body py-4">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Select Tour Package</label>
+                            <select name="formTourId" class="form-select rounded-3" required>
+                                <option value="">-- Choose Tour --</option>
+                                <c:forEach var="t" items="${tours}">
+                                    <c:if test="${t.status == 'Active'}">
+                                        <option value="${t.tourId}">ID: #${t.tourId} - ${t.tourName}</option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="createDepartureDate" class="form-label text-muted small fw-bold">Departure Date</label>
+                                <input type="date" class="form-control rounded-3" id="createDepartureDate" name="departureDate" required onchange="validateCreateDates()">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="createReturnDate" class="form-label text-muted small fw-bold">Return Date</label>
+                                <input type="date" class="form-control rounded-3" id="createReturnDate" name="returnDate" required onchange="validateCreateDates()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
+                            <input type="number" class="form-control rounded-3" id="createPrice" name="price" min="0" step="1000" placeholder="e.g. 1500000" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" placeholder="e.g. 20" required>
+                        </div>
+
+                        <div class="alert alert-danger d-none border-0 py-2 small rounded-3" id="createModalErrorAlert">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i>Departure date cannot be after return date.
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success px-4 rounded-pill text-white" id="submitCreateBtn">Create Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <jsp:include page="layout/footer.jsp" />
 <script>
         function openEditModal(scheduleId, tourName, departureDate, returnDate, price, totalSlots, bookedSlots, status) {
@@ -436,6 +502,26 @@
             var retDateVal = document.getElementById('editReturnDate').value;
             var errorAlert = document.getElementById('modalErrorAlert');
             var submitBtn = document.getElementById('submitUpdateBtn');
+
+            if (depDateVal && retDateVal) {
+                var depDate = new Date(depDateVal);
+                var retDate = new Date(retDateVal);
+                
+                if (depDate > retDate) {
+                    errorAlert.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else {
+                    errorAlert.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            }
+        }
+
+        function validateCreateDates() {
+            var depDateVal = document.getElementById('createDepartureDate').value;
+            var retDateVal = document.getElementById('createReturnDate').value;
+            var errorAlert = document.getElementById('createModalErrorAlert');
+            var submitBtn = document.getElementById('submitCreateBtn');
 
             if (depDateVal && retDateVal) {
                 var depDate = new Date(depDateVal);
@@ -602,4 +688,20 @@
                     detailModal.hide();
                 });
         }
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openCreate') === 'true') {
+                var createModal = new bootstrap.Modal(document.getElementById('createScheduleModal'));
+                createModal.show();
+                
+                const tourId = urlParams.get('tourId');
+                if (tourId) {
+                    const selectTour = document.querySelector('select[name="formTourId"]');
+                    if (selectTour) {
+                        selectTour.value = tourId;
+                    }
+                }
+            }
+        });
     </script>

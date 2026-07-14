@@ -39,6 +39,9 @@
                 <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-item-custom ${param.activeMenu == 'accounts' ? 'active' : ''}">
                     <i class="fa-solid fa-user-gear"></i> Manage Accounts
                 </a>
+                <a href="${pageContext.request.contextPath}/admin/discount-policies" class="nav-item-custom ${param.activeMenu == 'discount-policies' ? 'active' : ''}">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Discount Policies
+                </a>
             </c:if>
             <a href="${pageContext.request.contextPath}/admin/staff/reviews" class="nav-item-custom ${param.activeMenu == 'reviews' ? 'active' : ''}">
                 <i class="fa-solid fa-star"></i> Reviews

@@ -75,6 +75,7 @@ CREATE TABLE TourSchedule (
     departure_date DATE NOT NULL,
     return_date DATE NOT NULL,
     price DECIMAL(12,2),
+    total_slots INT,
     available_slots INT,
     status VARCHAR(20),
 
@@ -238,12 +239,12 @@ VALUES
 GO
 
 -- 8. Insert Data for TourSchedule
-INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, available_slots, status)
+INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, total_slots, available_slots, status)
 VALUES 
-(1, '2026-06-15', '2026-06-16', 1100000.00, 20, 'Open'),
-(1, '2026-07-10', '2026-07-11', 1200000.00, 20, 'Open'),
-(2, '2026-09-24', '2026-09-28', 8500000.00, 15, 'Open'),
-(3, '2026-08-20', '2026-08-20', 500000.00, 45, 'Open');
+(1, '2026-06-15', '2026-06-16', 1100000.00, 20, 20, 'Open'),
+(1, '2026-07-10', '2026-07-11', 1200000.00, 20, 20, 'Open'),
+(2, '2026-09-24', '2026-09-28', 8500000.00, 15, 15, 'Open'),
+(3, '2026-08-20', '2026-08-20', 500000.00, 45, 45, 'Open');
 GO
 
 -- 9. Insert Data for Promotion
