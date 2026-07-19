@@ -52,11 +52,9 @@ public class SystemSettingDAO {
             }
 
             // Seed default settings if they are missing (self-healing / robust)
-            seedKeyIfMissing(conn, "discount_min_amount", "1000000.00", "Minimum order value for general discount rule");
-            seedKeyIfMissing(conn, "discount_percent", "5", "General discount percentage");
+            seedKeyIfMissing(conn, "booking_window_days", "3", "Minimum days before departure to allow a booking");
             seedKeyIfMissing(conn, "deposit_percent", "20", "Deposit percentage required for booking");
-            seedKeyIfMissing(conn, "group_min_people", "5", "Minimum group size to apply group discount");
-            seedKeyIfMissing(conn, "group_discount_percent", "10", "Group booking discount percentage");
+            seedKeyIfMissing(conn, "cancellation_window_days", "7", "Minimum days before departure to allow cancellation");
 
         } finally {
             closeConnection(conn);

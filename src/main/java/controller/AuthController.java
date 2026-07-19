@@ -145,7 +145,9 @@ public class AuthController extends HttpServlet {
 
         String result = "Registration failed! Please try again.";
         if (acc != null) {
-            if (!password.equals(confirmPassword)) {
+            if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
+                result = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.";
+            } else if (!password.equals(confirmPassword)) {
                 result = "Passwords do not match!";
             } else if (accountDAO.checkUsernameExists(username)) {
                 result = "Username is already taken!";

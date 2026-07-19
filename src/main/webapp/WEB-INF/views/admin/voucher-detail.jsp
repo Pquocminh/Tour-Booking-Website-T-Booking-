@@ -66,13 +66,13 @@
                     <tr>
                         <td class="text-muted ps-0" style="width: 40%; font-weight: 600;">Minimum Order Value</td>
                         <td class="fw-bold text-dark">
-                            <fmt:formatNumber value="${voucher.minimumOrderValue}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${voucher.minimumOrderValue}" pattern="#,##0 ₫"/>
                         </td>
                     </tr>
                     <tr>
                         <td class="text-muted ps-0" style="font-weight: 600;">Maximum Discount</td>
                         <td class="fw-bold text-dark">
-                            <fmt:formatNumber value="${voucher.maxDiscountAmount}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${voucher.maxDiscountAmount}" pattern="#,##0 ₫"/>
                         </td>
                     </tr>
                     <tr>

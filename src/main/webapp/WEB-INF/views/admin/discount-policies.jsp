@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
-    <jsp:param name="pageTitle" value="Discount Policies" />
+    <jsp:param name="pageTitle" value="Global Policies" />
     <jsp:param name="activeMenu" value="discount-policies" />
 </jsp:include>
 
@@ -32,64 +32,54 @@
             <input type="hidden" name="action" value="updatePolicies">
             
             <div class="row g-4">
-                <!-- UC 1: Configure Discount Rules -->
+                <!-- UC 1: Booking Window Policy -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="policy-card">
-                        <div class="icon-circle bg-indigo-light">
-                            <i class="fa-solid fa-percent"></i>
+                    <div class="policy-card p-4 bg-white rounded-4 shadow-sm border h-100">
+                        <div class="icon-circle bg-indigo-light mb-3">
+                            <i class="fa-solid fa-calendar-check text-indigo fa-2x"></i>
                         </div>
-                        <h4 class="fw-bold mb-3 text-dark">Discount Rules</h4>
-                        <p class="text-muted small mb-4">Set up general rules to automatically discount bookings exceeding a specific price threshold.</p>
+                        <h4 class="fw-bold mb-3 text-dark">Booking Window</h4>
+                        <p class="text-muted small mb-4">Minimum days before departure that a customer must complete their booking. Prevents last-minute bookings.</p>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">Min Booking Amount (đ)</label>
-                            <input type="number" step="1000" min="0" name="discountMinAmount" class="form-control rounded-3" 
-                                   value="${not empty settings ? settings.discount_min_amount : '1000000.00'}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">Discount Rate (%)</label>
-                            <input type="number" min="0" max="100" name="discountPercent" class="form-control rounded-3" 
-                                   value="${not empty settings ? settings.discount_percent : '5'}" required>
+                            <label class="form-label text-muted small fw-bold">Min Days to Book</label>
+                            <input type="number" min="0" name="bookingWindowDays" class="form-control rounded-3" 
+                                   value="${not empty settings ? settings.booking_window_days : '3'}" required>
                         </div>
                     </div>
                 </div>
 
                 <!-- UC 2: Configure Deposit Policy -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="policy-card">
-                        <div class="icon-circle bg-sky-light">
-                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <div class="policy-card p-4 bg-white rounded-4 shadow-sm border border-primary h-100">
+                        <div class="icon-circle bg-sky-light mb-3">
+                            <i class="fa-solid fa-file-invoice-dollar text-primary fa-2x"></i>
                         </div>
                         <h4 class="fw-bold mb-3 text-dark">Deposit Policy</h4>
-                        <p class="text-muted small mb-4">Specify the minimum down-payment percentage required for customers to reserve slots on a tour.</p>
+                        <p class="text-muted small mb-4">Specify the minimum down-payment percentage required for customers to reserve slots on a tour. This applies globally.</p>
                         
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">Deposit Percentage (%)</label>
-                            <input type="number" min="1" max="100" name="depositPercent" class="form-control rounded-3" 
+                            <input type="number" min="1" max="100" name="depositPercent" class="form-control form-control-lg rounded-3 border-primary" 
                                    value="${not empty settings ? settings.deposit_percent : '20'}" required>
-                            <div class="form-text small text-muted">A setting of 100% requires payment in full upon booking.</div>
+                            <div class="form-text small text-muted mt-2">A setting of 100% requires payment in full upon booking.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- UC 3: Configure Group Booking Discount -->
+                <!-- UC 3: Cancellation Window Policy -->
                 <div class="col-lg-4 col-md-6">
-                    <div class="policy-card">
-                        <div class="icon-circle bg-amber-light">
-                            <i class="fa-solid fa-users"></i>
+                    <div class="policy-card p-4 bg-white rounded-4 shadow-sm border h-100">
+                        <div class="icon-circle bg-danger-subtle mb-3">
+                            <i class="fa-solid fa-ban text-danger fa-2x"></i>
                         </div>
-                        <h4 class="fw-bold mb-3 text-dark">Group Booking Discount</h4>
-                        <p class="text-muted small mb-4">Reward large parties by setting a discount threshold based on the number of people in the booking.</p>
+                        <h4 class="fw-bold mb-3 text-dark">Cancellation Window</h4>
+                        <p class="text-muted small mb-4">Minimum days before departure that a customer is allowed to cancel their booking without penalty.</p>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">Min Group Size (People)</label>
-                            <input type="number" min="1" name="groupMinPeople" class="form-control rounded-3" 
-                                   value="${not empty settings ? settings.group_min_people : '5'}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold">Group Discount (%)</label>
-                            <input type="number" min="0" max="100" name="groupDiscountPercent" class="form-control rounded-3" 
-                                   value="${not empty settings ? settings.group_discount_percent : '10'}" required>
+                            <label class="form-label text-muted small fw-bold">Min Days to Cancel</label>
+                            <input type="number" min="0" name="cancellationWindowDays" class="form-control rounded-3" 
+                                   value="${not empty settings ? settings.cancellation_window_days : '7'}" required>
                         </div>
                     </div>
                 </div>

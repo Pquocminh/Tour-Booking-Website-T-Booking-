@@ -14,6 +14,7 @@ import java.util.HashMap;
 import model.Tour;
 import model.TourSchedule;
 import model.Booking;
+import model.Account;
 import dao.TourDAO;
 import dao.AccountDAO;
 import com.google.gson.Gson;
@@ -206,6 +207,10 @@ public class AdminOperationController extends HttpServlet {
         List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
+        dao.AccountDAO accountDAO = new dao.AccountDAO();
+        List<model.Account> staffList = accountDAO.getAllAccounts(null, "Staff", "Active");
+        request.setAttribute("staffList", staffList);
+
         request.getRequestDispatcher("/WEB-INF/views/admin/schedules.jsp").forward(request, response);
     }
 
@@ -243,8 +248,14 @@ public class AdminOperationController extends HttpServlet {
                     return;
                 }
 
-                if (totalSlots <= 0) {
-                    request.getSession().setAttribute("errorMessage", "Total capacity must be greater than 0!");
+                if (tourDAO.isScheduleDateExists(tourId, departureDate)) {
+                    request.getSession().setAttribute("errorMessage", "A schedule with this departure date already exists for this tour!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
+                if (totalSlots <= 0 || totalSlots > 45) {
+                    request.getSession().setAttribute("errorMessage", "Total capacity must be between 1 and 45!");
                     response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                     return;
                 }
@@ -257,6 +268,11 @@ public class AdminOperationController extends HttpServlet {
                 sched.setTotalSlots(totalSlots);
                 sched.setAvailableSlots(totalSlots);
                 sched.setStatus("Open");
+                
+                String assignedStaffIdParam = request.getParameter("assignedStaffId");
+                if (assignedStaffIdParam != null && !assignedStaffIdParam.trim().isEmpty()) {
+                    sched.setAssignedStaffId(Integer.parseInt(assignedStaffIdParam.trim()));
+                }
 
                 boolean success = tourDAO.addTourSchedule(sched);
                 if (success) {
@@ -345,6 +361,16 @@ public class AdminOperationController extends HttpServlet {
                 if (sched == null) {
                     request.getSession().setAttribute("errorMessage", "Tour schedule not found!");
                 } else {
+                    if (!sched.getDepartureDate().equals(departureDate) && tourDAO.isScheduleDateExists(sched.getTourId(), departureDate)) {
+                        request.getSession().setAttribute("errorMessage", "A schedule with this departure date already exists for this tour!");
+                        response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                        return;
+                    }
+                    if (totalSlots <= 0 || totalSlots > 45) {
+                        request.getSession().setAttribute("errorMessage", "Total capacity must be between 1 and 45!");
+                        response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                        return;
+                    }
                     int bookedSlots = sched.getTotalSlots() - sched.getAvailableSlots();
                     if (totalSlots < bookedSlots) {
                         request.getSession().setAttribute("errorMessage", "Total slots (" + totalSlots + ") cannot be less than booked slots (" + bookedSlots + ")!");
@@ -363,6 +389,13 @@ public class AdminOperationController extends HttpServlet {
                         sched.setTotalSlots(totalSlots);
                         sched.setAvailableSlots(availableSlots);
                         sched.setStatus(status);
+                        
+                        String assignedStaffIdParam = request.getParameter("assignedStaffId");
+                        if (assignedStaffIdParam != null && !assignedStaffIdParam.trim().isEmpty()) {
+                            sched.setAssignedStaffId(Integer.parseInt(assignedStaffIdParam.trim()));
+                        } else {
+                            sched.setAssignedStaffId(null);
+                        }
 
                         boolean success = tourDAO.updateTourSchedule(sched);
                         if (success) {

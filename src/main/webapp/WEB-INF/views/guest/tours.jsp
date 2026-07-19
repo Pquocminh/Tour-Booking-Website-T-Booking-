@@ -223,7 +223,7 @@
                                         <div class="tour-price-wrapper">
                                             <span class="tour-price-label">From</span>
                                             <span class="tour-price">
-                                                <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                                <fmt:formatNumber value="${t.basePrice}" pattern="#,##0 ₫"/>
                                             </span>
                                         </div>
                                         <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn tour-btn">

@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                 <table class="table table-custom table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -78,7 +78,8 @@
                             <th>Price</th>
                             <th class="text-center">Booked / Total Capacity</th>
                             <th>Status</th>
-                            <th style="width: 320px;" class="text-center">Actions</th>
+                            <th>Assigned Staff</th>
+                            <th style="width: 320px; position: sticky; right: 0; background-color: #f8f9fa; z-index: 1;" class="text-center shadow-sm">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,7 +103,7 @@
                                         <td><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
                                         <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
                                         <td class="fw-bold text-primary">
-                                            <fmt:formatNumber value="${s.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                            <fmt:formatNumber value="${s.price}" pattern="#,##0 ₫"/>
                                         </td>
                                         <td class="text-center fw-semibold">
                                             <span class="badge bg-light text-dark border me-1">${booked}</span> / <span class="fw-bold text-dark">${s.totalSlots}</span>
@@ -124,40 +125,55 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty s.assignedStaffId}">
+                                                    <c:set var="staffName" value="Unknown"/>
+                                                    <c:forEach var="staff" items="${staffList}">
+                                                        <c:if test="${staff.accountId == s.assignedStaffId}">
+                                                            <c:set var="staffName" value="${staff.fullName}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <span class="badge bg-info-subtle text-info border border-info px-2 py-1 rounded-pill"><i class="fa-solid fa-user me-1"></i>${staffName}</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-muted small"><em>Unassigned</em></span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="text-center" style="position: sticky; right: 0; background-color: #fff; z-index: 1; box-shadow: -4px 0 8px rgba(0,0,0,0.05);">
+                                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                                <button class="btn btn-outline-info btn-icon shadow-sm" title="View Details"
                                                         onclick="viewDetails(${s.scheduleId})">
-                                                    <i class="fa-solid fa-eye me-1"></i>Detail
+                                                    <i class="fa-solid fa-eye"></i>
                                                 </button>
-                                                <button class="btn btn-outline-success btn-sm rounded-pill px-3" 
+                                                <button class="btn btn-outline-success btn-icon shadow-sm" title="Reserve Slot"
                                                         ${(!'Open'.equalsIgnoreCase(s.status) || s.availableSlots <= 0) ? 'disabled' : ''}
                                                         onclick="openReserveModal(${s.scheduleId}, '${s.tourName.replace("'", "\\'")}', ${s.availableSlots})">
-                                                    <i class="fa-solid fa-ticket me-1"></i>Reserve
+                                                    <i class="fa-solid fa-ticket"></i>
                                                 </button>
                                                 <c:choose>
                                                     <c:when test="${'Cancelled'.equalsIgnoreCase(s.status) || 'Completed'.equalsIgnoreCase(s.status)}">
-                                                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled title="Cannot edit Cancelled or Completed schedule">
-                                                            <i class="fa-solid fa-edit me-1"></i>Edit
+                                                        <button class="btn btn-outline-secondary btn-icon shadow-sm" disabled title="Cannot edit Cancelled or Completed schedule">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
                                                         </button>
-                                                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled title="Already Cancelled or Completed">
-                                                            <i class="fa-solid fa-ban me-1"></i>Cancel
+                                                        <button class="btn btn-outline-secondary btn-icon shadow-sm" disabled title="Already Cancelled or Completed">
+                                                            <i class="fa-solid fa-ban"></i>
                                                         </button>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
-                                                                onclick="openEditModal(${s.scheduleId}, '${s.tourName.replace("'", "\\'")}', '${depDateStr}', '${retDateStr}', ${s.price}, ${s.totalSlots}, ${booked}, '${s.status}')">
-                                                            <i class="fa-solid fa-edit me-1"></i>Edit
+                                                        <button class="btn btn-outline-primary btn-icon shadow-sm" title="Edit Schedule"
+                                                                onclick="openEditModal(${s.scheduleId}, '${s.tourName.replace("'", "\\'")}', '${depDateStr}', '${retDateStr}', ${s.price}, ${s.totalSlots}, ${booked}, '${s.status}', '${s.assignedStaffId}')">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
                                                         </button>
-                                                        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" 
+                                                        <button class="btn btn-outline-danger btn-icon shadow-sm" title="Cancel Schedule"
                                                                 onclick="confirmCancel(${s.scheduleId})">
-                                                            <i class="fa-solid fa-ban me-1"></i>Cancel
+                                                            <i class="fa-solid fa-ban"></i>
                                                         </button>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </div>
                                         </td>
-
                                     </tr>
                                 </c:forEach>
                             </c:otherwise>
@@ -211,9 +227,18 @@
                         </div>
 
                         <div class="row g-3 mb-3">
+                            <div class="col-12">
+                                <label for="editAssignedStaff" class="form-label text-muted small fw-bold">Assigned Staff</label>
+                                <select name="assignedStaffId" id="editAssignedStaff" class="form-select rounded-3 mb-3">
+                                    <option value="">-- No Staff Assigned --</option>
+                                    <c:forEach var="staff" items="${staffList}">
+                                        <option value="${staff.accountId}">${staff.fullName}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
                             <div class="col-md-6">
                                 <label for="editTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                                <input type="number" class="form-control rounded-3" id="editTotalSlots" name="totalSlots" min="1" required>
+                                <input type="number" class="form-control rounded-3" id="editTotalSlots" name="totalSlots" min="1" max="45" required>
                                 <div class="form-text text-primary small" id="editBookedSlotsInfo">Booked slots: 0</div>
                             </div>
                             <div class="col-md-6">
@@ -435,8 +460,17 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="createAssignedStaff" class="form-label text-muted small fw-bold">Assigned Staff</label>
+                            <select name="assignedStaffId" id="createAssignedStaff" class="form-select rounded-3">
+                                <option value="">-- No Staff Assigned --</option>
+                                <c:forEach var="staff" items="${staffList}">
+                                    <option value="${staff.accountId}">${staff.fullName}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" placeholder="e.g. 20" required>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" max="45" placeholder="e.g. 20" required>
                         </div>
 
                         <div class="alert alert-danger d-none border-0 py-2 small rounded-3" id="createModalErrorAlert">
@@ -456,7 +490,7 @@
 
     <jsp:include page="layout/footer.jsp" />
 <script>
-        function openEditModal(scheduleId, tourName, departureDate, returnDate, price, totalSlots, bookedSlots, status) {
+        function openEditModal(scheduleId, tourName, departureDate, returnDate, price, totalSlots, bookedSlots, status, assignedStaffId) {
             document.getElementById('editScheduleId').value = scheduleId;
             document.getElementById('editTourName').value = tourName;
             document.getElementById('editDepartureDate').value = departureDate;
@@ -481,6 +515,7 @@
 
             // Pre-select status
             document.getElementById('editStatus').value = status;
+            document.getElementById('editAssignedStaff').value = assignedStaffId || '';
             
             // Hide error alert initially
             document.getElementById('modalErrorAlert').classList.add('d-none');

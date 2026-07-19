@@ -111,20 +111,20 @@
                                     <div class="col-md-6">
                                         <span class="text-muted d-block">Discount Amount</span>
                                         <span class="fw-bold text-success">
-                                            -<fmt:formatNumber value="${discountAmount}" type="currency" currencySymbol="$" maxFractionDigits="2" />
+                                            -<fmt:formatNumber value="${discountAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
                                         </span>
                                     </div>
                                 </c:if>
                                 <div class="col-md-6">
                                     <span class="text-muted d-block">Total Price</span>
                                     <span class="fw-bold text-danger" style="font-size: 1.2rem;">
-                                        <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencySymbol="$" maxFractionDigits="2" />
+                                        <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
                                     </span>
                                 </div>
                                 <div class="col-md-6">
                                     <span class="text-muted d-block">Deposit Required</span>
                                     <span class="fw-bold text-primary" style="font-size: 1.2rem;">
-                                        <fmt:formatNumber value="${booking.depositAmount}" type="currency" currencySymbol="$" maxFractionDigits="2" />
+                                        <fmt:formatNumber value="${booking.depositAmount}" type="currency" currencySymbol="₫" maxFractionDigits="0" />
                                     </span>
                                 </div>
                             </div>

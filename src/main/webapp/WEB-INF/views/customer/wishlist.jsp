@@ -184,7 +184,7 @@
                                                         <div>
                                                             <span class="text-muted small d-block">Price starts from</span>
                                                             <span class="fs-5 fw-bold text-primary">
-                                                                <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                                                <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>
                                                             </span>
                                                         </div>
                                                     </div>

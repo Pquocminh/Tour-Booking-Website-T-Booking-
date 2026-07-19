@@ -100,7 +100,7 @@
                                         <td>${tour.destination.destinationName}</td>
                                         <td>${tour.durationDays} Days</td>
                                         <td class="fw-bold text-primary">
-                                            <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                            <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>
                                         </td>
                                         <td>
                                             <c:choose>

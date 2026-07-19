@@ -111,7 +111,7 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
-                                        <td><fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="₫" maxFractionDigits="0"/></td>
+                                        <td><fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/></td>
                                     </tr>
                                 </c:forEach>
                             </tbody>

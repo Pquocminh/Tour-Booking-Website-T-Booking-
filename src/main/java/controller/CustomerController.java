@@ -220,6 +220,11 @@ public class CustomerController extends HttpServlet {
                     if (review.getComment() != null) {
                         review.setComment(review.getComment().trim());
                     }
+                    if (review.getComment() == null || review.getComment().isEmpty()) {
+                        session.setAttribute("errorMessage", "Review comment cannot be empty.");
+                        response.sendRedirect(request.getContextPath() + "/customer/reviews");
+                        return;
+                    }
                     if (!reviewDAO.hasReviewed(review.getBookingId())) {
                         review.setStatus("Approved");
                         success = reviewDAO.addReview(review);
@@ -355,6 +360,25 @@ public class CustomerController extends HttpServlet {
                 return;
             }
 
+            try {
+                SystemSettingDAO sysDao = new SystemSettingDAO();
+                String bookingWindowStr = sysDao.getSettingValueByKey("booking_window_days");
+                if (bookingWindowStr != null && !bookingWindowStr.trim().isEmpty()) {
+                    int bookingWindowDays = Integer.parseInt(bookingWindowStr);
+                    java.time.LocalDate today = java.time.LocalDate.now();
+                    java.time.LocalDate departureDate = schedule.getDepartureDate().toLocalDate();
+                    long daysUntilDeparture = java.time.temporal.ChronoUnit.DAYS.between(today, departureDate);
+                    
+                    if (daysUntilDeparture < bookingWindowDays) {
+                        request.getSession().setAttribute("errorMessage", "Booking failed! The booking window has closed. You must book at least " + bookingWindowDays + " days before departure.");
+                        response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if (schedule.getAvailableSlots() < numberOfPeople) {
                 request.getSession().setAttribute("errorMessage", "Not enough available slots! Only " + schedule.getAvailableSlots() + " seats left, but tried to book " + numberOfPeople + " seats.");
                 response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
@@ -413,7 +437,31 @@ public class CustomerController extends HttpServlet {
             BookingDAO bookingDAO = new BookingDAO();
             Booking booking = bookingDAO.getBookingById(bookingId);
             if (booking != null && booking.getCustomerId() == user.getAccountId()) {
-                if ("Pending".equalsIgnoreCase(booking.getStatus())) {
+                if ("Pending".equalsIgnoreCase(booking.getStatus()) || "Confirmed".equalsIgnoreCase(booking.getStatus())) {
+                    
+                    try {
+                        TourDAO tourDAO = new TourDAO();
+                        TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
+                        if (schedule != null) {
+                            SystemSettingDAO sysDao = new SystemSettingDAO();
+                            String cancelWindowStr = sysDao.getSettingValueByKey("cancellation_window_days");
+                            if (cancelWindowStr != null && !cancelWindowStr.trim().isEmpty()) {
+                                int cancelWindowDays = Integer.parseInt(cancelWindowStr);
+                                java.time.LocalDate today = java.time.LocalDate.now();
+                                java.time.LocalDate departureDate = schedule.getDepartureDate().toLocalDate();
+                                long daysUntilDeparture = java.time.temporal.ChronoUnit.DAYS.between(today, departureDate);
+                                
+                                if (daysUntilDeparture < cancelWindowDays) {
+                                    session.setAttribute("errorMessage", "Cancellation failed! You can only cancel at least " + cancelWindowDays + " days before departure.");
+                                    response.sendRedirect(request.getContextPath() + "/booking");
+                                    return;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     boolean success = bookingDAO.cancelBooking(bookingId);
                     if (success) {
                         session.setAttribute("successMessage", "Booking cancelled successfully.");
@@ -717,7 +765,7 @@ public class CustomerController extends HttpServlet {
         try {
             int bookingId = Integer.parseInt(request.getParameter("bookingId"));
             BookingDAO bookingDAO = new BookingDAO();
-            boolean success = bookingDAO.updateBookingStatus(bookingId, "Pending Confirmation");
+            boolean success = bookingDAO.updateBookingStatus(bookingId, "Pending");
             
             if (success) {
                 session.setAttribute("successMessage", "Payment confirmation submitted successfully.");

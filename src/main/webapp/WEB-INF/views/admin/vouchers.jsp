@@ -153,8 +153,8 @@
                                         </td>
                                         <td class="fw-bold text-primary">${v.discountPercent}%</td>
                                         <td class="small text-muted">
-                                            Min: <fmt:formatNumber value="${v.minimumOrderValue}" type="currency" currencySymbol="đ" maxFractionDigits="0"/><br>
-                                            Max: <fmt:formatNumber value="${v.maxDiscountAmount}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                            Min: <fmt:formatNumber value="${v.minimumOrderValue}" pattern="#,##0 ₫"/><br>
+                                            Max: <fmt:formatNumber value="${v.maxDiscountAmount}" pattern="#,##0 ₫"/>
                                         </td>
                                         <td class="fw-semibold">${v.quantity}</td>
                                         <td class="small">

@@ -76,7 +76,7 @@
                     <div class="col-md-3">
                         <span class="text-muted small d-block">PRICE</span>
                         <span class="fw-bold text-primary">
-                            <fmt:formatNumber value="${detailSchedule.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${detailSchedule.price}" pattern="#,##0 ₫"/>
                         </span>
                     </div>
                     <div class="col-md-3">
@@ -137,7 +137,7 @@
                                             <td>${b.contactPhone}</td>
                                             <td class="text-center fw-bold">${b.numberOfPeople}</td>
                                             <td class="text-end fw-bold text-primary">
-                                                <fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                                <fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/>
                                             </td>
                                             <td>
                                                 <c:choose>
@@ -198,6 +198,7 @@
                                 <th class="text-center">Total Capacity</th>
                                 <th class="text-center">Booked</th>
                                 <th class="text-center">Available</th>
+                                <th>Assigned Staff</th>
                                 <th>Status</th>
                                 <th style="width: 320px;" class="text-center">Actions</th>
                             </tr>
@@ -206,7 +207,7 @@
                             <c:choose>
                                 <c:when test="${empty schedules}">
                                     <tr>
-                                        <td colspan="${empty selectedTour ? 10 : 9}" class="text-center py-5 text-muted">
+                                        <td colspan="${empty selectedTour ? 11 : 10}" class="text-center py-5 text-muted">
                                             <i class="fa-regular fa-calendar display-4 mb-3 d-block text-secondary"></i>
                                             No schedules found.
                                         </td>
@@ -222,7 +223,7 @@
                                             <td class="fw-semibold"><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
                                             <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
                                             <td class="fw-bold text-primary">
-                                                <fmt:formatNumber value="${s.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                                <fmt:formatNumber value="${s.price}" pattern="#,##0 ₫"/>
                                             </td>
                                             <td class="text-center fw-bold text-dark">${s.totalSlots}</td>
                                             <td class="text-center">
@@ -238,6 +239,16 @@
                                                     </c:when>
                                                     <c:otherwise>
                                                         <span class="badge bg-success-subtle text-success border border-success px-2 py-1">${s.availableSlots} left</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${not empty s.assignedStaffName}">
+                                                        <div class="fw-bold text-primary"><i class="fa-solid fa-user-check me-1"></i>${s.assignedStaffName}</div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="text-muted small"><i class="fa-regular fa-circle-user me-1"></i>Unassigned</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
