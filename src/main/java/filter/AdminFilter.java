@@ -37,8 +37,8 @@ public class AdminFilter implements Filter {
         
         if ("Staff".equalsIgnoreCase(user.getRole())) {
             String uri = httpRequest.getRequestURI();
-            // Allow /admin/staff/* and /admin/schedules (for the redirect filter)
-            if (uri.contains("/admin/staff/") || uri.endsWith("/admin/schedules")) {
+            // Allow /admin/staff/*, /admin/schedules, and /admin/tours (for managing tours)
+            if (uri.contains("/admin/staff/") || uri.endsWith("/admin/schedules") || uri.contains("/admin/tours")) {
                 chain.doFilter(request, response);
                 return;
             } else {
