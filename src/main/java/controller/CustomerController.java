@@ -18,7 +18,9 @@ import model.Booking;
 import model.Review;
 import model.TourSchedule;
 import model.Tour;
-import dao.AccountDAO;
+import dao.CustomerDAO;
+import dao.EmployeeDAO;
+import model.Employee;
 import dao.ReviewDAO;
 import dao.WishlistDAO;
 import dao.PaymentDAO;
@@ -29,7 +31,8 @@ import utils.PasswordUtils;
 @WebServlet(name = "CustomerController", urlPatterns = {"/profile", "/customer/reviews", "/booking", "/wishlist", "/payment", "/bills", "/bill-detail"})
 public class CustomerController extends HttpServlet {
 
-    private final AccountDAO accountDAO = new AccountDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
     private final ReviewDAO reviewDAO = new ReviewDAO();
     private final BookingDAO bookingDAO = new BookingDAO();
 
@@ -106,7 +109,7 @@ public class CustomerController extends HttpServlet {
             String phone = request.getParameter("phone");
             String address = request.getParameter("address");
 
-            Account tempUser = new Account();
+            Account tempUser = new model.Customer();
             tempUser.setAccountId(user.getAccountId());
             tempUser.setFullName(fullName);
             tempUser.setEmail(email);
@@ -119,11 +122,11 @@ public class CustomerController extends HttpServlet {
             } else if (tempUser.getEmail() == null || tempUser.getEmail().trim().isEmpty()) {
                 result = "Email cannot be empty!";
             } else {
-                Account existing = accountDAO.getAccountByEmail(tempUser.getEmail());
+                Account existing = tempUser instanceof Employee ? employeeDAO.getAccountByEmail(tempUser.getEmail()) : customerDAO.getAccountByEmail(tempUser.getEmail());
                 if (existing != null && existing.getAccountId() != tempUser.getAccountId()) {
                     result = "Email is already in use by another account!";
                 } else {
-                    boolean updated = accountDAO.updateProfile(tempUser);
+                    boolean updated = tempUser instanceof Employee ? employeeDAO.updateProfile((Employee)tempUser) : customerDAO.updateProfile((model.Customer)tempUser);
                     if (updated) {
                         result = "success";
                     }
@@ -156,7 +159,7 @@ public class CustomerController extends HttpServlet {
                     result = "Incorrect old password!";
                 } else {
                     String hashedNew = PasswordUtils.hashMD5(newPassword);
-                    boolean updated = accountDAO.updatePasswordById(user.getAccountId(), hashedNew);
+                    boolean updated = user instanceof Employee ? employeeDAO.updatePasswordById(user.getAccountId(), hashedNew) : customerDAO.updatePasswordById(user.getAccountId(), hashedNew);
                     if (updated) {
                         user.setPasswordHash(hashedNew);
                         result = "success";

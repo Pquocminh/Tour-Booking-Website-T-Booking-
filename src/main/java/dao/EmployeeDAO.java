@@ -1,6 +1,7 @@
 package dao;
 
 import db.DBContext;
+import model.Employee;
 import model.Account;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,33 +10,33 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountDAO {
-    public Account checkLogin(String loginInput, String passwordHash) {
+public class EmployeeDAO {
+    public Employee checkLogin(String loginInput, String passwordHash) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return null;
         }
 
-        String sql = "SELECT * FROM Account WHERE (username = ? OR email = ?) AND password_hash = ?";
+        String sql = "SELECT * FROM Employee WHERE (username = ? OR email = ?) AND password_hash = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, loginInput);
             ps.setString(2, loginInput);
             ps.setString(3, passwordHash);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Account acc = new Account();
-                    acc.setAccountId(rs.getInt("account_id"));
+                    Employee acc = new Employee();
+                    acc.setAccountId(rs.getInt("employee_id"));
                     acc.setUsername(rs.getString("username"));
                     acc.setPasswordHash(rs.getString("password_hash"));
                     acc.setEmail(rs.getString("email"));
                     acc.setFullName(rs.getString("full_name"));
                     acc.setPhone(rs.getString("phone"));
-                    acc.setAddress(rs.getString("address"));
+                    acc.setAddress(null);
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
-                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    acc.setLastLogin(null);
                     return acc;
                 }
             }
@@ -53,30 +54,30 @@ public class AccountDAO {
         return null;
     }
 
-    public Account getAccountByEmail(String email) {
+    public Employee getAccountByEmail(String email) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return null;
         }
 
-        String sql = "SELECT * FROM Account WHERE email = ?";
+        String sql = "SELECT * FROM Employee WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Account acc = new Account();
-                    acc.setAccountId(rs.getInt("account_id"));
+                    Employee acc = new Employee();
+                    acc.setAccountId(rs.getInt("employee_id"));
                     acc.setUsername(rs.getString("username"));
                     acc.setPasswordHash(rs.getString("password_hash"));
                     acc.setEmail(rs.getString("email"));
                     acc.setFullName(rs.getString("full_name"));
                     acc.setPhone(rs.getString("phone"));
-                    acc.setAddress(rs.getString("address"));
+                    acc.setAddress(null);
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
-                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    acc.setLastLogin(null);
                     return acc;
                 }
             }
@@ -101,7 +102,7 @@ public class AccountDAO {
             return false;
         }
 
-        String sql = "SELECT 1 FROM Account WHERE username = ?";
+        String sql = "SELECT 1 FROM Employee WHERE username = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
@@ -121,14 +122,14 @@ public class AccountDAO {
         return false;
     }
 
-    public boolean insertAccount(Account acc) {
+    public boolean insertAccount(Employee acc) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return false;
         }
 
-        String sql = "INSERT INTO Account (username, password_hash, email, full_name, phone, address, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Employee (username, password_hash, email, full_name, phone, address, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, acc.getUsername());
             ps.setString(2, acc.getPasswordHash());
@@ -161,7 +162,7 @@ public class AccountDAO {
             return false;
         }
 
-        String sql = "UPDATE Account SET password_hash = ? WHERE email = ?";
+        String sql = "UPDATE Employee SET password_hash = ? WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newPasswordHash);
             ps.setString(2, email);
@@ -181,12 +182,12 @@ public class AccountDAO {
         return false;
     }
 
-    public boolean updateProfile(Account acc) {
+    public boolean updateProfile(Employee acc) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) return false;
 
-        String sql = "UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ? WHERE account_id = ?";
+        String sql = "UPDATE Employee SET full_name = ?, phone = ?, email = ?, address = ? WHERE employee_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, acc.getFullName());
             ps.setString(2, acc.getPhone());
@@ -207,7 +208,7 @@ public class AccountDAO {
         Connection conn = db.getConnection();
         if (conn == null) return false;
 
-        String sql = "UPDATE Account SET password_hash = ? WHERE account_id = ?";
+        String sql = "UPDATE Employee SET password_hash = ? WHERE employee_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newPasswordHash);
             ps.setInt(2, accountId);
@@ -225,7 +226,7 @@ public class AccountDAO {
         Connection conn = db.getConnection();
         if (conn == null) return true;
 
-        String sql = "SELECT 1 FROM Account WHERE email = ? AND account_id != ?";
+        String sql = "SELECT 1 FROM Employee WHERE email = ? AND employee_id != ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ps.setInt(2, accountId);
@@ -240,31 +241,31 @@ public class AccountDAO {
         return true;
     }
 
-    public Account getAccountByUsernameOrEmail(String input) {
+    public Employee getAccountByUsernameOrEmail(String input) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return null;
         }
 
-        String sql = "SELECT * FROM Account WHERE username = ? OR email = ?";
+        String sql = "SELECT * FROM Employee WHERE username = ? OR email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, input);
             ps.setString(2, input);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Account acc = new Account();
-                    acc.setAccountId(rs.getInt("account_id"));
+                    Employee acc = new Employee();
+                    acc.setAccountId(rs.getInt("employee_id"));
                     acc.setUsername(rs.getString("username"));
                     acc.setPasswordHash(rs.getString("password_hash"));
                     acc.setEmail(rs.getString("email"));
                     acc.setFullName(rs.getString("full_name"));
                     acc.setPhone(rs.getString("phone"));
-                    acc.setAddress(rs.getString("address"));
+                    acc.setAddress(null);
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
-                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    acc.setLastLogin(null);
                     return acc;
                 }
             }
@@ -282,15 +283,15 @@ public class AccountDAO {
         return null;
     }
 
-    public List<Account> getAllAccounts(String search, String role, String status) {
-        List<Account> list = new ArrayList<>();
+    public List<Employee> getAllAccounts(String search, String role, String status) {
+        List<Employee> list = new ArrayList<>();
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return list;
         }
 
-        StringBuilder sql = new StringBuilder("SELECT * FROM Account WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT * FROM Employee WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (search != null && !search.trim().isEmpty()) {
@@ -312,7 +313,7 @@ public class AccountDAO {
             params.add(status.trim());
         }
 
-        sql.append(" ORDER BY account_id ASC");
+        sql.append(" ORDER BY employee_id ASC");
 
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
@@ -320,18 +321,18 @@ public class AccountDAO {
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Account acc = new Account();
-                    acc.setAccountId(rs.getInt("account_id"));
+                    Employee acc = new Employee();
+                    acc.setAccountId(rs.getInt("employee_id"));
                     acc.setUsername(rs.getString("username"));
                     acc.setPasswordHash(rs.getString("password_hash"));
                     acc.setEmail(rs.getString("email"));
                     acc.setFullName(rs.getString("full_name"));
                     acc.setPhone(rs.getString("phone"));
-                    acc.setAddress(rs.getString("address"));
+                    acc.setAddress(null);
                     acc.setRole(rs.getString("role"));
                     acc.setStatus(rs.getString("status"));
                     acc.setCreatedAt(rs.getTimestamp("created_at"));
-                    acc.setLastLogin(rs.getTimestamp("last_login"));
+                    acc.setLastLogin(null);
                     list.add(acc);
                 }
             }
@@ -358,7 +359,7 @@ public class AccountDAO {
      *   1.1.4.3.1. Send SELECT Account by ID
      * 1.1.4.4. close()
      */
-    public Account getAccountById(int accountId) {
+    public Employee getAccountById(int accountId) {
         DBContext db = new DBContext();
         
         // 1.1.4.1. getConnection()
@@ -368,8 +369,8 @@ public class AccountDAO {
             return null;
         }
 
-        // Database Query as specified: SELECT account_id, username, email, full_name, phone, address, role, status, created_at FROM Account WHERE account_id = ?;
-        String sql = "SELECT account_id, username, email, full_name, phone, address, role, status, created_at FROM Account WHERE account_id = ?";
+        // Database Query as specified: SELECT employee_id, username, email, full_name, phone, address, role, status, created_at FROM Employee WHERE employee_id = ?;
+        String sql = "SELECT employee_id, username, email, full_name, phone, address, role, status, created_at FROM Employee WHERE employee_id = ?";
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -382,13 +383,13 @@ public class AccountDAO {
             rs = ps.executeQuery();
             
             if (rs.next()) {
-                Account acc = new Account();
-                acc.setAccountId(rs.getInt("account_id"));
+                Employee acc = new Employee();
+                acc.setAccountId(rs.getInt("employee_id"));
                 acc.setUsername(rs.getString("username"));
                 acc.setEmail(rs.getString("email"));
                 acc.setFullName(rs.getString("full_name"));
                 acc.setPhone(rs.getString("phone"));
-                acc.setAddress(rs.getString("address"));
+                acc.setAddress(null);
                 acc.setRole(rs.getString("role"));
                 acc.setStatus(rs.getString("status"));
                 acc.setCreatedAt(rs.getTimestamp("created_at"));
@@ -423,10 +424,10 @@ public class AccountDAO {
      * 1.1.4.1. getConnection()
      * 1.1.4.2. prepareStatement(sql)
      * 1.1.4.3. executeUpdate()
-     *   1.1.4.3.1. Send UPDATE Account to database
+     *   1.1.4.3.1. Send UPDATE Employee to database
      * 1.1.4.4. close()
      */
-    public boolean updateAccount(Account acc) {
+    public boolean updateAccount(Employee acc) {
         DBContext db = new DBContext();
         
         // 1.1.4.1. getConnection()
@@ -436,8 +437,8 @@ public class AccountDAO {
             return false;
         }
 
-        // Database Query as specified: UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE account_id = ?;
-        String sql = "UPDATE Account SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE account_id = ?";
+        // Database Query as specified: UPDATE Employee SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE employee_id = ?;
+        String sql = "UPDATE Employee SET full_name = ?, phone = ?, email = ?, address = ?, role = ?, status = ? WHERE employee_id = ?";
         PreparedStatement ps = null;
         
         try {
@@ -453,7 +454,7 @@ public class AccountDAO {
             
             System.out.println("[AccountDAO] Executing SQL: " + sql + " for ID: " + acc.getAccountId());
             
-            // 1.1.4.3. executeUpdate() -> 1.1.4.3.1. Send UPDATE Account
+            // 1.1.4.3. executeUpdate() -> 1.1.4.3.1. Send UPDATE Employee
             int rowsUpdated = ps.executeUpdate();
             
             System.out.println("[AccountDAO] Rows updated: " + rowsUpdated);
@@ -498,8 +499,8 @@ public class AccountDAO {
             return false;
         }
 
-        // Database Query as specified: DELETE FROM Account WHERE account_id = ?;
-        String sql = "DELETE FROM Account WHERE account_id = ?";
+        // Database Query as specified: DELETE FROM Employee WHERE employee_id = ?;
+        String sql = "DELETE FROM Employee WHERE employee_id = ?";
         PreparedStatement ps = null;
         
         try {

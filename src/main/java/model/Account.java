@@ -2,7 +2,7 @@ package model;
 
 import java.sql.Timestamp;
 
-public class Account {
+public abstract class Account {
     private int accountId;
     private String username;
     private String passwordHash;
