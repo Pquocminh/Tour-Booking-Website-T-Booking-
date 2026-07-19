@@ -211,9 +211,9 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, a.full_name AS customer_name, t.tour_name, s.departure_date " +
+        String sql = "SELECT r.*, c.full_name AS customer_name, t.tour_name, s.departure_date " +
                      "FROM Review r " +
-                     "JOIN Account a ON r.customer_id = a.account_id " +
+                     "JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "JOIN Tour t ON s.tour_id = t.tour_id " +
@@ -311,9 +311,9 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, a.full_name AS customer_name, s.departure_date " +
+        String sql = "SELECT r.*, c.full_name AS customer_name, s.departure_date " +
                      "FROM Review r " +
-                     "JOIN Account a ON r.customer_id = a.account_id " +
+                     "JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "WHERE s.tour_id = ? AND r.status = 'Visible' " +

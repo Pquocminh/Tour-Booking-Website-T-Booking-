@@ -93,8 +93,10 @@ CREATE TABLE TourSchedule (
     total_slots INT,
     available_slots INT,
     status VARCHAR(20),
+    assigned_staff_id INT,
 
-    FOREIGN KEY (tour_id) REFERENCES Tour(tour_id)
+    FOREIGN KEY (tour_id) REFERENCES Tour(tour_id),
+    FOREIGN KEY (assigned_staff_id) REFERENCES Employee(employee_id)
 );
 
 CREATE TABLE Promotion (
@@ -147,6 +149,7 @@ CREATE TABLE Payment (
     payment_id INT IDENTITY(1,1) PRIMARY KEY,
     booking_id INT NOT NULL,
     amount DECIMAL(12,2),
+    payment_type VARCHAR(20),
     payment_method VARCHAR(30),
     payment_status VARCHAR(20),
     transaction_code VARCHAR(255),
@@ -166,15 +169,17 @@ CREATE TABLE BookingVoucher (
 
 CREATE TABLE Review (
     review_id INT IDENTITY(1,1) PRIMARY KEY,
-    booking_id INT NOT NULL,
+    tour_id INT NOT NULL,
     customer_id INT NOT NULL,
     rating INT,
     comment NVARCHAR(MAX),
-    status VARCHAR(20),
+    staff_response NVARCHAR(MAX),
+    response_date DATETIME,
     created_at DATETIME DEFAULT GETDATE(),
+    status VARCHAR(20),
 
-    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id),
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    FOREIGN KEY (tour_id) REFERENCES Tour(tour_id)
 );
 
 CREATE TABLE Wishlist (

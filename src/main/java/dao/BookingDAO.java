@@ -89,11 +89,11 @@ public class BookingDAO extends DBContext {
 
     public List<Booking> getAllBookings() {
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, t.tour_name, ts.departure_date, a.username AS customer_username, a.email AS customer_email " +
+        String sql = "SELECT b.*, t.tour_name, ts.departure_date, c.username AS customer_username, c.email AS customer_email " +
                      "FROM Booking b " +
                      "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
                      "JOIN Tour t ON ts.tour_id = t.tour_id " +
-                     "LEFT JOIN Account a ON b.customer_id = a.account_id " +
+                     "LEFT JOIN Customer c ON b.customer_id = c.customer_id " +
                      "ORDER BY b.booking_date DESC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
