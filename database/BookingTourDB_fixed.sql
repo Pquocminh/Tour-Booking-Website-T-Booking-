@@ -1,4 +1,4 @@
-﻿CREATE DATABASE BookingTourWebsite;
+CREATE DATABASE BookingTourWebsite;
 GO
 
 USE BookingTourWebsite;
@@ -11,8 +11,10 @@ CREATE TABLE Customer (
     email VARCHAR(100) NOT NULL UNIQUE,
     full_name NVARCHAR(100) NOT NULL,
     phone VARCHAR(20),
+    address NVARCHAR(255),
     status VARCHAR(20) NOT NULL,
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    last_login DATETIME
 );
 
 CREATE TABLE Employee (
@@ -22,9 +24,11 @@ CREATE TABLE Employee (
     email VARCHAR(100) NOT NULL UNIQUE,
     full_name NVARCHAR(100) NOT NULL,
     phone VARCHAR(20),
+    address NVARCHAR(255),
     role VARCHAR(20) NOT NULL,
     status VARCHAR(20) NOT NULL,
-    created_at DATETIME DEFAULT GETDATE()
+    created_at DATETIME DEFAULT GETDATE(),
+    last_login DATETIME
 );
 
 CREATE TABLE Category (
