@@ -120,7 +120,7 @@
                                         <td>${t.destination.destinationName}</td>
                                         <td>${t.departureLocation}</td>
                                         <td class="fw-bold text-primary">
-                                            <fmt:formatNumber value="${t.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                            <fmt:formatNumber value="${t.basePrice}" pattern="#,##0 ₫"/>
                                         </td>
                                         <td>${t.durationDays} Days</td>
                                         <td>
@@ -134,31 +134,33 @@
                                             </c:choose>
                                         </td>
                                         <td class="text-center">
-                                            <a href="${pageContext.request.contextPath}/admin/tours?action=view&id=${t.tourId}" class="btn btn-outline-info btn-sm rounded-pill px-2 me-1" title="View Details">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/admin/tours?action=edit&id=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-2 me-1" title="Edit Tour">
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            </a>
-                                            <c:choose>
-                                                <c:when test="${tourHasSchedules[t.tourId]}">
-                                                    <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="Schedules">
-                                                        <i class="fa-solid fa-calendar-days"></i>
-                                                    </a>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}&openCreate=true" class="btn btn-outline-secondary btn-sm rounded-pill px-2 me-1" title="New Schedule">
-                                                        <i class="fa-solid fa-calendar-days"></i>
-                                                    </a>
-                                                </c:otherwise>
-                                            </c:choose>
-                                            <form method="POST" action="${pageContext.request.contextPath}/admin/tours" class="d-inline" onsubmit="return confirm('Are you sure you want to mark this tour as Inactive?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="${t.tourId}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" title="Delete (Inactive)">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                                <a href="${pageContext.request.contextPath}/admin/tours?action=view&id=${t.tourId}" class="btn btn-outline-info btn-icon shadow-sm" title="View Details">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <a href="${pageContext.request.contextPath}/admin/tours?action=edit&id=${t.tourId}" class="btn btn-outline-primary btn-icon shadow-sm" title="Edit Tour">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
+                                                <c:choose>
+                                                    <c:when test="${tourHasSchedules[t.tourId]}">
+                                                        <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}" class="btn btn-outline-secondary btn-icon shadow-sm" title="Manage Schedule">
+                                                            <i class="fa-solid fa-calendar-days"></i>
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <a href="${pageContext.request.contextPath}/admin/schedules?tourId=${t.tourId}&openCreate=true" class="btn btn-outline-secondary btn-icon shadow-sm" title="Create Schedule">
+                                                            <i class="fa-solid fa-calendar-plus"></i>
+                                                        </a>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <form method="POST" action="${pageContext.request.contextPath}/admin/tours" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this tour?');">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="${t.tourId}">
+                                                    <button type="submit" class="btn btn-outline-danger btn-icon shadow-sm" title="Delete Tour">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
 

@@ -81,6 +81,10 @@ public class StaffController extends HttpServlet {
         List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
+        dao.AccountDAO accountDAO = new dao.AccountDAO();
+        List<model.Account> staffList = accountDAO.getAllAccounts(null, "Staff", "Active");
+        request.setAttribute("staffList", staffList);
+
         request.getRequestDispatcher("/WEB-INF/views/staff/schedules.jsp").forward(request, response);
     }
 
@@ -141,7 +145,40 @@ public class StaffController extends HttpServlet {
             handleReserveSlots(request, response, tourIdParam);
             return;
         }
+        
+        if ("takeTour".equalsIgnoreCase(action)) {
+            handleTakeTour(request, response, tourIdParam);
+            return;
+        }
 
+        response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
+    }
+
+    private void handleTakeTour(HttpServletRequest request, HttpServletResponse response, String tourIdParam) throws IOException {
+        String scheduleIdParam = request.getParameter("scheduleId");
+        if (scheduleIdParam != null && !scheduleIdParam.trim().isEmpty()) {
+            try {
+                int scheduleId = Integer.parseInt(scheduleIdParam.trim());
+                model.Account account = (model.Account) request.getSession().getAttribute("account");
+                if (account != null) {
+                    TourSchedule sched = tourDAO.getTourScheduleById(scheduleId);
+                    if (sched != null) {
+                        if (sched.getAssignedStaffId() != null) {
+                            request.getSession().setAttribute("errorMessage", "This tour has already been assigned!");
+                        } else {
+                            sched.setAssignedStaffId(account.getAccountId());
+                            if (tourDAO.updateTourSchedule(sched)) {
+                                request.getSession().setAttribute("successMessage", "You have successfully taken the tour!");
+                            } else {
+                                request.getSession().setAttribute("errorMessage", "Failed to take the tour.");
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                request.getSession().setAttribute("errorMessage", "Invalid request.");
+            }
+        }
         response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
     }
 
@@ -178,8 +215,14 @@ public class StaffController extends HttpServlet {
                 return;
             }
 
-            if (totalSlots <= 0) {
-                request.getSession().setAttribute("errorMessage", "Capacity must be greater than zero!");
+            if (tourDAO.isScheduleDateExists(tourId, departureDate)) {
+                request.getSession().setAttribute("errorMessage", "A schedule with this departure date already exists for this tour!");
+                response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                return;
+            }
+
+            if (totalSlots <= 0 || totalSlots > 45) {
+                request.getSession().setAttribute("errorMessage", "Capacity must be between 1 and 45!");
                 response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                 return;
             }

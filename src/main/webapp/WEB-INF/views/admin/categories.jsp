@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -102,21 +102,22 @@
                                             <span class="text-muted small">${not empty cat.description ? cat.description : 'No description provided.'}</span>
                                         </td>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 me-1" 
-                                                    data-bs-toggle="modal" data-bs-target="#viewCategoryModal${cat.categoryId}">
-                                                <i class="fa-solid fa-eye me-1"></i>View
-                                            </button>
-                                            <a href="${pageContext.request.contextPath}/admin/categories?action=edit&id=${cat.categoryId}" 
-                                               class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">
-                                                <i class="fa-solid fa-pen-to-square me-1"></i>Edit
-                                            </a>
-                                            <form method="POST" action="${pageContext.request.contextPath}/admin/categories" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="id" value="${cat.categoryId}">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                    <i class="fa-solid fa-trash me-1"></i>Delete
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button type="button" class="btn btn-outline-info btn-icon shadow-sm" data-bs-toggle="modal" data-bs-target="#viewCategoryModal${cat.categoryId}" title="View Details">
+                                                    <i class="fa-solid fa-eye"></i>
                                                 </button>
-                                            </form>
+                                                <a href="${pageContext.request.contextPath}/admin/categories?action=edit&id=${cat.categoryId}"
+                                                   class="btn btn-outline-primary btn-icon shadow-sm" title="Edit Category">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
+                                                <form method="POST" action="${pageContext.request.contextPath}/admin/categories" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="id" value="${cat.categoryId}">
+                                                    <button type="submit" class="btn btn-outline-danger btn-icon shadow-sm" title="Delete Category">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
 
                                             <!-- View Modal -->
                                             <div class="modal fade text-start" id="viewCategoryModal${cat.categoryId}" tabindex="-1" aria-hidden="true">

@@ -80,6 +80,7 @@
                             <th>Price</th>
                             <th class="text-center">Booked / Total Capacity</th>
                             <th>Status</th>
+                            <th>Assigned Staff</th>
                             <th style="width: 320px;" class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -104,7 +105,7 @@
                                         <td><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
                                         <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
                                         <td class="fw-bold text-primary">
-                                            <fmt:formatNumber value="${s.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                            <fmt:formatNumber value="${s.price}" pattern="#,##0 ₫"/>
                                         </td>
                                         <td class="text-center fw-semibold">
                                             <span class="badge bg-light text-dark border me-1">${booked}</span> / <span class="fw-bold text-dark">${s.totalSlots}</span>
@@ -126,6 +127,25 @@
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty s.assignedStaffId}">
+                                                    <c:set var="staffName" value="Unknown"/>
+                                                    <c:forEach var="staff" items="${staffList}">
+                                                        <c:if test="${staff.accountId == s.assignedStaffId}">
+                                                            <c:set var="staffName" value="${staff.fullName}"/>
+                                                        </c:if>
+                                                    </c:forEach>
+                                                    <span class="badge bg-info-subtle text-info border border-info px-2 py-1 rounded-pill">
+                                                        <i class="fa-solid fa-user me-1"></i>${staffName}
+                                                        <c:if test="${sessionScope.account.accountId == s.assignedStaffId}"> (You)</c:if>
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="text-muted small"><em>Unassigned</em></span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
                                                 <button class="btn btn-outline-success btn-sm rounded-pill px-3" 
@@ -133,6 +153,16 @@
                                                         onclick="openReserveModal(${s.scheduleId}, '${s.tourName.replace("'", "\\'")}', ${s.availableSlots})">
                                                     <i class="fa-solid fa-ticket me-1"></i>Reserve
                                                 </button>
+                                                <c:if test="${empty s.assignedStaffId}">
+                                                    <form action="${pageContext.request.contextPath}/admin/staff/schedules" method="post" class="d-inline">
+                                                        <input type="hidden" name="action" value="takeTour">
+                                                        <input type="hidden" name="scheduleId" value="${s.scheduleId}">
+                                                        <input type="hidden" name="tourId" value="${param.tourId}">
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="return confirm('Are you sure you want to take this tour?');">
+                                                            <i class="fa-solid fa-hand-paper me-1"></i>Take Tour
+                                                        </button>
+                                                    </form>
+                                                </c:if>
                                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
                                                         onclick="viewDetails(${s.scheduleId})">
                                                     <i class="fa-solid fa-eye me-1"></i>Detail
@@ -204,7 +234,7 @@
 
                         <div class="mb-3">
                             <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" placeholder="e.g. 20" required>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" max="45" placeholder="e.g. 20" required>
                         </div>
 
                         <div class="alert alert-danger d-none border-0 py-2 small rounded-3" id="createModalErrorAlert">

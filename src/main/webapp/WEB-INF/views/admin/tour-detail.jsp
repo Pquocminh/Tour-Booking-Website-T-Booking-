@@ -73,7 +73,7 @@
                     <div class="col-md-12">
                         <div class="info-label">Base Price</div>
                         <div class="fs-4 fw-bold text-success">
-                            <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="VND " maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>
                         </div>
                     </div>
 

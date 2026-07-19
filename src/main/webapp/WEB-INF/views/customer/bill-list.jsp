@@ -109,11 +109,14 @@
                         <c:choose>
                             <c:when test="${empty bills}">
                                 <div class="text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="fa-regular fa-folder-open text-muted" style="font-size: 4rem;"></i>
+                                    <div class="mb-4 text-primary opacity-50">
+                                        <i class="fa-solid fa-file-invoice-dollar fa-5x"></i>
                                     </div>
-                                    <h4 class="text-muted">No Bills Found</h4>
-                                    <p class="text-muted mb-4">You don't have any bills/invoices yet.</p>
+                                    <h4 class="fw-bold text-secondary">No Bills Found</h4>
+                                    <p class="text-muted mb-4">You haven't booked any tours yet. Ready for an adventure?</p>
+                                    <a href="${pageContext.request.contextPath}/tours" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow">
+                                        <i class="fa-solid fa-plane-departure me-2"></i>Book a Tour Now
+                                    </a>
                                 </div>
                             </c:when>
                             <c:otherwise>

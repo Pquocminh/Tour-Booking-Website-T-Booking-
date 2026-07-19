@@ -209,6 +209,10 @@ public class TourDAO {
                     sched.setAvailableSlots(rs.getInt("available_slots"));
                     sched.setTotalSlots(rs.getInt("total_slots"));
                     sched.setStatus(rs.getString("status"));
+                    int staffId = rs.getInt("assigned_staff_id");
+                    if (!rs.wasNull()) {
+                        sched.setAssignedStaffId(staffId);
+                    }
                     list.add(sched);
                 }
             }
@@ -247,6 +251,10 @@ public class TourDAO {
                     sched.setAvailableSlots(rs.getInt("available_slots"));
                     sched.setTotalSlots(rs.getInt("total_slots"));
                     sched.setStatus(rs.getString("status"));
+                    int staffId = rs.getInt("assigned_staff_id");
+                    if (!rs.wasNull()) {
+                        sched.setAssignedStaffId(staffId);
+                    }
                     list.add(sched);
                 }
             }
@@ -291,6 +299,10 @@ public class TourDAO {
                     sched.setAvailableSlots(rs.getInt("available_slots"));
                     sched.setTotalSlots(rs.getInt("total_slots"));
                     sched.setStatus(rs.getString("status"));
+                    int staffId = rs.getInt("assigned_staff_id");
+                    if (!rs.wasNull()) {
+                        sched.setAssignedStaffId(staffId);
+                    }
                     sched.setTourName(rs.getString("tour_name"));
                     list.add(sched);
                 }
@@ -329,6 +341,10 @@ public class TourDAO {
                     sched.setAvailableSlots(rs.getInt("available_slots"));
                     sched.setTotalSlots(rs.getInt("total_slots"));
                     sched.setStatus(rs.getString("status"));
+                    int staffId = rs.getInt("assigned_staff_id");
+                    if (!rs.wasNull()) {
+                        sched.setAssignedStaffId(staffId);
+                    }
                     return sched;
                 }
             }
@@ -352,7 +368,7 @@ public class TourDAO {
         if (conn == null) {
             return false;
         }
-        String sql = "UPDATE TourSchedule SET tour_id = ?, departure_date = ?, return_date = ?, price = ?, total_slots = ?, available_slots = ?, status = ? WHERE schedule_id = ?";
+        String sql = "UPDATE TourSchedule SET tour_id = ?, departure_date = ?, return_date = ?, price = ?, total_slots = ?, available_slots = ?, status = ?, assigned_staff_id = ? WHERE schedule_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sched.getTourId());
             ps.setDate(2, sched.getDepartureDate());
@@ -361,7 +377,12 @@ public class TourDAO {
             ps.setInt(5, sched.getTotalSlots());
             ps.setInt(6, sched.getAvailableSlots());
             ps.setString(7, sched.getStatus());
-            ps.setInt(8, sched.getScheduleId());
+            if (sched.getAssignedStaffId() != null) {
+                ps.setInt(8, sched.getAssignedStaffId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
+            ps.setInt(9, sched.getScheduleId());
             int rows = ps.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {
@@ -656,13 +677,34 @@ public class TourDAO {
         }
     }
 
+    public boolean isScheduleDateExists(int tourId, java.sql.Date departureDate) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "SELECT COUNT(*) FROM TourSchedule WHERE tour_id = ? AND departure_date = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, tourId);
+            pstmt.setDate(2, departureDate);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean addTourSchedule(TourSchedule sched) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
         if (conn == null) {
             return false;
         }
-        String sql = "INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, total_slots, available_slots, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TourSchedule (tour_id, departure_date, return_date, price, total_slots, available_slots, status, assigned_staff_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sched.getTourId());
             ps.setDate(2, sched.getDepartureDate());
@@ -671,6 +713,11 @@ public class TourDAO {
             ps.setInt(5, sched.getTotalSlots());
             ps.setInt(6, sched.getAvailableSlots());
             ps.setString(7, sched.getStatus());
+            if (sched.getAssignedStaffId() != null) {
+                ps.setInt(8, sched.getAssignedStaffId());
+            } else {
+                ps.setNull(8, java.sql.Types.INTEGER);
+            }
             int rows = ps.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {

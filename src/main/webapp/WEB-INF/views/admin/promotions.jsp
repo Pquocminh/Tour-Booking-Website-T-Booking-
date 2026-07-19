@@ -72,7 +72,7 @@
                                             <input class="form-check-input" type="checkbox" name="tourIds" value="${tour.tourId}" id="tour_${tour.tourId}">
                                             <label class="form-check-label small" for="tour_${tour.tourId}">
                                                 <span class="text-primary fw-bold">[#${tour.tourId}]</span> ${tour.tourName} 
-                                                <span class="text-muted">(${tour.durationDays} Days, <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>)</span>
+                                                <span class="text-muted">(${tour.durationDays} Days, <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>)</span>
                                             </label>
                                         </div>
                                     </c:forEach>

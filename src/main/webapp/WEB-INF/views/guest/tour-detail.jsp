@@ -221,7 +221,10 @@
                                             </div>
                                         </div>
                                         <p class="mb-2 text-secondary">${r.comment}</p>
-                                        <div class="text-muted small mb-2"><fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/></div>
+                                        <div class="text-muted small mb-2">
+                                            <i class="fa-regular fa-calendar-check me-1"></i>Reviewed on <fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy"/>
+                                            <span class="ms-3"><i class="fa-solid fa-plane-departure me-1"></i>Travelled on <fmt:formatDate value="${r.departureDate}" pattern="dd/MM/yyyy"/></span>
+                                        </div>
                                         
                                         <c:if test="${not empty r.staffResponse}">
                                             <div class="mt-2 p-2 bg-light border-start border-3 border-primary rounded">
@@ -247,7 +250,7 @@
                     <div class="mb-3">
                         <span class="text-muted" style="font-size: 0.9rem;">Price starts from</span>
                         <h2 class="fw-extrabold text-primary mb-0">
-                            <fmt:formatNumber value="${tour.basePrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                            <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>
                         </h2>
                     </div>
                     
@@ -269,11 +272,11 @@
                                     </div>
                                 </c:when>
                                 <c:otherwise>
-                                    <select class="form-select custom-select" id="departureDate" name="scheduleId" required onchange="calculateTotalPrice()">
+                                    <select class="form-select custom-select" id="departureDate" name="scheduleId" required onchange="updateMaxSlots(); calculateTotalPrice()">
                                         <c:forEach var="sch" items="${tour.schedules}">
-                                            <option value="${sch.scheduleId}" data-price="${sch.price}">
+                                            <option value="${sch.scheduleId}" data-price="${sch.price}" data-available="${sch.availableSlots}">
                                                 <fmt:formatDate value="${sch.departureDate}" pattern="dd/MM/yyyy"/> 
-                                                (Price: <fmt:formatNumber value="${sch.price}" type="currency" currencySymbol="đ" maxFractionDigits="0"/> - ${sch.availableSlots} seats left)
+                                                - <fmt:formatNumber value="${sch.price}" pattern="#,##0 ₫"/> (${sch.availableSlots} left)
                                             </option>
                                         </c:forEach>
                                     </select>
@@ -285,7 +288,11 @@
                             <label for="numberOfPeople" class="form-label fw-bold text-main">
                                 <i class="fa-solid fa-users me-1 text-primary"></i>Number of Travelers
                             </label>
-                            <input type="number" class="form-control custom-select" id="numberOfPeople" name="numberOfPeople" min="1" value="1" required onchange="calculateTotalPrice()" onkeyup="calculateTotalPrice()">
+                            <div class="input-group" style="max-width: 150px;">
+                                <button class="btn btn-outline-primary" type="button" onclick="decrementTravelers()"><i class="fa-solid fa-minus"></i></button>
+                                <input type="number" class="form-control text-center fw-bold text-primary" id="numberOfPeople" name="numberOfPeople" min="1" value="1" required style="background-color: white;" oninput="updateMaxSlots(); calculateTotalPrice()" onblur="if(this.value==='' || parseInt(this.value)<1) { this.value=1; calculateTotalPrice(); }">
+                                <button class="btn btn-outline-primary" type="button" onclick="incrementTravelers()"><i class="fa-solid fa-plus"></i></button>
+                            </div>
                         </div>
 
                         <div class="mb-3 p-3 bg-light rounded border border-primary-subtle">
@@ -363,6 +370,45 @@
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
     <script>
+        function updateMaxSlots() {
+            const selectElement = document.getElementById("departureDate");
+            if (!selectElement || selectElement.options.length === 0) return;
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const max = parseInt(selectedOption.getAttribute("data-available") || 1);
+            const input = document.getElementById("numberOfPeople");
+            
+            if (input.value === "") return; // Allow empty while typing
+            
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) {
+                // We don't force 1 on input to allow typing, handled on blur
+            } else if (val > max) {
+                input.value = max;
+            }
+        }
+        
+        function incrementTravelers() {
+            const input = document.getElementById("numberOfPeople");
+            const selectElement = document.getElementById("departureDate");
+            if (!selectElement || selectElement.options.length === 0) return;
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const max = parseInt(selectedOption.getAttribute("data-available") || 1);
+            let val = parseInt(input.value || 1);
+            if (val < max) {
+                input.value = val + 1;
+                calculateTotalPrice();
+            }
+        }
+        
+        function decrementTravelers() {
+            const input = document.getElementById("numberOfPeople");
+            let val = parseInt(input.value || 1);
+            if (val > 1) {
+                input.value = val - 1;
+                calculateTotalPrice();
+            }
+        }
+
         function calculateTotalPrice() {
             const selectElement = document.getElementById("departureDate");
             if (!selectElement || selectElement.options.length === 0) return;

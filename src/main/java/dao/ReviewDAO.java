@@ -211,7 +211,7 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, a.full_name AS customer_name, t.tour_name " +
+        String sql = "SELECT r.*, a.full_name AS customer_name, t.tour_name, s.departure_date " +
                      "FROM Review r " +
                      "JOIN Account a ON r.customer_id = a.account_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
@@ -233,6 +233,7 @@ public class ReviewDAO {
                     r.setCreatedAt(rs.getTimestamp("created_at"));
                     r.setCustomerName(rs.getString("customer_name"));
                     r.setTourName(rs.getString("tour_name"));
+                    r.setDepartureDate(rs.getDate("departure_date"));
                     list.add(r);
                 }
             }
@@ -310,7 +311,7 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, a.full_name AS customer_name " +
+        String sql = "SELECT r.*, a.full_name AS customer_name, s.departure_date " +
                      "FROM Review r " +
                      "JOIN Account a ON r.customer_id = a.account_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
@@ -332,6 +333,7 @@ public class ReviewDAO {
                     r.setStatus(rs.getString("status"));
                     r.setCreatedAt(rs.getTimestamp("created_at"));
                     r.setCustomerName(rs.getString("customer_name"));
+                    r.setDepartureDate(rs.getDate("departure_date"));
                     list.add(r);
                 }
             }

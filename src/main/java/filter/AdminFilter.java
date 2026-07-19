@@ -32,10 +32,23 @@ public class AdminFilter implements Filter {
         if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
             // Not logged in or not admin/staff -> redirect to login page
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
-        } else {
-            // Authorized -> proceed
-            chain.doFilter(request, response);
+            return;
         }
+        
+        if ("Staff".equalsIgnoreCase(user.getRole())) {
+            String uri = httpRequest.getRequestURI();
+            // Allow /admin/staff/* and /admin/schedules (for the redirect filter)
+            if (uri.contains("/admin/staff/") || uri.endsWith("/admin/schedules")) {
+                chain.doFilter(request, response);
+                return;
+            } else {
+                httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin/staff/schedules");
+                return;
+            }
+        }
+
+        // Authorized Admin -> proceed
+        chain.doFilter(request, response);
     }
 
     @Override

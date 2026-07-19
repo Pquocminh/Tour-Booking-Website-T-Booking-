@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -55,6 +55,7 @@
                                             <div class="fw-bold text-primary mb-1">${r.customerName}</div>
                                             <div class="text-muted small"><i class="fa-solid fa-map-location-dot me-1"></i>${r.tourName}</div>
                                             <div class="text-muted small"><i class="fa-solid fa-hashtag me-1"></i>Booking #${r.bookingId}</div>
+                                            <div class="text-muted small mt-1 border-top pt-1"><i class="fa-solid fa-plane-departure me-1"></i>Departure: <strong><fmt:formatDate value="${r.departureDate}" pattern="dd/MM/yyyy"/></strong></div>
                                         </td>
                                         <td>
                                             <div class="star-rating">

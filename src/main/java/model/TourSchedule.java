@@ -11,6 +11,8 @@ public class TourSchedule {
     private int availableSlots;
     private String status;
     private String tourName;
+    private Integer assignedStaffId;
+    private String assignedStaffName;
 
 
     public TourSchedule() {
@@ -98,5 +100,21 @@ public class TourSchedule {
 
     public void setTourName(String tourName) {
         this.tourName = tourName;
+    }
+
+    public Integer getAssignedStaffId() {
+        return assignedStaffId;
+    }
+
+    public void setAssignedStaffId(Integer assignedStaffId) {
+        this.assignedStaffId = assignedStaffId;
+    }
+
+    public String getAssignedStaffName() {
+        return assignedStaffName;
+    }
+
+    public void setAssignedStaffName(String assignedStaffName) {
+        this.assignedStaffName = assignedStaffName;
     }
 }

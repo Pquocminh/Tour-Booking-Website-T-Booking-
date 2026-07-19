@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -73,21 +73,28 @@
                                     </td>
                                     <td>${b.numberOfPeople}</td>
                                     <td>
-                                        <fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/>
+                                        <fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/>
                                     </td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${b.status == 'Pending'}">
-                                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Pending</span>
-                                            </c:when>
-                                            <c:when test="${b.status == 'Confirmed'}">
-                                                <span class="badge bg-success px-3 py-2 rounded-pill">Confirmed</span>
-                                            </c:when>
                                             <c:when test="${b.status == 'Cancelled'}">
                                                 <span class="badge bg-danger px-3 py-2 rounded-pill">Cancelled</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="badge bg-secondary px-3 py-2 rounded-pill">${b.status}</span>
+                                                <form action="${pageContext.request.contextPath}/admin/bookings" method="post" class="m-0 p-0">
+                                                    <input type="hidden" name="action" value="updateStatus">
+                                                    <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                                    <select name="status" class="form-select form-select-sm fw-bold rounded-pill text-center border-0" 
+                                                        onchange="this.form.submit()" 
+                                                        style="cursor: pointer; box-shadow: none; width: 130px; display: inline-block;
+                                                        ${b.status == 'Pending' ? 'background-color: #fff3cd; color: #856404;' : 
+                                                          b.status == 'Confirmed' ? 'background-color: #d1e7dd; color: #0f5132;' : 
+                                                          'background-color: #e2e3e5; color: #41464b;'}">
+                                                        <option value="Pending" style="background-color: white; color: black;" ${b.status == 'Pending' ? 'selected' : ''}>Pending</option>
+                                                        <option value="Confirmed" style="background-color: white; color: black;" ${b.status == 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                                        <option value="Completed" style="background-color: white; color: black;" ${b.status == 'Completed' ? 'selected' : ''}>Completed</option>
+                                                    </select>
+                                                </form>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
@@ -95,9 +102,6 @@
                                         <c:if test="${b.status != 'Cancelled'}">
                                             <button class="btn btn-sm btn-outline-danger rounded-circle me-1" title="Cancel Booking" data-bs-toggle="modal" data-bs-target="#cancelModal${b.bookingId}">
                                                 <i class="fa-solid fa-ban"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Update Status" data-bs-toggle="modal" data-bs-target="#updateStatusModal${b.bookingId}">
-                                                <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
                                         </c:if>
                                         <button class="btn btn-sm btn-outline-info rounded-circle me-1" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
@@ -138,8 +142,8 @@
                                                     <!-- Payment Info -->
                                                     <div class="col-md-6">
                                                         <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Payment & Status</h6>
-                                                        <div class="mb-2"><strong>Total Price:</strong> <span class="fw-bold text-success"><fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
-                                                        <div class="mb-2"><strong>Deposit Paid:</strong> <fmt:formatNumber value="${b.depositAmount}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></div>
+                                                        <div class="mb-2"><strong>Total Price:</strong> <span class="fw-bold text-success"><fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/></span></div>
+                                                        <div class="mb-2"><strong>Deposit Paid:</strong> <fmt:formatNumber value="${b.depositAmount}" pattern="#,##0 ₫"/></div>
                                                         <div class="mb-2"><strong>Status:</strong> ${b.status}</div>
                                                     </div>
                                                 </div>
@@ -152,41 +156,7 @@
                                 </div>
                                 <!-- End View Details Modal -->
                                 
-                                <!-- Update Status Modal -->
-                                <div class="modal fade" id="updateStatusModal${b.bookingId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header border-0 pb-0">
-                                                <h5 class="modal-title fw-bold">Update Status for Booking #${b.bookingId}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="${pageContext.request.contextPath}/admin/bookings" method="post">
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="action" value="updateStatus">
-                                                    <input type="hidden" name="bookingId" value="${b.bookingId}">
-                                                    
-                                                    <div class="mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">Current Status</label>
-                                                        <input type="text" class="form-control bg-light border-0" value="${b.status}" readonly>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">New Status</label>
-                                                        <select name="status" class="form-select border-0 bg-light" required>
-                                                            <option value="Pending" ${b.status == 'Pending' ? 'selected' : ''}>Pending</option>
-                                                            <option value="Confirmed" ${b.status == 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                                            <option value="Completed" ${b.status == 'Completed' ? 'selected' : ''}>Completed</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0 pt-0">
-                                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
-                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End Modal -->
+                                <!-- Removed Update Status Modal -->
                                 
                                 <!-- Cancel Booking Modal -->
                                 <c:if test="${b.status != 'Cancelled'}">
