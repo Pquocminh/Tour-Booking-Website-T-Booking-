@@ -74,7 +74,10 @@ public class DashboardDAO extends DBContext {
 
     public List<Booking> getRecentBookings(int limit) {
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT * FROM Booking ORDER BY booking_date DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT b.*, bv.voucher_id " +
+                     "FROM Booking b " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
+                     "ORDER BY b.booking_date DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              

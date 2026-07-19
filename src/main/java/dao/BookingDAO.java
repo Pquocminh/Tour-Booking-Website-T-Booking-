@@ -12,8 +12,9 @@ import java.util.List;
 public class BookingDAO extends DBContext {
 
     public boolean insertBooking(Booking booking) {
-        String insertBookingSql = "INSERT INTO Booking (customer_id, schedule_id, voucher_id, booking_date, number_of_people, contact_name, contact_phone, total_price, deposit_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertBookingSql = "INSERT INTO Booking (customer_id, schedule_id, booking_date, number_of_people, contact_name, contact_phone, total_price, deposit_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String updateScheduleSql = "UPDATE TourSchedule SET available_slots = available_slots - ? WHERE schedule_id = ? AND available_slots >= ?";
+        String insertBookingVoucherSql = "INSERT INTO BookingVoucher (booking_id, voucher_id) VALUES (?, ?)";
 
         Connection connection = null;
         try {
@@ -38,18 +39,13 @@ public class BookingDAO extends DBContext {
             try (PreparedStatement psInsert = connection.prepareStatement(insertBookingSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 psInsert.setInt(1, booking.getCustomerId());
                 psInsert.setInt(2, booking.getScheduleId());
-                if (booking.getVoucherId() != null) {
-                    psInsert.setInt(3, booking.getVoucherId());
-                } else {
-                    psInsert.setNull(3, java.sql.Types.INTEGER);
-                }
-                psInsert.setTimestamp(4, new java.sql.Timestamp(System.currentTimeMillis()));
-                psInsert.setInt(5, booking.getNumberOfPeople());
-                psInsert.setString(6, booking.getContactName());
-                psInsert.setString(7, booking.getContactPhone());
-                psInsert.setDouble(8, booking.getTotalPrice());
-                psInsert.setDouble(9, booking.getDepositAmount());
-                psInsert.setString(10, booking.getStatus());
+                psInsert.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+                psInsert.setInt(4, booking.getNumberOfPeople());
+                psInsert.setString(5, booking.getContactName());
+                psInsert.setString(6, booking.getContactPhone());
+                psInsert.setDouble(7, booking.getTotalPrice());
+                psInsert.setDouble(8, booking.getDepositAmount());
+                psInsert.setString(9, booking.getStatus());
                 
                 int rowsInserted = psInsert.executeUpdate();
                 if (rowsInserted > 0) {
@@ -58,6 +54,16 @@ public class BookingDAO extends DBContext {
                             booking.setBookingId(generatedKeys.getInt(1));
                         }
                     }
+                    
+                    // 3. Insert BookingVoucher link if voucher is applied
+                    if (booking.getVoucherId() != null) {
+                        try (PreparedStatement psVoucher = connection.prepareStatement(insertBookingVoucherSql)) {
+                            psVoucher.setInt(1, booking.getBookingId());
+                            psVoucher.setInt(2, booking.getVoucherId());
+                            psVoucher.executeUpdate();
+                        }
+                    }
+                    
                     connection.commit();
                     return true;
                 } else {
@@ -89,11 +95,12 @@ public class BookingDAO extends DBContext {
 
     public List<Booking> getAllBookings() {
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, t.tour_name, ts.departure_date, c.username AS customer_username, c.email AS customer_email " +
+        String sql = "SELECT b.*, bv.voucher_id, t.tour_name, ts.departure_date, c.username AS customer_username, c.email AS customer_email " +
                      "FROM Booking b " +
                      "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
                      "JOIN Tour t ON ts.tour_id = t.tour_id " +
                      "LEFT JOIN Customer c ON b.customer_id = c.customer_id " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
                      "ORDER BY b.booking_date DESC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -129,7 +136,7 @@ public class BookingDAO extends DBContext {
     }
 
     public Booking getBookingById(int bookingId) {
-        String sql = "SELECT * FROM Booking WHERE booking_id = ?";
+        String sql = "SELECT b.*, bv.voucher_id FROM Booking b LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id WHERE b.booking_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, bookingId);
@@ -235,10 +242,11 @@ public class BookingDAO extends DBContext {
 
     public List<Booking> getBookingsByCustomerId(int customerId) {
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, t.tour_name, ts.departure_date " +
+        String sql = "SELECT b.*, bv.voucher_id, t.tour_name, ts.departure_date " +
                      "FROM Booking b " +
                      "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
                      "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
                      "WHERE b.customer_id = ? " +
                      "ORDER BY b.booking_date DESC";
         try (Connection conn = getConnection();
@@ -318,10 +326,11 @@ public class BookingDAO extends DBContext {
     }
 
     public Booking getBookingDetails(int bookingId) {
-        String sql = "SELECT b.*, t.tour_name, ts.departure_date " +
+        String sql = "SELECT b.*, bv.voucher_id, t.tour_name, ts.departure_date " +
                      "FROM Booking b " +
                      "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
                      "JOIN Tour t ON ts.tour_id = t.tour_id " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
                      "WHERE b.booking_id = ?";
         Connection conn = null;
         try {
@@ -368,16 +377,56 @@ public class BookingDAO extends DBContext {
     }
 
     public boolean applyVoucherToBooking(int bookingId, int voucherId, double newTotalPrice, double newDepositAmount) {
-        String sql = "UPDATE Booking SET voucher_id = ?, total_price = ?, deposit_amount = ? WHERE booking_id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, voucherId);
-            ps.setDouble(2, newTotalPrice);
-            ps.setDouble(3, newDepositAmount);
-            ps.setInt(4, bookingId);
-            return ps.executeUpdate() > 0;
+        String updateBookingSql = "UPDATE Booking SET total_price = ?, deposit_amount = ? WHERE booking_id = ?";
+        String deleteOldVoucherSql = "DELETE FROM BookingVoucher WHERE booking_id = ?";
+        String insertNewVoucherSql = "INSERT INTO BookingVoucher (booking_id, voucher_id) VALUES (?, ?)";
+        
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+            
+            // 1. Update Booking
+            try (PreparedStatement psUpdate = conn.prepareStatement(updateBookingSql)) {
+                psUpdate.setDouble(1, newTotalPrice);
+                psUpdate.setDouble(2, newDepositAmount);
+                psUpdate.setInt(3, bookingId);
+                psUpdate.executeUpdate();
+            }
+            
+            // 2. Delete old voucher association if exists
+            try (PreparedStatement psDelete = conn.prepareStatement(deleteOldVoucherSql)) {
+                psDelete.setInt(1, bookingId);
+                psDelete.executeUpdate();
+            }
+            
+            // 3. Insert new voucher association
+            try (PreparedStatement psInsert = conn.prepareStatement(insertNewVoucherSql)) {
+                psInsert.setInt(1, bookingId);
+                psInsert.setInt(2, voucherId);
+                psInsert.executeUpdate();
+            }
+            
+            conn.commit();
+            return true;
         } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return false;
     }

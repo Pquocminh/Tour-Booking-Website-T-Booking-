@@ -67,8 +67,9 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT b.*, s.departure_date, t.tour_name " +
+        String sql = "SELECT b.*, bv.voucher_id, s.departure_date, t.tour_name " +
                      "FROM Booking b " +
+                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "JOIN Tour t ON s.tour_id = t.tour_id " +
                      "LEFT JOIN Review r ON b.booking_id = r.booking_id " +
