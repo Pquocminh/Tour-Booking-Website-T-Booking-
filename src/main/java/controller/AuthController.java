@@ -23,7 +23,10 @@ import java.util.Properties;
 import java.util.Random;
 
 import model.Account;
-import dao.AccountDAO;
+import dao.CustomerDAO;
+import dao.EmployeeDAO;
+import model.Customer;
+import model.Employee;
 import utils.PasswordUtils;
 
 @WebServlet(name = "AuthController", urlPatterns = {
@@ -31,7 +34,14 @@ import utils.PasswordUtils;
     "/forgot-password", "/verify-otp", "/reset-password"
 })
 public class AuthController extends HttpServlet {
-    private final AccountDAO accountDAO = new AccountDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
+
+    private Account getAccountByEmail(String email) {
+        Account acc = employeeDAO.getAccountByEmail(email);
+        if (acc == null) acc = customerDAO.getAccountByEmail(email);
+        return acc;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -85,7 +95,8 @@ public class AuthController extends HttpServlet {
         Account acc = null;
         if (username != null && pass != null) {
             String hashedPassword = PasswordUtils.hashMD5(pass);
-            acc = accountDAO.checkLogin(username.trim(), hashedPassword);
+            acc = employeeDAO.checkLogin(username.trim(), hashedPassword);
+            if (acc == null) acc = customerDAO.checkLogin(username.trim(), hashedPassword);
         }
         if (acc != null) {
             HttpSession session = request.getSession();
@@ -136,7 +147,7 @@ public class AuthController extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        Account acc = new Account();
+        Customer acc = new Customer();
         acc.setFullName(fullName);
         acc.setEmail(email);
         acc.setPhone(phone);
@@ -149,16 +160,16 @@ public class AuthController extends HttpServlet {
                 result = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.";
             } else if (!password.equals(confirmPassword)) {
                 result = "Passwords do not match!";
-            } else if (accountDAO.checkUsernameExists(username)) {
+            } else if (customerDAO.checkUsernameExists(username) || employeeDAO.checkUsernameExists(username)) {
                 result = "Username is already taken!";
-            } else if (accountDAO.getAccountByEmail(email) != null) {
+            } else if (getAccountByEmail(email) != null) {
                 result = "Email is already registered!";
             } else {
                 String hashedPassword = PasswordUtils.hashMD5(password);
                 acc.setPasswordHash(hashedPassword);
                 acc.setRole("Customer");
                 acc.setStatus("Active");
-                boolean success = accountDAO.insertAccount(acc);
+                boolean success = customerDAO.insertAccount(acc);
                 if (success) {
                     result = "success";
                 }
@@ -185,9 +196,9 @@ public class AuthController extends HttpServlet {
         if (googleUser != null && "true".equalsIgnoreCase(googleUser.email_verified)) {
             Account acc = null;
             if (googleUser.email != null) {
-                acc = accountDAO.getAccountByEmail(googleUser.email);
+                acc = getAccountByEmail(googleUser.email);
                 if (acc == null) {
-                    Account newAcc = new Account();
+                    Customer newAcc = new Customer();
                     newAcc.setEmail(googleUser.email);
                     newAcc.setFullName(googleUser.name);
                     String randomUser = "user_" + System.currentTimeMillis();
@@ -196,8 +207,8 @@ public class AuthController extends HttpServlet {
                     newAcc.setPasswordHash(randomPass);
                     newAcc.setRole("Customer");
                     newAcc.setStatus("Active");
-                    if (accountDAO.insertAccount(newAcc)) {
-                        acc = accountDAO.getAccountByEmail(googleUser.email);
+                    if (customerDAO.insertAccount(newAcc)) {
+                        acc = getAccountByEmail(googleUser.email);
                     }
                 } else if ("Suspended".equalsIgnoreCase(acc.getStatus())) {
                     acc = null;
@@ -267,7 +278,7 @@ public class AuthController extends HttpServlet {
         }
 
         email = email.trim();
-        Account acc = accountDAO.getAccountByEmail(email);
+        Account acc = getAccountByEmail(email);
         if (acc == null) {
             request.setAttribute("error", "This email address is not registered!");
             request.getRequestDispatcher("/WEB-INF/views/auth/forgot-password.jsp").forward(request, response);
@@ -381,9 +392,13 @@ public class AuthController extends HttpServlet {
         boolean success = false;
         if (email != null && password != null) {
             String hashedPassword = PasswordUtils.hashMD5(password);
-            Account acc = accountDAO.getAccountByEmail(email);
+            Account acc = getAccountByEmail(email);
             if (acc != null) {
-                success = accountDAO.updatePasswordById(acc.getAccountId(), hashedPassword);
+                if (acc instanceof Employee) {
+                    success = employeeDAO.updatePasswordById(acc.getAccountId(), hashedPassword);
+                } else {
+                    success = customerDAO.updatePasswordById(acc.getAccountId(), hashedPassword);
+                }
             }
         }
         if (success) {

@@ -19,7 +19,8 @@ import model.Booking;
 import model.Account;
 import model.Review;
 import dao.TourDAO;
-import dao.AccountDAO;
+import dao.CustomerDAO;
+import dao.EmployeeDAO;
 import dao.ReviewDAO;
 import com.google.gson.Gson;
 
@@ -81,8 +82,8 @@ public class StaffController extends HttpServlet {
         List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
         request.setAttribute("schedules", schedules);
 
-        dao.AccountDAO accountDAO = new dao.AccountDAO();
-        List<model.Account> staffList = accountDAO.getAllAccounts(null, "Staff", "Active");
+        dao.EmployeeDAO employeeDAO = new dao.EmployeeDAO();
+        List<model.Employee> staffList = employeeDAO.getAllAccounts(null, "Staff", "Active");
         request.setAttribute("staffList", staffList);
 
         request.getRequestDispatcher("/WEB-INF/views/staff/schedules.jsp").forward(request, response);
@@ -311,8 +312,8 @@ public class StaffController extends HttpServlet {
                 return;
             }
             
-            AccountDAO accountDAO = new AccountDAO();
-            Account customer = accountDAO.getAccountByUsernameOrEmail(customerIdentifier.trim());
+            CustomerDAO customerDAO = new CustomerDAO();
+            Account customer = customerDAO.getAccountByUsernameOrEmail(customerIdentifier.trim());
             
             if (customer == null) {
                 request.getSession().setAttribute("errorMessage", "Customer account with username or email '" + customerIdentifier + "' not found! Please check and try again.");

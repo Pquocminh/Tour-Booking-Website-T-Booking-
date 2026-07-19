@@ -1,25 +1,9 @@
+﻿CREATE DATABASE BookingTourWebsite;
+GO
+
 USE BookingTourWebsite;
 GO
 
-DROP TABLE IF EXISTS BookingStatusHistory;
-DROP TABLE IF EXISTS BookingVoucher;
-DROP TABLE IF EXISTS Payment;
-DROP TABLE IF EXISTS Review;
-DROP TABLE IF EXISTS Wishlist;
-DROP TABLE IF EXISTS Booking;
-DROP TABLE IF EXISTS TourPromotion;
-DROP TABLE IF EXISTS Promotion;
-DROP TABLE IF EXISTS Voucher;
-DROP TABLE IF EXISTS TourSchedule;
-DROP TABLE IF EXISTS Itinerary;
-DROP TABLE IF EXISTS TourImage;
-DROP TABLE IF EXISTS Tour;
-DROP TABLE IF EXISTS Destination;
-DROP TABLE IF EXISTS Category;
-DROP TABLE IF EXISTS Customer;
-DROP TABLE IF EXISTS Employee;
-DROP TABLE IF EXISTS Account;
-GO
 CREATE TABLE Customer (
     customer_id INT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -266,8 +250,8 @@ GO
 -- 7. Insert Data for Itinerary
 INSERT INTO Itinerary (tour_id, day_number, title, description)
 VALUES 
-(1, 1, 'Can Tho - Ha Tien - Thach Dong Cave', 'Morning: Ride out from Can Tho. Afternoon: Discover Thạch Động cave and enjoy the scenic coastal sunset.'),
-(1, 2, 'Da Dung Mountain Trek - Return to Can Tho', 'Morning: Explore the 14 historical caves inside Đá Dựng Mountain. Afternoon: Ride back to Can Tho, tour ends.'),
+(1, 1, 'Can Tho - Ha Tien - Thach Dong Cave', 'Morning: Ride out from Can Tho. Afternoon: Discover Tháº¡ch Äá»™ng cave and enjoy the scenic coastal sunset.'),
+(1, 2, 'Da Dung Mountain Trek - Return to Can Tho', 'Morning: Explore the 14 historical caves inside ÄĂ¡ Dá»±ng Mountain. Afternoon: Ride back to Can Tho, tour ends.'),
 (2, 1, 'HCMC - Bangkok Arrival', 'Midday flight to Suvarnabhumi Airport. Check-in at the hotel and evening welcome dinner.'),
 (2, 2, 'University Campus Exchange', 'Visit and engage in academic workshops with international students at Kasem Bundit University.'),
 (3, 1, 'Tech Industry Exploration', 'Travel to HCMC, tour active tech workspace environments, and join a seminar on Agile/Scrum application.');

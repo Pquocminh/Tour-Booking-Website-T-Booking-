@@ -83,8 +83,27 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-custom table-hover align-middle">
+        
+        <!-- Tabs Nav -->
+        <ul class="nav nav-tabs mb-4" id="accountTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="true">
+                    <i class="fa-solid fa-user-tie me-2"></i>Managers / Staff
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab" aria-controls="customers" aria-selected="false">
+                    <i class="fa-solid fa-users me-2"></i>Customers
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tabs Content -->
+        <div class="tab-content" id="accountTabsContent">
+            <!-- Employees Tab -->
+            <div class="tab-pane fade show active" id="employees" role="tabpanel" aria-labelledby="employees-tab">
+                <div class="table-responsive">
+<table class="table table-custom table-hover align-middle">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 70px;">Avatar</th>
@@ -110,6 +129,7 @@
                         </c:when>
                         <c:otherwise>
                             <c:forEach var="acc" items="${accounts}">
+                                <c:if test="${'Admin'.equalsIgnoreCase(acc.role) || 'Staff'.equalsIgnoreCase(acc.role)}">
                                 <tr>
                                     <td>
                                         <img src="https://ui-avatars.com/api/?name=${acc.username}&background=random&size=128" 
@@ -193,12 +213,138 @@
                                         </div>
                                     </td>
                                 </tr>
+                            </c:if>
                             </c:forEach>
                         </c:otherwise>
                     </c:choose>
                 </tbody>
             </table>
+                </div>
+            </div>
+
+            <!-- Customers Tab -->
+            <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+                <div class="table-responsive">
+<table class="table table-custom table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 70px;">Avatar</th>
+                        <th>Account ID & Username</th>
+                        <th>Full Name</th>
+                        <th>Email & Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th style="width: 150px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <c:choose>
+                        <c:when test="${empty accounts}">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
+                                    No accounts found matching the selected search criteria.
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="acc" items="${accounts}">
+                                <c:if test="${'Customer'.equalsIgnoreCase(acc.role)}">
+                                <tr>
+                                    <td>
+                                        <img src="https://ui-avatars.com/api/?name=${acc.username}&background=random&size=128" 
+                                             alt="User Avatar" 
+                                             class="user-avatar">
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small d-block">ID: #${acc.accountId}</span>
+                                        <span class="fw-semibold text-dark d-block">${acc.username}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark d-block">${acc.fullName}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small d-block"><i class="fa-regular fa-envelope me-1"></i>${acc.email}</span>
+                                        <c:if test="${not empty acc.phone}">
+                                            <span class="text-muted small d-block"><i class="fa-solid fa-phone me-1"></i>${acc.phone}</span>
+                                        </c:if>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${'Admin'.equalsIgnoreCase(acc.role)}">
+                                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>
+                                            </c:when>
+                                            <c:when test="${'Staff'.equalsIgnoreCase(acc.role)}">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2 rounded-pill"><i class="fa-solid fa-user-tie me-1"></i>Staff</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-info-subtle text-info border border-info px-3 py-2 rounded-pill"><i class="fa-solid fa-user me-1"></i>Customer</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${'Active'.equalsIgnoreCase(acc.status)}">
+                                                <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-check me-1"></i>Active</span>
+                                            </c:when>
+                                            <c:when test="${'Inactive'.equalsIgnoreCase(acc.status)}">
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill"><i class="fa-solid fa-circle-pause me-1"></i>Inactive</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-ban me-1"></i>${acc.status}</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small d-block">
+                                            <fmt:formatDate value="${acc.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}" 
+                                               class="btn btn-outline-primary btn-sm rounded-pill" title="View Profile">
+                                                <i class="fa-regular fa-eye"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning btn-sm rounded-pill edit-btn" 
+                                                    title="Edit Account"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editAccountModal"
+                                                    data-id="${acc.accountId}"
+                                                    data-username="${acc.username}"
+                                                    data-fullname="${acc.fullName}"
+                                                    data-email="${acc.email}"
+                                                    data-phone="${acc.phone}"
+                                                    data-address="${acc.address}"
+                                                    data-role="${acc.role}"
+                                                    data-status="${acc.status}">
+                                                <i class="fa-regular fa-pen-to-square"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm rounded-pill delete-btn" 
+                                                    title="Delete Account"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteAccountModal"
+                                                    data-id="${acc.accountId}"
+                                                    data-username="${acc.username}">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:if>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                </tbody>
+            </table>
+                </div>
+            </div>
         </div>
+
     </section>
 </div>
 

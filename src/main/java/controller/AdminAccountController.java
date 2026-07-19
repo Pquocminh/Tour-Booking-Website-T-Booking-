@@ -10,11 +10,15 @@ import java.io.IOException;
 import java.util.List;
 
 import model.Account;
-import dao.AccountDAO;
+import dao.CustomerDAO;
+import dao.EmployeeDAO;
+import model.Customer;
+import model.Employee;
 
 @WebServlet(name = "AdminAccountController", urlPatterns = {"/admin/accounts"})
 public class AdminAccountController extends HttpServlet {
-    private final AccountDAO accountDAO = new AccountDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,7 +49,13 @@ public class AdminAccountController extends HttpServlet {
             status = "All";
         }
 
-        List<Account> accounts = accountDAO.getAllAccounts(search, role, status);
+        List<Account> accounts = new java.util.ArrayList<>();
+        if (role == null || role.equals("All") || role.equals("Customer")) {
+            accounts.addAll(customerDAO.getAllAccounts(search, status));
+        }
+        if (role == null || role.equals("All") || role.equals("Admin") || role.equals("Staff")) {
+            accounts.addAll(employeeDAO.getAllAccounts(search, role.equals("All") ? null : role, status));
+        }
 
         request.setAttribute("accounts", accounts);
         request.setAttribute("searchKeyword", search);
@@ -83,7 +93,8 @@ public class AdminAccountController extends HttpServlet {
 
         // 1.1.3. getParameter("id")
         String idStr = request.getParameter("id");
-        if (idStr == null || idStr.trim().isEmpty()) {
+        String role = request.getParameter("role");
+        if (idStr == null || idStr.trim().isEmpty() || role == null || role.trim().isEmpty()) {
             // alt id is invalid/empty -> 5. Redirect to /admin/accounts (invalid ID message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -94,7 +105,7 @@ public class AdminAccountController extends HttpServlet {
             int id = Integer.parseInt(idStr);
             
             // 1.1.4. getAccountById(id)
-            Account account = accountDAO.getAccountById(id);
+            Account account = ("Customer".equalsIgnoreCase(role) ? customerDAO.getAccountById(id) : employeeDAO.getAccountById(id));
             
             // alt account != null
             if (account != null) {
@@ -155,9 +166,9 @@ public class AdminAccountController extends HttpServlet {
         String fullName = request.getParameter("fullName");
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
-        String role = request.getParameter("role");
         String status = request.getParameter("status");
         String password = request.getParameter("password");
+        String role = request.getParameter("role");
 
         // Input validation
         if (username == null || username.trim().isEmpty() ||
@@ -171,14 +182,14 @@ public class AdminAccountController extends HttpServlet {
         }
 
         // Check if username already exists
-        if (accountDAO.getAccountByUsernameOrEmail(username) != null) {
+        if ((customerDAO.getAccountByUsernameOrEmail(username) != null || employeeDAO.getAccountByUsernameOrEmail(username) != null)) {
             session.setAttribute("errorMessage", "Username is already taken.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
         }
 
         // Check if email already exists
-        if (accountDAO.getAccountByEmail(email) != null) {
+        if ((customerDAO.getAccountByEmail(email) != null ? customerDAO.getAccountByEmail(email) : employeeDAO.getAccountByEmail(email)) != null) {
             session.setAttribute("errorMessage", "Email is already in use.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
@@ -187,7 +198,7 @@ public class AdminAccountController extends HttpServlet {
         // Encrypt password using utils.PasswordUtils
         String passwordHash = utils.PasswordUtils.hashMD5(password);
 
-        Account acc = new Account();
+        Account acc = "Customer".equalsIgnoreCase(role) ? new Customer() : new Employee();
         acc.setUsername(username.trim());
         acc.setPasswordHash(passwordHash);
         acc.setEmail(email.trim());
@@ -198,7 +209,12 @@ public class AdminAccountController extends HttpServlet {
         acc.setStatus(status.trim());
         acc.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
 
-        boolean success = accountDAO.insertAccount(acc);
+        boolean success;
+            if (acc instanceof Employee) {
+                success = employeeDAO.insertAccount((Employee)acc);
+            } else {
+                success = customerDAO.insertAccount((Customer)acc);
+            }
         if (success) {
             session.setAttribute("successMessage", "Account created successfully.");
         } else {
@@ -237,11 +253,11 @@ public class AdminAccountController extends HttpServlet {
 
         // 1.1.3. Get and validate parameters
         String idStr = request.getParameter("id");
+        String role = request.getParameter("role");
         String email = request.getParameter("email");
         String fullName = request.getParameter("fullName");
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
-        String role = request.getParameter("role");
         String status = request.getParameter("status");
 
         if (idStr == null || idStr.trim().isEmpty() ||
@@ -256,7 +272,12 @@ public class AdminAccountController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idStr);
-            Account existingAcc = accountDAO.getAccountById(id);
+            Account existingAcc = null;
+            if ("Customer".equalsIgnoreCase(role)) {
+                existingAcc = customerDAO.getAccountById(id);
+            } else {
+                existingAcc = employeeDAO.getAccountById(id);
+            }
             if (existingAcc == null) {
                 session.setAttribute("errorMessage", "Account not found.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -264,7 +285,7 @@ public class AdminAccountController extends HttpServlet {
             }
 
             // Check if email belongs to someone else
-            if (accountDAO.checkEmailExistsForOtherAccount(email, id)) {
+            if (("Customer".equalsIgnoreCase(role) ? customerDAO.checkEmailExistsForOtherAccount(email, id) : employeeDAO.checkEmailExistsForOtherAccount(email, id))) {
                 session.setAttribute("errorMessage", "Email is already in use by another account.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
                 return;
@@ -274,11 +295,12 @@ public class AdminAccountController extends HttpServlet {
             String password = request.getParameter("password");
             if (password != null && !password.trim().isEmpty()) {
                 String passwordHash = utils.PasswordUtils.hashMD5(password);
-                accountDAO.updatePasswordById(id, passwordHash);
+                if ("Customer".equalsIgnoreCase(role)) customerDAO.updatePasswordById(id, passwordHash);
+                else employeeDAO.updatePasswordById(id, passwordHash);
             }
 
             // inputs valid -> Construct Account object
-            Account acc = new Account();
+            Account acc = "Customer".equalsIgnoreCase(role) ? new Customer() : new Employee();
             acc.setAccountId(id);
             acc.setEmail(email.trim());
             acc.setFullName(fullName != null ? fullName.trim() : "");
@@ -288,7 +310,7 @@ public class AdminAccountController extends HttpServlet {
             acc.setStatus(status.trim());
 
             // 1.1.4. updateAccount(acc)
-            boolean success = accountDAO.updateAccount(acc);
+            boolean success = acc instanceof Employee ? employeeDAO.updateAccount((Employee)acc) : customerDAO.updateAccount((model.Customer)acc);
             
             // alt success == true
             if (success) {
@@ -335,7 +357,8 @@ public class AdminAccountController extends HttpServlet {
 
         // 1.1.3. Get and validate id parameter
         String idStr = request.getParameter("id");
-        if (idStr == null || idStr.trim().isEmpty()) {
+        String role = request.getParameter("role");
+        if (idStr == null || idStr.trim().isEmpty() || role == null || role.trim().isEmpty()) {
             // alt id invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -346,7 +369,12 @@ public class AdminAccountController extends HttpServlet {
             int id = Integer.parseInt(idStr);
             
             // Further validation: check if account exists
-            Account existingAcc = accountDAO.getAccountById(id);
+            Account existingAcc = null;
+            if ("Customer".equalsIgnoreCase(role)) {
+                existingAcc = customerDAO.getAccountById(id);
+            } else {
+                existingAcc = employeeDAO.getAccountById(id);
+            }
             if (existingAcc == null) {
                 session.setAttribute("errorMessage", "Account not found.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -361,7 +389,7 @@ public class AdminAccountController extends HttpServlet {
             }
 
             // 1.1.4. deleteAccount(id)
-            boolean success = accountDAO.deleteAccount(id);
+            boolean success = "Customer".equalsIgnoreCase(role) ? customerDAO.deleteAccount(id) : employeeDAO.deleteAccount(id);
             
             // alt success == true
             if (success) {
