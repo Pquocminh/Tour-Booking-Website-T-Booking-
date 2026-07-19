@@ -12,7 +12,7 @@ import model.Booking;
 public class DashboardDAO extends DBContext {
 
     public int getTotalUsers() {
-        String sql = "SELECT COUNT(*) FROM Account WHERE role = 'Customer'";
+        String sql = "SELECT COUNT(*) FROM Customer";
         int count = 0;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
