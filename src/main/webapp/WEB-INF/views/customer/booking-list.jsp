@@ -156,7 +156,7 @@
                                                         </span>
                                                     </td>
                                                     <td style="padding: 16px; text-align: right; font-weight: 700; color: var(--primary); border: none;">
-                                                        <fmt:formatNumber value="${b.totalPrice}" type="currency" currencySymbol="$" maxFractionDigits="2" />
+                                                        <fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫" />
                                                     </td>
                                                     <td style="padding: 16px; text-align: center; border: none;">
                                                         <c:choose>

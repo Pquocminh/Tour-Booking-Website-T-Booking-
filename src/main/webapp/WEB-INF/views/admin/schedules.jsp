@@ -213,11 +213,11 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="editDepartureDate" class="form-label text-muted small fw-bold">Departure Date</label>
-                                <input type="date" class="form-control rounded-3" id="editDepartureDate" name="departureDate" required onchange="validateDates()">
+                                <input type="date" class="form-control rounded-3" id="editDepartureDate" name="departureDate" min="2020-01-01" max="2099-12-31" required onchange="validateDates()">
                             </div>
                             <div class="col-md-6">
                                 <label for="editReturnDate" class="form-label text-muted small fw-bold">Return Date</label>
-                                <input type="date" class="form-control rounded-3" id="editReturnDate" name="returnDate" required onchange="validateDates()">
+                                <input type="date" class="form-control rounded-3" id="editReturnDate" name="returnDate" min="2020-01-01" max="2099-12-31" required onchange="validateDates()">
                             </div>
                         </div>
 
@@ -446,11 +446,11 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="createDepartureDate" class="form-label text-muted small fw-bold">Departure Date</label>
-                                <input type="date" class="form-control rounded-3" id="createDepartureDate" name="departureDate" required onchange="validateCreateDates()">
+                                <input type="date" class="form-control rounded-3" id="createDepartureDate" name="departureDate" min="2020-01-01" max="2099-12-31" required onchange="validateCreateDates()">
                             </div>
                             <div class="col-md-6">
                                 <label for="createReturnDate" class="form-label text-muted small fw-bold">Return Date</label>
-                                <input type="date" class="form-control rounded-3" id="createReturnDate" name="returnDate" required onchange="validateCreateDates()">
+                                <input type="date" class="form-control rounded-3" id="createReturnDate" name="returnDate" min="2020-01-01" max="2099-12-31" required onchange="validateCreateDates()">
                             </div>
                         </div>
 
@@ -541,8 +541,15 @@
             if (depDateVal && retDateVal) {
                 var depDate = new Date(depDateVal);
                 var retDate = new Date(retDateVal);
-                
-                if (depDate > retDate) {
+                var depYear = depDate.getFullYear();
+                var retYear = retDate.getFullYear();
+
+                if (depYear < 2020 || depYear > 2099 || retYear < 2020 || retYear > 2099) {
+                    errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Year must be a valid 4-digit year (2020 - 2099).';
+                    errorAlert.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else if (depDate > retDate) {
+                    errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Departure date cannot be after return date.';
                     errorAlert.classList.remove('d-none');
                     submitBtn.disabled = true;
                 } else {
@@ -561,8 +568,15 @@
             if (depDateVal && retDateVal) {
                 var depDate = new Date(depDateVal);
                 var retDate = new Date(retDateVal);
-                
-                if (depDate > retDate) {
+                var depYear = depDate.getFullYear();
+                var retYear = retDate.getFullYear();
+
+                if (depYear < 2020 || depYear > 2099 || retYear < 2020 || retYear > 2099) {
+                    errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Year must be a valid 4-digit year (2020 - 2099).';
+                    errorAlert.classList.remove('d-none');
+                    submitBtn.disabled = true;
+                } else if (depDate > retDate) {
+                    errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Departure date cannot be after return date.';
                     errorAlert.classList.remove('d-none');
                     submitBtn.disabled = true;
                 } else {

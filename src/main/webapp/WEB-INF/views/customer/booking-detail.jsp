@@ -179,7 +179,7 @@
                                     
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Price per person</span>
-                                        <span class="fw-bold"><fmt:formatNumber value="${schedule.price}" type="currency" currencySymbol="$" /></span>
+                                        <span class="fw-bold"><fmt:formatNumber value="${schedule.price}" pattern="#,##0 ₫" /></span>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Total guests</span>
@@ -198,13 +198,13 @@
                                     <div class="d-flex justify-content-between mb-3">
                                         <span class="h6 mb-0" style="font-weight: 700;">Total Amount</span>
                                         <span class="h5 mb-0 text-primary" style="font-weight: 800;">
-                                            <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencySymbol="$" />
+                                            <fmt:formatNumber value="${booking.totalPrice}" pattern="#,##0 ₫" />
                                         </span>
                                     </div>
 
                                     <div class="d-flex justify-content-between mb-1" style="font-size: 0.9rem;">
                                         <span class="text-muted">Required Deposit</span>
-                                        <span class="fw-bold text-dark"><fmt:formatNumber value="${booking.depositAmount}" type="currency" currencySymbol="$" /></span>
+                                        <span class="fw-bold text-dark"><fmt:formatNumber value="${booking.depositAmount}" pattern="#,##0 ₫" /></span>
                                     </div>
                                 </div>
 
@@ -258,7 +258,7 @@
                                                             <span class="badge rounded-pill bg-light text-dark px-3 py-1 border">${p.paymentType}</span>
                                                         </td>
                                                         <td class="text-end fw-bold text-success">
-                                                            <fmt:formatNumber value="${p.amount}" type="currency" currencySymbol="$" />
+                                                            <fmt:formatNumber value="${p.amount}" pattern="#,##0 ₫" />
                                                         </td>
                                                         <td class="text-center">
                                                             <c:choose>

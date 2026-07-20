@@ -175,13 +175,13 @@
                                     <div class="d-flex justify-content-between mb-3">
                                         <span class="h6 mb-0" style="font-weight: 700;">Total Price</span>
                                         <span class="h5 mb-0 text-primary" style="font-weight: 800;">
-                                            <fmt:formatNumber value="${bill.totalPrice}" type="currency" currencySymbol="$" />
+                                            <fmt:formatNumber value="${bill.totalPrice}" pattern="#,##0 ₫" />
                                         </span>
                                     </div>
 
                                     <div class="d-flex justify-content-between mb-1" style="font-size: 0.9rem;">
                                         <span class="text-muted">Paid/Deposit Amount</span>
-                                        <span class="fw-bold text-success"><fmt:formatNumber value="${bill.depositAmount}" type="currency" currencySymbol="$" /></span>
+                                        <span class="fw-bold text-success"><fmt:formatNumber value="${bill.depositAmount}" pattern="#,##0 ₫" /></span>
                                     </div>
                                 </div>
 
