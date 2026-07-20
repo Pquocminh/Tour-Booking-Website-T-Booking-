@@ -203,8 +203,34 @@ public class AdminTourController extends HttpServlet {
                 tour.setDestinationId(Integer.parseInt(request.getParameter("destinationId")));
                 tour.setDepartureLocation(request.getParameter("departureLocation"));
                 tour.setDescription(request.getParameter("description"));
-                tour.setDurationDays(Integer.parseInt(request.getParameter("durationDays")));
-                tour.setBasePrice(Double.parseDouble(request.getParameter("basePrice")));
+                String durationParam = request.getParameter("durationDays");
+                int duration = 1;
+                if ("update".equalsIgnoreCase(action)) {
+                    Tour existing = tourDAO.getTourByIdAdmin(tour.getTourId());
+                    if (existing != null && existing.getDurationDays() > 0) {
+                        duration = existing.getDurationDays();
+                    }
+                }
+                if (durationParam != null && !durationParam.trim().isEmpty()) {
+                    try {
+                        duration = Integer.parseInt(durationParam.trim());
+                    } catch (NumberFormatException e) {}
+                }
+                tour.setDurationDays(duration);
+                String basePriceParam = request.getParameter("basePrice");
+                double basePrice = 0.0;
+                if ("update".equalsIgnoreCase(action)) {
+                    Tour existing = tourDAO.getTourByIdAdmin(tour.getTourId());
+                    if (existing != null) {
+                        basePrice = existing.getBasePrice();
+                    }
+                }
+                if (basePriceParam != null && !basePriceParam.trim().isEmpty()) {
+                    try {
+                        basePrice = Double.parseDouble(basePriceParam.trim());
+                    } catch (NumberFormatException e) {}
+                }
+                tour.setBasePrice(basePrice);
                 tour.setStatus(request.getParameter("status"));
                 tour.setThumbnailUrl(request.getParameter("thumbnailUrl"));
                 
@@ -217,10 +243,17 @@ public class AdminTourController extends HttpServlet {
                 boolean success;
                 if ("update".equalsIgnoreCase(action)) {
                     success = tourDAO.updateTour(tour);
+                    if (success) {
+                        tourDAO.syncTourDurationFromSchedules(tour.getTourId());
+                        tourDAO.syncTourBasePriceFromSchedules(tour.getTourId());
+                    }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour updated successfully!" : "Failed to update tour.");
                 } else {
                     success = tourDAO.addTour(tour);
+                    if (success) {
+                        tourDAO.syncTourBasePriceFromSchedules(tour.getTourId());
+                    }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour created successfully!" : "Failed to create tour.");
                 }
@@ -278,14 +311,14 @@ public class AdminTourController extends HttpServlet {
         if ("create".equalsIgnoreCase(action)) {
             String categoryName = request.getParameter("categoryName");
             String description = request.getParameter("description");
-            if (categoryName == null || categoryName.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Category name is required!");
+            if (categoryName == null || categoryName.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category name must be at least 3 characters long!");
+            } else if (description == null || description.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category description must be at least 3 characters long!");
             } else {
                 Category cat = new Category();
                 cat.setCategoryName(categoryName.trim());
-                if (description != null) {
-                    cat.setDescription(description.trim());
-                }
+                cat.setDescription(description.trim());
                 if (categoryDAO.addCategory(cat)) {
                     request.getSession().setAttribute("successMessage", "Category created successfully!");
                     response.sendRedirect(request.getContextPath() + "/admin/categories");
@@ -299,8 +332,13 @@ public class AdminTourController extends HttpServlet {
             String categoryName = request.getParameter("categoryName");
             String description = request.getParameter("description");
 
-            if (categoryName == null || categoryName.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Category name is required!");
+            if (categoryName == null || categoryName.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category name must be at least 3 characters long!");
+                reloadPageWithEditCategory(request, response, idParam);
+                return;
+            }
+            if (description == null || description.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category description must be at least 3 characters long!");
                 reloadPageWithEditCategory(request, response, idParam);
                 return;
             }
@@ -310,9 +348,7 @@ public class AdminTourController extends HttpServlet {
                 Category category = new Category();
                 category.setCategoryId(id);
                 category.setCategoryName(categoryName.trim());
-                if (description != null) {
-                    category.setDescription(description.trim());
-                }
+                category.setDescription(description.trim());
                 boolean success = categoryDAO.updateCategory(category);
                 if (success) {
                     request.getSession().setAttribute("successMessage", "Category updated successfully!");

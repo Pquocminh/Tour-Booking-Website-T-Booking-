@@ -38,12 +38,14 @@
                             <input type="text" class="form-control rounded-3" value="#${editCategory.categoryId}" readonly disabled>
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label text-muted small fw-bold">Category Name</label>
-                            <input type="text" name="categoryName" class="form-control rounded-3" value="${editCategory.categoryName}" required>
+                            <label class="form-label text-muted small fw-bold">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" name="categoryName" class="form-control rounded-3" value="${editCategory.categoryName}" minlength="3" required placeholder="e.g. Luxury Tours">
+                            <div class="form-text text-muted small">Must be at least 3 characters long.</div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label text-muted small fw-bold">Description</label>
-                            <textarea name="description" class="form-control rounded-3" rows="3">${editCategory.description}</textarea>
+                            <label class="form-label text-muted small fw-bold">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control rounded-3" rows="3" minlength="3" required placeholder="Briefly describe this category...">${editCategory.description}</textarea>
+                            <div class="form-text text-muted small">Must be at least 3 characters long.</div>
                         </div>
                     </div>
 
@@ -171,11 +173,13 @@
             <div class="modal-body">
               <div class="mb-3">
                   <label class="form-label text-muted small fw-bold">Category Name <span class="text-danger">*</span></label>
-                  <input type="text" name="categoryName" class="form-control rounded-3" required placeholder="e.g. Luxury Tours">
+                  <input type="text" name="categoryName" class="form-control rounded-3" minlength="3" required placeholder="e.g. Luxury Tours">
+                  <div class="form-text text-muted small">Must be at least 3 characters long.</div>
               </div>
               <div class="mb-3">
-                  <label class="form-label text-muted small fw-bold">Description</label>
-                  <textarea name="description" class="form-control rounded-3" rows="4" placeholder="Briefly describe this category..."></textarea>
+                  <label class="form-label text-muted small fw-bold">Description <span class="text-danger">*</span></label>
+                  <textarea name="description" class="form-control rounded-3" rows="4" minlength="3" required placeholder="Briefly describe this category..."></textarea>
+                  <div class="form-text text-muted small">Must be at least 3 characters long.</div>
               </div>
             </div>
             <div class="modal-footer border-0 pt-0">

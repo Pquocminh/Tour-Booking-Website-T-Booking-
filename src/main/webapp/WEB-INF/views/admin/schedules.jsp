@@ -223,7 +223,8 @@
 
                         <div class="mb-3">
                             <label for="editPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
-                            <input type="number" class="form-control rounded-3" id="editPrice" name="price" min="0" step="1000" required>
+                            <input type="number" class="form-control rounded-3 bg-light" id="editPrice" name="price" readonly>
+                            <div class="form-text text-muted small">Price is fixed for this schedule</div>
                         </div>
 
                         <div class="row g-3 mb-3">
@@ -238,7 +239,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="editTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                                <input type="number" class="form-control rounded-3" id="editTotalSlots" name="totalSlots" min="1" max="45" required>
+                                <input type="number" class="form-control rounded-3 bg-light" id="editTotalSlots" name="totalSlots" readonly>
                                 <div class="form-text text-primary small" id="editBookedSlotsInfo">Booked slots: 0</div>
                             </div>
                             <div class="col-md-6">
@@ -469,8 +470,9 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" max="45" placeholder="e.g. 20" required>
+                            <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity (Passengers)</label>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" value="44" step="44" placeholder="44 (1 Bus)" required>
+                            <div class="form-text text-muted small">Default 1 big bus (44 passenger seats)</div>
                         </div>
 
                         <div class="alert alert-danger d-none border-0 py-2 small rounded-3" id="createModalErrorAlert">

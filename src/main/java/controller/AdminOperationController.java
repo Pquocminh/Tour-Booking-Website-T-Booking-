@@ -255,10 +255,8 @@ public class AdminOperationController extends HttpServlet {
                     return;
                 }
 
-                if (totalSlots <= 0 || totalSlots > 45) {
-                    request.getSession().setAttribute("errorMessage", "Total capacity must be between 1 and 45!");
-                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
-                    return;
+                if (totalSlots <= 0) {
+                    totalSlots = 44;
                 }
 
                 TourSchedule sched = new TourSchedule();
@@ -277,6 +275,8 @@ public class AdminOperationController extends HttpServlet {
 
                 boolean success = tourDAO.addTourSchedule(sched);
                 if (success) {
+                    tourDAO.syncTourDurationFromSchedules(tourId);
+                    tourDAO.syncTourBasePriceFromSchedules(tourId);
                     request.getSession().setAttribute("successMessage", "Tour schedule created successfully!");
                 } else {
                     request.getSession().setAttribute("errorMessage", "Failed to create tour schedule in database!");
@@ -329,11 +329,9 @@ public class AdminOperationController extends HttpServlet {
             String scheduleIdParam = request.getParameter("scheduleId");
             String departureDateStr = request.getParameter("departureDate");
             String returnDateStr = request.getParameter("returnDate");
-            String priceParam = request.getParameter("price");
-            String totalSlotsParam = request.getParameter("totalSlots");
             String status = request.getParameter("status");
 
-            if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || priceParam == null || totalSlotsParam == null || status == null) {
+            if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null) {
                 request.getSession().setAttribute("errorMessage", "Missing required fields for update!");
                 response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                 return;
@@ -343,17 +341,9 @@ public class AdminOperationController extends HttpServlet {
                 int scheduleId = Integer.parseInt(scheduleIdParam.trim());
                 Date departureDate = Date.valueOf(departureDateStr.trim());
                 Date returnDate = Date.valueOf(returnDateStr.trim());
-                double price = Double.parseDouble(priceParam.trim());
-                int totalSlots = Integer.parseInt(totalSlotsParam.trim());
 
                 if (departureDate.after(returnDate)) {
                     request.getSession().setAttribute("errorMessage", "Departure date cannot be after return date!");
-                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
-                    return;
-                }
-
-                if (price < 0) {
-                    request.getSession().setAttribute("errorMessage", "Price cannot be negative!");
                     response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                     return;
                 }
@@ -367,43 +357,34 @@ public class AdminOperationController extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                         return;
                     }
-                    if (totalSlots <= 0 || totalSlots > 45) {
-                        request.getSession().setAttribute("errorMessage", "Total capacity must be between 1 and 45!");
-                        response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
-                        return;
-                    }
+
                     int bookedSlots = sched.getTotalSlots() - sched.getAvailableSlots();
-                    if (totalSlots < bookedSlots) {
-                        request.getSession().setAttribute("errorMessage", "Total slots (" + totalSlots + ") cannot be less than booked slots (" + bookedSlots + ")!");
+                    int availableSlots = sched.getTotalSlots() - bookedSlots;
+                    
+                    if ("Open".equalsIgnoreCase(status) && availableSlots == 0) {
+                        status = "Full";
+                    } else if ("Full".equalsIgnoreCase(status) && availableSlots > 0) {
+                        status = "Open";
+                    }
+
+                    sched.setDepartureDate(departureDate);
+                    sched.setReturnDate(returnDate);
+                    sched.setStatus(status);
+                    
+                    String assignedStaffIdParam = request.getParameter("assignedStaffId");
+                    if (assignedStaffIdParam != null && !assignedStaffIdParam.trim().isEmpty()) {
+                        sched.setAssignedStaffId(Integer.parseInt(assignedStaffIdParam.trim()));
                     } else {
-                        int availableSlots = totalSlots - bookedSlots;
-                        
-                        if ("Open".equalsIgnoreCase(status) && availableSlots == 0) {
-                            status = "Full";
-                        } else if ("Full".equalsIgnoreCase(status) && availableSlots > 0) {
-                            status = "Open";
-                        }
+                        sched.setAssignedStaffId(null);
+                    }
 
-                        sched.setDepartureDate(departureDate);
-                        sched.setReturnDate(returnDate);
-                        sched.setPrice(price);
-                        sched.setTotalSlots(totalSlots);
-                        sched.setAvailableSlots(availableSlots);
-                        sched.setStatus(status);
-                        
-                        String assignedStaffIdParam = request.getParameter("assignedStaffId");
-                        if (assignedStaffIdParam != null && !assignedStaffIdParam.trim().isEmpty()) {
-                            sched.setAssignedStaffId(Integer.parseInt(assignedStaffIdParam.trim()));
-                        } else {
-                            sched.setAssignedStaffId(null);
-                        }
-
-                        boolean success = tourDAO.updateTourSchedule(sched);
-                        if (success) {
-                            request.getSession().setAttribute("successMessage", "Updated Tour Schedule #" + scheduleId + " successfully!");
-                        } else {
-                            request.getSession().setAttribute("errorMessage", "Failed to update tour schedule in database!");
-                        }
+                    boolean success = tourDAO.updateTourSchedule(sched);
+                    if (success) {
+                        tourDAO.syncTourDurationFromSchedules(sched.getTourId());
+                        tourDAO.syncTourBasePriceFromSchedules(sched.getTourId());
+                        request.getSession().setAttribute("successMessage", "Updated Tour Schedule #" + scheduleId + " successfully!");
+                    } else {
+                        request.getSession().setAttribute("errorMessage", "Failed to update tour schedule in database!");
                     }
                 }
             } catch (IllegalArgumentException e) {

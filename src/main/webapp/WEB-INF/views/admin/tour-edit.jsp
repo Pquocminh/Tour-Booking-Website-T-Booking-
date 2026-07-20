@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -57,8 +57,9 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Duration (Days) <span class="text-danger">*</span></label>
-                        <input type="number" name="durationDays" class="form-control rounded-3" value="${tour.durationDays}" min="1" required>
+                        <label class="form-label text-muted small fw-bold">Duration (Days)</label>
+                        <input type="number" name="durationDays" class="form-control rounded-3 bg-light" value="${not empty tour and tour.durationDays > 0 ? tour.durationDays : 1}" readonly>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Calculated automatically from Tour Schedule dates</small>
                     </div>
 
                     <div class="col-md-3">
@@ -70,11 +71,12 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">Base Price (VND) <span class="text-danger">*</span></label>
+                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price)</label>
                         <div class="input-group">
-                            <input type="number" name="basePrice" class="form-control rounded-start-3" value="${tour.basePrice}" step="0.01" min="0" required>
+                            <input type="text" class="form-control rounded-start-3 bg-light" value="<fmt:formatNumber value='${not empty tour and tour.basePrice > 0 ? tour.basePrice : 0}' pattern='#,##0'/>" readonly disabled>
                             <span class="input-group-text rounded-end-3 border-start-0">VND</span>
                         </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Prices are managed per Schedule. Tour starting price automatically syncs from the lowest schedule price.</small>
                     </div>
 
                     <div class="col-md-6">

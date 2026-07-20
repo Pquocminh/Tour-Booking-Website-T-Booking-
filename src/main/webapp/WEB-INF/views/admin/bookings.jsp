@@ -35,18 +35,18 @@
 
     <!-- Table -->
     <div class="table-panel">
-        <div class="table-responsive">
-            <table class="table-custom">
-                <thead>
+        <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
+            <table class="table table-custom table-hover align-middle w-100 mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>Booking ID</th>
+                        <th style="width: 80px;">Booking ID</th>
                         <th>Tour Name</th>
                         <th>Departure Date</th>
                         <th>Contact Name</th>
-                        <th>People</th>
+                        <th class="text-center">People</th>
                         <th>Total Price</th>
                         <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th style="width: 120px;" class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,17 +62,17 @@
                         <c:otherwise>
                             <c:forEach var="b" items="${bookings}">
                                 <tr>
-                                    <td>#${b.bookingId}</td>
+                                    <td><span class="text-muted small fw-bold">#${b.bookingId}</span></td>
                                     <td>
-                                        <div class="fw-bold text-primary">${b.tourName}</div>
+                                        <div class="fw-bold text-primary text-truncate" style="max-width: 260px;" title="${b.tourName}">${b.tourName}</div>
                                     </td>
-                                    <td><fmt:formatDate value="${b.departureDate}" pattern="MMM dd, yyyy"/></td>
+                                    <td><fmt:formatDate value="${b.departureDate}" pattern="dd/MM/yyyy"/></td>
                                     <td>
-                                        <div>${b.contactName}</div>
+                                        <div class="fw-semibold text-dark">${b.contactName}</div>
                                         <div class="text-muted small">${b.contactPhone}</div>
                                     </td>
-                                    <td>${b.numberOfPeople}</td>
-                                    <td>
+                                    <td class="text-center fw-bold text-dark">${b.numberOfPeople}</td>
+                                    <td class="fw-bold text-success">
                                         <fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/>
                                     </td>
                                     <td>
@@ -98,100 +98,105 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
-                                    <td class="text-end">
-                                        <c:if test="${b.status != 'Cancelled'}">
-                                            <button class="btn btn-sm btn-outline-danger rounded-circle me-1" title="Cancel Booking" data-bs-toggle="modal" data-bs-target="#cancelModal${b.bookingId}">
-                                                <i class="fa-solid fa-ban"></i>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button class="btn btn-outline-info btn-icon shadow-sm" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
+                                                <i class="fa-solid fa-eye"></i>
                                             </button>
-                                        </c:if>
-                                        <button class="btn btn-sm btn-outline-info rounded-circle me-1" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
+                                            <c:if test="${b.status != 'Cancelled'}">
+                                                <button class="btn btn-outline-danger btn-icon shadow-sm" title="Cancel Booking" data-bs-toggle="modal" data-bs-target="#cancelModal${b.bookingId}">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                            </c:if>
+                                        </div>
                                     </td>
                                 </tr>
-
-                                <!-- View Details Modal -->
-                                <div class="modal fade" id="viewDetailsModal${b.bookingId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                                        <div class="modal-content border-0 shadow">
-                                            <div class="modal-header border-0 pb-0">
-                                                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-receipt me-2"></i>Booking Details #${b.bookingId}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="row g-3">
-                                                    <!-- Tour Info -->
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Tour Information</h6>
-                                                        <div class="mb-2"><strong>Tour Name:</strong> <span class="text-primary">${b.tourName}</span></div>
-                                                        <div class="mb-2"><strong>Departure Date:</strong> <fmt:formatDate value="${b.departureDate}" pattern="MMM dd, yyyy"/></div>
-                                                        <div class="mb-2"><strong>Number of People:</strong> ${b.numberOfPeople}</div>
-                                                    </div>
-                                                    <!-- Customer Info -->
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Customer Account</h6>
-                                                        <div class="mb-2"><strong>Username:</strong> ${not empty b.customerUsername ? b.customerUsername : 'Guest'}</div>
-                                                        <div class="mb-2"><strong>Email:</strong> ${not empty b.customerEmail ? b.customerEmail : 'N/A'}</div>
-                                                    </div>
-                                                    <!-- Contact Info -->
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Contact details</h6>
-                                                        <div class="mb-2"><strong>Contact Name:</strong> ${b.contactName}</div>
-                                                        <div class="mb-2"><strong>Contact Phone:</strong> ${b.contactPhone}</div>
-                                                    </div>
-                                                    <!-- Payment Info -->
-                                                    <div class="col-md-6">
-                                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Payment & Status</h6>
-                                                        <div class="mb-2"><strong>Total Price:</strong> <span class="fw-bold text-success"><fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/></span></div>
-                                                        <div class="mb-2"><strong>Deposit Paid:</strong> <fmt:formatNumber value="${b.depositAmount}" pattern="#,##0 ₫"/></div>
-                                                        <div class="mb-2"><strong>Status:</strong> ${b.status}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer border-0 pt-0">
-                                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- End View Details Modal -->
-                                
-                                <!-- Removed Update Status Modal -->
-                                
-                                <!-- Cancel Booking Modal -->
-                                <c:if test="${b.status != 'Cancelled'}">
-                                    <div class="modal fade" id="cancelModal${b.bookingId}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow">
-                                                <div class="modal-header border-0 pb-0">
-                                                    <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Cancel Booking #${b.bookingId}</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <form action="${pageContext.request.contextPath}/admin/bookings" method="post">
-                                                    <div class="modal-body text-start">
-                                                        <input type="hidden" name="action" value="cancel">
-                                                        <input type="hidden" name="bookingId" value="${b.bookingId}">
-                                                        <p class="mb-0">Are you sure you want to cancel booking <strong>#${b.bookingId}</strong> for <strong>${b.contactName}</strong>?</p>
-                                                        <p class="text-danger small mt-2 mb-0"><i class="fa-solid fa-triangle-exclamation me-1"></i>This will update the booking status to Cancelled and release ${b.numberOfPeople} slots back to the schedule.</p>
-                                                    </div>
-                                                    <div class="modal-footer border-0 pt-0">
-                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">No, Keep It</button>
-                                                        <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Cancel Booking</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </c:if>
-                                <!-- End Cancel Booking Modal -->
-                                
                             </c:forEach>
                         </c:otherwise>
                     </c:choose>
                 </tbody>
             </table>
         </div>
+
+        <!-- Modals rendered outside table structure -->
+        <c:if test="${not empty bookings}">
+            <c:forEach var="b" items="${bookings}">
+                <!-- View Details Modal -->
+                <div class="modal fade" id="viewDetailsModal${b.bookingId}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-receipt me-2"></i>Booking Details #${b.bookingId}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <!-- Tour Info -->
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Tour Information</h6>
+                                        <div class="mb-2"><strong>Tour Name:</strong> <span class="text-primary">${b.tourName}</span></div>
+                                        <div class="mb-2"><strong>Departure Date:</strong> <fmt:formatDate value="${b.departureDate}" pattern="MMM dd, yyyy"/></div>
+                                        <div class="mb-2"><strong>Number of People:</strong> ${b.numberOfPeople}</div>
+                                    </div>
+                                    <!-- Customer Info -->
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Customer Account</h6>
+                                        <div class="mb-2"><strong>Username:</strong> ${not empty b.customerUsername ? b.customerUsername : 'Guest'}</div>
+                                        <div class="mb-2"><strong>Email:</strong> ${not empty b.customerEmail ? b.customerEmail : 'N/A'}</div>
+                                    </div>
+                                    <!-- Contact Info -->
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Contact details</h6>
+                                        <div class="mb-2"><strong>Contact Name:</strong> ${b.contactName}</div>
+                                        <div class="mb-2"><strong>Contact Phone:</strong> ${b.contactPhone}</div>
+                                    </div>
+                                    <!-- Payment Info -->
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Payment & Status</h6>
+                                        <div class="mb-2"><strong>Total Price:</strong> <span class="fw-bold text-success"><fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/></span></div>
+                                        <div class="mb-2"><strong>Deposit Paid:</strong> <fmt:formatNumber value="${b.depositAmount}" pattern="#,##0 ₫"/></div>
+                                        <div class="mb-2"><strong>Status:</strong> ${b.status}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End View Details Modal -->
+                
+                <!-- Cancel Booking Modal -->
+                <c:if test="${b.status != 'Cancelled'}">
+                    <div class="modal fade" id="cancelModal${b.bookingId}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Cancel Booking #${b.bookingId}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="${pageContext.request.contextPath}/admin/bookings" method="post">
+                                    <div class="modal-body text-start">
+                                        <input type="hidden" name="action" value="cancel">
+                                        <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                        <p class="mb-0">Are you sure you want to cancel booking <strong>#${b.bookingId}</strong> for <strong>${b.contactName}</strong>?</p>
+                                        <p class="text-danger small mt-2 mb-0"><i class="fa-solid fa-triangle-exclamation me-1"></i>This will update the booking status to Cancelled and release ${b.numberOfPeople} slots back to the schedule.</p>
+                                    </div>
+                                    <div class="modal-footer border-0 pt-0">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">No, Keep It</button>
+                                        <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Cancel Booking</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </c:if>
+                <!-- End Cancel Booking Modal -->
+            </c:forEach>
+        </c:if>
     </div>
+</div>
 </div>
 
 <jsp:include page="layout/footer.jsp" />
