@@ -260,7 +260,7 @@
                         </div>
                         <c:remove var="errorMessage" scope="session" />
                     </c:if>
-                    <form action="${pageContext.request.contextPath}/booking" method="POST" class="mt-4">
+                    <form action="${pageContext.request.contextPath}/booking" method="POST" class="mt-4" onsubmit="return validateBookingForm(event)">
                         <div class="mb-3">
                             <label for="departureDate" class="form-label fw-bold text-main">
                                 <i class="fa-regular fa-calendar-days me-1 text-primary"></i>Select Departure Date
@@ -305,9 +305,10 @@
                             </label>
                             <div class="input-group" style="max-width: 150px;">
                                 <button class="btn btn-outline-primary" type="button" onclick="decrementTravelers()"><i class="fa-solid fa-minus"></i></button>
-                                <input type="number" class="form-control text-center fw-bold text-primary" id="numberOfPeople" name="numberOfPeople" min="1" value="1" required style="background-color: white;" oninput="updateMaxSlots(); calculateTotalPrice()" onblur="if(this.value==='' || parseInt(this.value)<1) { this.value=1; calculateTotalPrice(); }">
+                                <input type="text" class="form-control text-center fw-bold text-primary" id="numberOfPeople" name="numberOfPeople" value="1" style="background-color: white;" oninput="hideTravelersError(); calculateTotalPrice()" autocomplete="off">
                                 <button class="btn btn-outline-primary" type="button" onclick="incrementTravelers()"><i class="fa-solid fa-plus"></i></button>
                             </div>
+                            <div id="travelersError" class="text-danger small mt-2 fw-bold" style="display: none;"></div>
                         </div>
 
                         <div class="mb-3 p-3 bg-light rounded border border-primary-subtle">
@@ -385,30 +386,97 @@
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
     <script>
-        function updateMaxSlots() {
-            const selectElement = document.getElementById("departureDate");
-            if (!selectElement || selectElement.options.length === 0) return;
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-            const max = parseInt(selectedOption.getAttribute("data-available") || 1);
-            const input = document.getElementById("numberOfPeople");
-            
-            if (input.value === "") return; // Allow empty while typing
-            
-            let val = parseInt(input.value);
-            if (isNaN(val) || val < 1) {
-                // We don't force 1 on input to allow typing, handled on blur
-            } else if (val > max) {
-                input.value = max;
+        function showTravelersError(msg) {
+            const errorDiv = document.getElementById("travelersError");
+            if (errorDiv) {
+                errorDiv.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>' + msg;
+                errorDiv.style.display = "block";
             }
+            const input = document.getElementById("numberOfPeople");
+            if (input) {
+                input.classList.add("is-invalid");
+            }
+        }
+
+        function hideTravelersError() {
+            const errorDiv = document.getElementById("travelersError");
+            if (errorDiv) {
+                errorDiv.innerText = "";
+                errorDiv.style.display = "none";
+            }
+            const input = document.getElementById("numberOfPeople");
+            if (input) {
+                input.classList.remove("is-invalid");
+            }
+        }
+
+        function validateBookingForm(event) {
+            hideTravelersError();
+            const input = document.getElementById("numberOfPeople");
+            if (!input) return true;
+            
+            const rawVal = input.value.trim();
+
+            // Business Rule 1: Passenger count requirement - cannot be empty
+            if (rawVal === "") {
+                showTravelersError("Please enter the number of travelers.");
+                if (event) event.preventDefault();
+                return false;
+            }
+
+            const normalizedVal = rawVal.replace(',', '.');
+
+            // Business Rule 2: Numerical input validation - non-numeric characters prohibited
+            if (isNaN(normalizedVal) || !/^-?\d+(\.\d+)?$/.test(normalizedVal)) {
+                showTravelersError("Invalid character detected. Please enter digits only.");
+                if (event) event.preventDefault();
+                return false;
+            }
+
+            // Business Rule 3: Whole number restriction - fractional traveler counts invalid
+            if (normalizedVal.includes('.')) {
+                showTravelersError("Decimal values are not allowed. Please enter a whole number.");
+                if (event) event.preventDefault();
+                return false;
+            }
+
+            const val = parseInt(normalizedVal, 10);
+
+            // Business Rule 4: Minimum capacity enforcement - booking requires >= 1 traveler
+            if (val <= 0) {
+                showTravelersError("Number of travelers must be at least 1.");
+                if (event) event.preventDefault();
+                return false;
+            }
+
+            // Business Rule 5: Schedule availability constraint - cannot exceed inventory capacity
+            const selectElement = document.getElementById("departureDate");
+            if (selectElement && selectElement.options.length > 0) {
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                const max = parseInt(selectedOption.getAttribute("data-available") || "0", 10);
+                if (val > max) {
+                    showTravelersError("Not enough capacity! Only " + max + " slot(s) remaining for this schedule.");
+                    if (event) event.preventDefault();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function updateMaxSlots() {
+            // Keep user input as typed to allow validation on form submit
         }
         
         function incrementTravelers() {
+            hideTravelersError();
             const input = document.getElementById("numberOfPeople");
             const selectElement = document.getElementById("departureDate");
             if (!selectElement || selectElement.options.length === 0) return;
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const max = parseInt(selectedOption.getAttribute("data-available") || 1);
-            let val = parseInt(input.value || 1);
+            let val = parseInt(input.value || 0, 10);
+            if (isNaN(val)) val = 0;
             if (val < max) {
                 input.value = val + 1;
                 calculateTotalPrice();
@@ -416,8 +484,10 @@
         }
         
         function decrementTravelers() {
+            hideTravelersError();
             const input = document.getElementById("numberOfPeople");
-            let val = parseInt(input.value || 1);
+            let val = parseInt(input.value || 0, 10);
+            if (isNaN(val)) val = 1;
             if (val > 1) {
                 input.value = val - 1;
                 calculateTotalPrice();
@@ -425,20 +495,54 @@
         }
 
         function calculateTotalPrice() {
+            const priceDisplay = document.getElementById("totalPriceDisplay");
+            if (!priceDisplay) return;
+
+            const formatZero = () => {
+                priceDisplay.innerText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(0);
+            };
+
             const selectElement = document.getElementById("departureDate");
-            if (!selectElement || selectElement.options.length === 0) return;
+            if (!selectElement || selectElement.options.length === 0) {
+                formatZero();
+                return;
+            }
             
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const price = parseFloat(selectedOption.getAttribute("data-price") || 0);
+            const maxAvailable = parseInt(selectedOption.getAttribute("data-available") || "0", 10);
             
             const numPeopleElement = document.getElementById("numberOfPeople");
-            const numPeople = parseInt(numPeopleElement.value || 0);
+            if (!numPeopleElement) {
+                formatZero();
+                return;
+            }
+
+            const rawVal = numPeopleElement.value.trim();
+
+            // Business Rule: If input is invalid (empty, non-digit, decimal, <= 0, or exceeds capacity), total price is 0
+            if (rawVal === "") {
+                formatZero();
+                return;
+            }
+
+            const normalizedVal = rawVal.replace(',', '.');
+
+            if (isNaN(normalizedVal) || !/^-?\d+(\.\d+)?$/.test(normalizedVal) || normalizedVal.includes('.')) {
+                formatZero();
+                return;
+            }
+
+            const numPeople = parseInt(normalizedVal, 10);
+
+            if (numPeople <= 0 || numPeople > maxAvailable) {
+                formatZero();
+                return;
+            }
             
             const total = price * numPeople;
-            
-            // Format number to vnd currency style
             const formattedTotal = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total);
-            document.getElementById("totalPriceDisplay").innerText = formattedTotal;
+            priceDisplay.innerText = formattedTotal;
         }
 
         // Initialize total price on page load

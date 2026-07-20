@@ -348,18 +348,44 @@ public class CustomerController extends HttpServlet {
 
         try {
             int scheduleId = Integer.parseInt(scheduleIdStr);
-            int numberOfPeople = Integer.parseInt(numberOfPeopleStr);
-
-            if (numberOfPeople <= 0) {
-                response.sendRedirect(request.getContextPath() + "/tours");
-                return;
-            }
-
             TourDAO tourDAO = new TourDAO();
             TourSchedule schedule = tourDAO.getTourScheduleById(scheduleId);
 
             if (schedule == null) {
                 response.sendRedirect(request.getContextPath() + "/tours");
+                return;
+            }
+
+            int numberOfPeople;
+            try {
+                String trimmedPeopleStr = numberOfPeopleStr.trim();
+
+                // Business Rule 1: Mandatory traveler count check
+                if (trimmedPeopleStr.isEmpty()) {
+                    request.getSession().setAttribute("errorMessage", "Please enter the number of travelers.");
+                    response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
+                    return;
+                }
+
+                // Business Rule 2: Fractional values prohibited
+                if (trimmedPeopleStr.contains(".") || trimmedPeopleStr.contains(",")) {
+                    request.getSession().setAttribute("errorMessage", "Decimal values are not allowed. Please enter a whole number.");
+                    response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
+                    return;
+                }
+
+                numberOfPeople = Integer.parseInt(trimmedPeopleStr);
+
+                // Business Rule 3: Minimum capacity threshold check (>= 1 traveler)
+                if (numberOfPeople <= 0) {
+                    request.getSession().setAttribute("errorMessage", "Number of travelers must be at least 1.");
+                    response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                // Business Rule 4: Strictly numeric input validation
+                request.getSession().setAttribute("errorMessage", "Invalid character detected. Please enter digits only.");
+                response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
                 return;
             }
 
@@ -382,8 +408,9 @@ public class CustomerController extends HttpServlet {
                 e.printStackTrace();
             }
 
+            // Business Rule 5: Capacity limit enforcement
             if (schedule.getAvailableSlots() < numberOfPeople) {
-                request.getSession().setAttribute("errorMessage", "Not enough available slots! Only " + schedule.getAvailableSlots() + " seats left, but tried to book " + numberOfPeople + " seats.");
+                request.getSession().setAttribute("errorMessage", "Not enough capacity! Only " + schedule.getAvailableSlots() + " slot(s) remaining for this schedule.");
                 response.sendRedirect(request.getContextPath() + "/tour-detail?id=" + schedule.getTourId());
                 return;
             }
