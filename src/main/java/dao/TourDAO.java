@@ -447,37 +447,7 @@ public class TourDAO {
     }
 
     public List<Destination> getAllDestinations() {
-        List<Destination> list = new ArrayList<>();
-        DBContext db = new DBContext();
-        Connection conn = db.getConnection();
-        if (conn == null) {
-            return list;
-        }
-        String sql = "SELECT destination_id, destination_name, province, region, description, image_url FROM Destination";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Destination dest = new Destination();
-                dest.setDestinationId(rs.getInt("destination_id"));
-                dest.setDestinationName(rs.getString("destination_name"));
-                dest.setProvince(rs.getString("province"));
-                dest.setRegion(rs.getString("region"));
-                dest.setDescription(rs.getString("description"));
-                dest.setImageUrl(rs.getString("image_url"));
-                list.add(dest);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null && !conn.isClosed()) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return list;
+        return new DestinationDAO().getAllDestinations();
     }
 
     public List<Tour> searchToursAdmin(String keyword, String status, Integer categoryId, Integer destinationId) {

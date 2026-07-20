@@ -36,6 +36,9 @@
                 <a href="${pageContext.request.contextPath}/admin/categories" class="nav-item-custom ${param.activeMenu == 'categories' ? 'active' : ''}">
                     <i class="fa-solid fa-tags"></i> Categories
                 </a>
+                <a href="${pageContext.request.contextPath}/admin/destinations" class="nav-item-custom ${param.activeMenu == 'destinations' ? 'active' : ''}">
+                    <i class="fa-solid fa-location-dot"></i> Destinations
+                </a>
                 <a href="${pageContext.request.contextPath}/admin/accounts" class="nav-item-custom ${param.activeMenu == 'accounts' ? 'active' : ''}">
                     <i class="fa-solid fa-user-gear"></i> Manage Accounts
                 </a>
