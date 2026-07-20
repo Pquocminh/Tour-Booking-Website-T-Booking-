@@ -86,17 +86,9 @@
                             <i class="fa-solid fa-search"></i>
                         </div>
                     </div>
-                    <div class="dropdown">
-                        <a href="#" class="profile-btn text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://ui-avatars.com/api/?name=${sessionScope.user.username}&background=random" alt="Avatar">
-                            ${sessionScope.user.username}
-                            <i class="fa-solid fa-chevron-down ms-2" style="font-size: 0.8rem; color: var(--text-gray);"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 mt-2">
-                            <li><a class="dropdown-item py-2" href="${pageContext.request.contextPath}/customer/profile"><i class="fa-regular fa-user me-2 text-muted"></i> Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item py-2 text-danger" href="${pageContext.request.contextPath}/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Log Out</a></li>
-                        </ul>
+                    <div class="profile-btn text-decoration-none">
+                        <img src="https://ui-avatars.com/api/?name=${sessionScope.user.username}&background=random" alt="Avatar">
+                        ${sessionScope.user.username}
                     </div>
                 </div>
             </div>
