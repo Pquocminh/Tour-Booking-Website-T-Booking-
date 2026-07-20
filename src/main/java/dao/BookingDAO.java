@@ -62,6 +62,13 @@ public class BookingDAO extends DBContext {
                             psVoucher.setInt(2, booking.getVoucherId());
                             psVoucher.executeUpdate();
                         }
+                        
+                        // Reduce voucher quantity by 1
+                        String reduceVoucherSql = "UPDATE Voucher SET quantity = quantity - 1 WHERE voucher_id = ?";
+                        try (PreparedStatement psReduce = connection.prepareStatement(reduceVoucherSql)) {
+                            psReduce.setInt(1, booking.getVoucherId());
+                            psReduce.executeUpdate();
+                        }
                     }
                     
                     connection.commit();
@@ -194,6 +201,26 @@ public class BookingDAO extends DBContext {
         try {
             connection = getConnection();
             connection.setAutoCommit(false); // Start transaction
+
+            // Refund voucher quantity if exists
+            int oldVoucherId = -1;
+            String selectOldVoucherSql = "SELECT voucher_id FROM BookingVoucher WHERE booking_id = ?";
+            try (PreparedStatement psSelect = connection.prepareStatement(selectOldVoucherSql)) {
+                psSelect.setInt(1, bookingId);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    if (rs.next()) {
+                        oldVoucherId = rs.getInt("voucher_id");
+                    }
+                }
+            }
+            
+            if (oldVoucherId != -1) {
+                String refundVoucherSql = "UPDATE Voucher SET quantity = quantity + 1 WHERE voucher_id = ?";
+                try (PreparedStatement psRefund = connection.prepareStatement(refundVoucherSql)) {
+                    psRefund.setInt(1, oldVoucherId);
+                    psRefund.executeUpdate();
+                }
+            }
 
             // 1. Update Booking status to Cancelled
             try (PreparedStatement psUpdateBooking = connection.prepareStatement(updateBookingSql)) {
@@ -386,6 +413,33 @@ public class BookingDAO extends DBContext {
             conn = getConnection();
             conn.setAutoCommit(false);
             
+            // Get old voucher if exists to refund quantity
+            int oldVoucherId = -1;
+            String selectOldVoucherSql = "SELECT voucher_id FROM BookingVoucher WHERE booking_id = ?";
+            try (PreparedStatement psSelect = conn.prepareStatement(selectOldVoucherSql)) {
+                psSelect.setInt(1, bookingId);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    if (rs.next()) {
+                        oldVoucherId = rs.getInt("voucher_id");
+                    }
+                }
+            }
+            
+            if (oldVoucherId != -1) {
+                String refundVoucherSql = "UPDATE Voucher SET quantity = quantity + 1 WHERE voucher_id = ?";
+                try (PreparedStatement psRefund = conn.prepareStatement(refundVoucherSql)) {
+                    psRefund.setInt(1, oldVoucherId);
+                    psRefund.executeUpdate();
+                }
+            }
+
+            // Reduce new voucher quantity by 1
+            String reduceVoucherSql = "UPDATE Voucher SET quantity = quantity - 1 WHERE voucher_id = ?";
+            try (PreparedStatement psReduce = conn.prepareStatement(reduceVoucherSql)) {
+                psReduce.setInt(1, voucherId);
+                psReduce.executeUpdate();
+            }
+
             // 1. Update Booking
             try (PreparedStatement psUpdate = conn.prepareStatement(updateBookingSql)) {
                 psUpdate.setDouble(1, newTotalPrice);

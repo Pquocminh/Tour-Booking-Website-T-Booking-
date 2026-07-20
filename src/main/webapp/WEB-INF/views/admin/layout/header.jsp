@@ -42,6 +42,12 @@
                 <a href="${pageContext.request.contextPath}/admin/discount-policies" class="nav-item-custom ${param.activeMenu == 'discount-policies' ? 'active' : ''}">
                     <i class="fa-solid fa-hand-holding-dollar"></i> Deposit Policy
                 </a>
+                <a href="${pageContext.request.contextPath}/admin/promotions" class="nav-item-custom ${param.activeMenu == 'promotions' ? 'active' : ''}">
+                    <i class="fa-solid fa-percent"></i> Promotions
+                </a>
+                <a href="${pageContext.request.contextPath}/admin/vouchers" class="nav-item-custom ${param.activeMenu == 'vouchers' ? 'active' : ''}">
+                    <i class="fa-solid fa-tags"></i> Vouchers
+                </a>
             </c:if>
             <a href="${pageContext.request.contextPath}/admin/staff/reviews" class="nav-item-custom ${param.activeMenu == 'reviews' ? 'active' : ''}">
                 <i class="fa-solid fa-star"></i> Reviews
@@ -54,12 +60,6 @@
             </a>
             <a href="${pageContext.request.contextPath}/admin/bookings" class="nav-item-custom ${param.activeMenu == 'bookings' ? 'active' : ''}">
                 <i class="fa-solid fa-list-check"></i> Bookings
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/promotions" class="nav-item-custom ${param.activeMenu == 'promotions' ? 'active' : ''}">
-                <i class="fa-solid fa-percent"></i> Promotions
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/vouchers" class="nav-item-custom ${param.activeMenu == 'vouchers' ? 'active' : ''}">
-                <i class="fa-solid fa-tags"></i> Vouchers
             </a>
             
 

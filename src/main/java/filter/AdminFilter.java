@@ -37,8 +37,12 @@ public class AdminFilter implements Filter {
         
         if ("Staff".equalsIgnoreCase(user.getRole())) {
             String uri = httpRequest.getRequestURI();
-            // Allow /admin/staff/*, /admin/schedules, and /admin/tours (for managing tours)
-            if (uri.contains("/admin/staff/") || uri.endsWith("/admin/schedules") || uri.contains("/admin/tours")) {
+            // Allow /admin/staff/*, /admin/schedules, /admin/tours, /admin/bookings, and /admin/capacity
+            if (uri.contains("/admin/staff/") 
+                    || uri.endsWith("/admin/schedules") 
+                    || uri.contains("/admin/tours") 
+                    || uri.contains("/admin/bookings") 
+                    || uri.contains("/admin/capacity")) {
                 chain.doFilter(request, response);
                 return;
             } else {

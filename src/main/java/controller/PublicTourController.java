@@ -123,6 +123,33 @@ public class PublicTourController extends HttpServlet {
 
             request.setAttribute("tour", tour);
 
+            // Get cancellation window days and calculate non-refundable schedules
+            dao.SystemSettingDAO sysDao = new dao.SystemSettingDAO();
+            int cancellationWindowDays = 7;
+            try {
+                String cancelWindowStr = sysDao.getSettingValueByKey("cancellation_window_days");
+                if (cancelWindowStr != null && !cancelWindowStr.trim().isEmpty()) {
+                    cancellationWindowDays = Integer.parseInt(cancelWindowStr);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            java.util.Map<Integer, Boolean> scheduleRefundableMap = new java.util.HashMap<>();
+            if (tour.getSchedules() != null) {
+                java.time.LocalDate today = java.time.LocalDate.now();
+                for (model.TourSchedule sch : tour.getSchedules()) {
+                    if (sch.getDepartureDate() != null) {
+                        java.time.LocalDate departureDate = sch.getDepartureDate().toLocalDate();
+                        long daysUntilDeparture = java.time.temporal.ChronoUnit.DAYS.between(today, departureDate);
+                        boolean isNonRefundable = daysUntilDeparture < cancellationWindowDays;
+                        scheduleRefundableMap.put(sch.getScheduleId(), isNonRefundable);
+                    }
+                }
+            }
+            request.setAttribute("cancellationWindowDays", cancellationWindowDays);
+            request.setAttribute("scheduleRefundableMap", scheduleRefundableMap);
+
             HttpSession session = request.getSession(false);
             boolean isInWishlist = false;
             if (session != null) {

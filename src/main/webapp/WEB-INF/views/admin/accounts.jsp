@@ -42,7 +42,6 @@
                     <label class="form-label text-muted small fw-bold">Role</label>
                     <select name="role" class="form-select rounded-3">
                         <option value="All" ${selectedRole == 'All' ? 'selected' : ''}>All Roles</option>
-                        <option value="Admin" ${selectedRole == 'Admin' ? 'selected' : ''}>Admin</option>
                         <option value="Staff" ${selectedRole == 'Staff' ? 'selected' : ''}>Staff</option>
                         <option value="Customer" ${selectedRole == 'Customer' ? 'selected' : ''}>Customer</option>
                     </select>
@@ -88,7 +87,7 @@
         <ul class="nav nav-tabs mb-4" id="accountTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active fw-bold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="true">
-                    <i class="fa-solid fa-user-tie me-2"></i>Managers / Staff
+                    <i class="fa-solid fa-user-tie me-2"></i>Staff
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -388,7 +387,6 @@
                             <select name="role" class="form-select rounded-3" required>
                                 <option value="Customer">Customer</option>
                                 <option value="Staff">Staff</option>
-                                <option value="Admin">Admin</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -451,7 +449,6 @@
                             <select name="role" id="edit_role" class="form-select rounded-3" required>
                                 <option value="Customer">Customer</option>
                                 <option value="Staff">Staff</option>
-                                <option value="Admin">Admin</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">

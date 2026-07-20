@@ -277,9 +277,24 @@
                                             <option value="${sch.scheduleId}" data-price="${sch.price}" data-available="${sch.availableSlots}">
                                                 <fmt:formatDate value="${sch.departureDate}" pattern="dd/MM/yyyy"/> 
                                                 - <fmt:formatNumber value="${sch.price}" pattern="#,##0 ₫"/> (${sch.availableSlots} left)
+                                                <c:if test="${scheduleRefundableMap[sch.scheduleId]}">
+                                                    [Non-refundable on cancellation]
+                                                </c:if>
                                             </option>
                                         </c:forEach>
                                     </select>
+                                    <c:if test="${not empty tour.schedules}">
+                                        <div class="mt-2">
+                                            <c:forEach var="sch" items="${tour.schedules}">
+                                                <c:if test="${scheduleRefundableMap[sch.scheduleId]}">
+                                                    <div class="text-danger small mt-1" style="font-size: 0.82rem; line-height: 1.4;">
+                                                        <i class="fa-solid fa-circle-exclamation me-1"></i>
+                                                        Schedule on <fmt:formatDate value="${sch.departureDate}" pattern="dd/MM/yyyy"/>: Non-refundable on cancellation (departure is less than ${cancellationWindowDays} days away).
+                                                    </div>
+                                                </c:if>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
                                 </c:otherwise>
                             </c:choose>
                         </div>
