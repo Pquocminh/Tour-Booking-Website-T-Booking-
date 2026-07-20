@@ -284,7 +284,6 @@ public class AdminOperationController extends HttpServlet {
 
                 boolean success = tourDAO.addTourSchedule(sched);
                 if (success) {
-                    tourDAO.syncTourDurationFromSchedules(tourId);
                     tourDAO.syncTourBasePriceFromSchedules(tourId);
                     request.getSession().setAttribute("successMessage", "Tour schedule created successfully!");
                 } else {
@@ -398,7 +397,6 @@ public class AdminOperationController extends HttpServlet {
 
                     boolean success = tourDAO.updateTourSchedule(sched);
                     if (success) {
-                        tourDAO.syncTourDurationFromSchedules(sched.getTourId());
                         tourDAO.syncTourBasePriceFromSchedules(sched.getTourId());
                         request.getSession().setAttribute("successMessage", "Updated Tour Schedule #" + scheduleId + " successfully!");
                     } else {
