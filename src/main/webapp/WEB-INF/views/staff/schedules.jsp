@@ -206,11 +206,11 @@
                     <div class="modal-body py-4">
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold">Select Tour Package</label>
-                            <select name="formTourId" class="form-select rounded-3" required>
+                            <select name="formTourId" class="form-select rounded-3" required onchange="onTourSelectChangeCreate()">
                                 <option value="">-- Choose Tour --</option>
                                 <c:forEach var="t" items="${tours}">
                                     <c:if test="${t.status == 'Active'}">
-                                        <option value="${t.tourId}">ID: #${t.tourId} - ${t.tourName}</option>
+                                        <option value="${t.tourId}">ID: #${t.tourId} - ${t.tourName} (${t.durationDays} days)</option>
                                     </c:if>
                                 </c:forEach>
                             </select>
@@ -219,7 +219,7 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label for="createDepartureDate" class="form-label text-muted small fw-bold">Departure Date</label>
-                                <input type="date" class="form-control rounded-3" id="createDepartureDate" name="departureDate" min="2020-01-01" max="2099-12-31" required onchange="validateCreateDates()">
+                                <input type="date" class="form-control rounded-3" id="createDepartureDate" name="departureDate" min="2020-01-01" max="2099-12-31" required onchange="onDepartureDateChangeCreate()">
                             </div>
                             <div class="col-md-6">
                                 <label for="createReturnDate" class="form-label text-muted small fw-bold">Return Date</label>
@@ -567,6 +567,93 @@
                     alert('An error occurred while loading details. Please try again.');
                     detailModal.hide();
                 });
+        }
+
+        const tourDurations = {
+            <c:forEach var="t" items="${tours}">
+                "${t.tourId}": ${t.durationDays > 0 ? t.durationDays : 1},
+            </c:forEach>
+        };
+
+        function autoCalculateReturnDate(depDateString, durationDays) {
+            if (!depDateString || !durationDays || durationDays < 1) return null;
+            const parts = depDateString.split('-');
+            if (parts.length !== 3) return null;
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            
+            const depDate = new Date(Date.UTC(year, month, day));
+            if (isNaN(depDate.getTime())) return null;
+            
+            depDate.setUTCDate(depDate.getUTCDate() + (parseInt(durationDays, 10) - 1));
+            
+            const resYear = depDate.getUTCFullYear();
+            const resMonth = String(depDate.getUTCMonth() + 1).padStart(2, '0');
+            const resDay = String(depDate.getUTCDate()).padStart(2, '0');
+            
+            return resYear + '-' + resMonth + '-' + resDay;
+        }
+
+        function validateCreateDates() {
+            const depDateVal = document.getElementById('createDepartureDate').value;
+            const retDateVal = document.getElementById('createReturnDate').value;
+            const errorAlert = document.getElementById('createModalErrorAlert');
+            const submitBtn = document.getElementById('submitCreateBtn');
+
+            if (depDateVal && retDateVal) {
+                const depDate = new Date(depDateVal);
+                const retDate = new Date(retDateVal);
+                const depYear = depDate.getFullYear();
+                const retYear = retDate.getFullYear();
+
+                if (depYear < 2020 || depYear > 2099 || retYear < 2020 || retYear > 2099) {
+                    if (errorAlert) {
+                        errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Year must be a valid 4-digit year (2020 - 2099).';
+                        errorAlert.classList.remove('d-none');
+                    }
+                    if (submitBtn) submitBtn.disabled = true;
+                } else if (depDate > retDate) {
+                    if (errorAlert) {
+                        errorAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation me-1"></i>Departure date cannot be after return date.';
+                        errorAlert.classList.remove('d-none');
+                    }
+                    if (submitBtn) submitBtn.disabled = true;
+                } else {
+                    if (errorAlert) errorAlert.classList.add('d-none');
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            }
+        }
+
+        function onDepartureDateChangeCreate() {
+            const depVal = document.getElementById('createDepartureDate').value;
+            const selectTour = document.querySelector('select[name="formTourId"]');
+            const tourId = (selectTour && selectTour.value) ? selectTour.value : "${selectedTourId}";
+            const duration = tourDurations[tourId] || 1;
+            
+            if (depVal) {
+                const calculatedRet = autoCalculateReturnDate(depVal, duration);
+                if (calculatedRet) {
+                    document.getElementById('createReturnDate').value = calculatedRet;
+                }
+            }
+            validateCreateDates();
+        }
+
+        function onTourSelectChangeCreate() {
+            const depVal = document.getElementById('createDepartureDate').value;
+            const selectTour = document.querySelector('select[name="formTourId"]');
+            const tourId = selectTour ? selectTour.value : null;
+            const duration = tourDurations[tourId] || 1;
+            
+            if (depVal && tourId) {
+                const calculatedRet = autoCalculateReturnDate(depVal, duration);
+                if (calculatedRet) {
+                    document.getElementById('createReturnDate').value = calculatedRet;
+                }
+            }
+            validateCreateDates();
         }
 
         function openReserveModal(scheduleId, tourName, availableSlots) {

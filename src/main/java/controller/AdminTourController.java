@@ -244,7 +244,6 @@ public class AdminTourController extends HttpServlet {
                 if ("update".equalsIgnoreCase(action)) {
                     success = tourDAO.updateTour(tour);
                     if (success) {
-                        tourDAO.syncTourDurationFromSchedules(tour.getTourId());
                         tourDAO.syncTourBasePriceFromSchedules(tour.getTourId());
                     }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 

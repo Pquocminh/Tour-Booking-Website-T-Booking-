@@ -57,9 +57,9 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Duration (Days)</label>
-                        <input type="number" name="durationDays" class="form-control rounded-3 bg-light" value="${not empty tour and tour.durationDays > 0 ? tour.durationDays : 1}" readonly>
-                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Calculated automatically from Tour Schedule dates</small>
+                        <label class="form-label text-muted small fw-bold">Duration (Days) <span class="text-danger">*</span></label>
+                        <input type="number" name="durationDays" min="1" class="form-control rounded-3" value="${not empty tour and tour.durationDays > 0 ? tour.durationDays : 1}" required>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Set the tour duration in days</small>
                     </div>
 
                     <div class="col-md-3">
