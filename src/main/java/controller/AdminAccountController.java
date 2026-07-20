@@ -50,11 +50,14 @@ public class AdminAccountController extends HttpServlet {
         }
 
         List<Account> accounts = new java.util.ArrayList<>();
-        if (role == null || role.equals("All") || role.equals("Customer")) {
+        if ("Customer".equals(role)) {
             accounts.addAll(customerDAO.getAllAccounts(search, status));
-        }
-        if (role == null || role.equals("All") || role.equals("Admin") || role.equals("Staff")) {
-            accounts.addAll(employeeDAO.getAllAccounts(search, role.equals("All") ? null : role, status));
+        } else if ("Staff".equals(role)) {
+            accounts.addAll(employeeDAO.getAllAccounts(search, "Staff", status));
+        } else {
+            // role is "All" (or any other invalid role, we only show Customer and Staff)
+            accounts.addAll(customerDAO.getAllAccounts(search, status));
+            accounts.addAll(employeeDAO.getAllAccounts(search, "Staff", status));
         }
 
         request.setAttribute("accounts", accounts);
@@ -109,6 +112,12 @@ public class AdminAccountController extends HttpServlet {
             
             // alt account != null
             if (account != null) {
+                // Safety check: Prevent Admin from viewing Admin accounts
+                if ("Admin".equalsIgnoreCase(account.getRole())) {
+                    session.setAttribute("errorMessage", "Access denied. Admin cannot manage other Admin accounts.");
+                    response.sendRedirect(request.getContextPath() + "/admin/accounts");
+                    return;
+                }
                 request.setAttribute("account", account);
                 // 1.1.5. forward(request, response) -> 3. Render account details page
                 request.getRequestDispatcher("/WEB-INF/views/admin/account-details.jsp").forward(request, response);
@@ -177,6 +186,13 @@ public class AdminAccountController extends HttpServlet {
             role == null || role.trim().isEmpty() ||
             status == null || status.trim().isEmpty()) {
             session.setAttribute("errorMessage", "Required fields are missing.");
+            response.sendRedirect(request.getContextPath() + "/admin/accounts");
+            return;
+        }
+
+        // Safety check: Admin cannot create Admin accounts
+        if ("Admin".equalsIgnoreCase(role)) {
+            session.setAttribute("errorMessage", "You cannot create Admin accounts.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
             return;
         }
@@ -284,6 +300,13 @@ public class AdminAccountController extends HttpServlet {
                 return;
             }
 
+            // Safety check: Admin cannot update Admin accounts
+            if ("Admin".equalsIgnoreCase(existingAcc.getRole())) {
+                session.setAttribute("errorMessage", "Access denied. Admin cannot modify Admin accounts.");
+                response.sendRedirect(request.getContextPath() + "/admin/accounts");
+                return;
+            }
+
             // Check if email belongs to someone else
             if (("Customer".equalsIgnoreCase(role) ? customerDAO.checkEmailExistsForOtherAccount(email, id) : employeeDAO.checkEmailExistsForOtherAccount(email, id))) {
                 session.setAttribute("errorMessage", "Email is already in use by another account.");
@@ -377,6 +400,13 @@ public class AdminAccountController extends HttpServlet {
             }
             if (existingAcc == null) {
                 session.setAttribute("errorMessage", "Account not found.");
+                response.sendRedirect(request.getContextPath() + "/admin/accounts");
+                return;
+            }
+
+            // Safety check: Prevent deleting Admin accounts
+            if ("Admin".equalsIgnoreCase(existingAcc.getRole())) {
+                session.setAttribute("errorMessage", "Access denied. Admin cannot delete Admin accounts.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
                 return;
             }
