@@ -237,6 +237,15 @@ public class AdminOperationController extends HttpServlet {
                 double price = Double.parseDouble(priceParam.trim());
                 int totalSlots = Integer.parseInt(totalSlotsParam.trim());
 
+                int depYear = departureDate.toLocalDate().getYear();
+                int retYear = returnDate.toLocalDate().getYear();
+
+                if (depYear < 2020 || depYear > 2099 || retYear < 2020 || retYear > 2099) {
+                    request.getSession().setAttribute("errorMessage", "Year must be a valid 4-digit year (2020 - 2099)!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
                 if (departureDate.after(returnDate)) {
                     request.getSession().setAttribute("errorMessage", "Departure date cannot be after return date!");
                     response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
@@ -341,6 +350,15 @@ public class AdminOperationController extends HttpServlet {
                 int scheduleId = Integer.parseInt(scheduleIdParam.trim());
                 Date departureDate = Date.valueOf(departureDateStr.trim());
                 Date returnDate = Date.valueOf(returnDateStr.trim());
+
+                int depYear = departureDate.toLocalDate().getYear();
+                int retYear = returnDate.toLocalDate().getYear();
+
+                if (depYear < 2020 || depYear > 2099 || retYear < 2020 || retYear > 2099) {
+                    request.getSession().setAttribute("errorMessage", "Year must be a valid 4-digit year (2020 - 2099)!");
+                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
 
                 if (departureDate.after(returnDate)) {
                     request.getSession().setAttribute("errorMessage", "Departure date cannot be after return date!");

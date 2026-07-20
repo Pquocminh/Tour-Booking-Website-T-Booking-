@@ -62,11 +62,11 @@
 
                 <div class="col-md-6">
                     <label class="form-label text-muted small fw-bold">Start Date</label>
-                    <input type="date" name="startDate" value="${voucher.startDate}" class="form-control rounded-3" required>
+                    <input type="date" name="startDate" value="${voucher.startDate}" min="2020-01-01" max="2099-12-31" class="form-control rounded-3" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label text-muted small fw-bold">End Date</label>
-                    <input type="date" name="endDate" value="${voucher.endDate}" class="form-control rounded-3" required>
+                    <input type="date" name="endDate" value="${voucher.endDate}" min="2020-01-01" max="2099-12-31" class="form-control rounded-3" required>
                 </div>
             </div>
 

@@ -50,12 +50,12 @@
                     
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">Start Date</label>
-                        <input type="date" name="startDate" class="form-control rounded-3" value="${promotion.startDate}" required>
+                        <input type="date" name="startDate" min="2020-01-01" max="2099-12-31" class="form-control rounded-3" value="${promotion.startDate}" required>
                     </div>
                     
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-bold">End Date</label>
-                        <input type="date" name="endDate" class="form-control rounded-3" value="${promotion.endDate}" required>
+                        <input type="date" name="endDate" min="2020-01-01" max="2099-12-31" class="form-control rounded-3" value="${promotion.endDate}" required>
                     </div>
                     
                     <div class="col-12">

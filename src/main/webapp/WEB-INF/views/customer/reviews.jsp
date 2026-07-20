@@ -195,7 +195,7 @@
                                                                 <div class="text-muted small">
                                                                     <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy"/></span>
                                                                     <span class="me-3"><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${booking.departureDate}" pattern="dd/MM/yyyy"/></span>
-                                                                    <span><i class="fa-solid fa-wallet me-1"></i>Total Paid: <fmt:formatNumber value="${booking.totalPrice}" type="currency" currencySymbol="₫"/></span>
+                                                                    <span><i class="fa-solid fa-wallet me-1"></i>Total Paid: <fmt:formatNumber value="${booking.totalPrice}" pattern="#,##0 ₫"/></span>
                                                                 </div>
                                                             </div>
                                                             <div class="mt-3 mt-md-0">
