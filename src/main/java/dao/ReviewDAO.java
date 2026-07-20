@@ -67,13 +67,14 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT b.*, bv.voucher_id, s.departure_date, t.tour_name " +
+        String sql = "SELECT b.*, bv.voucher_id, s.departure_date, s.return_date, t.tour_name " +
                      "FROM Booking b " +
                      "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "JOIN Tour t ON s.tour_id = t.tour_id " +
                      "LEFT JOIN Review r ON b.booking_id = r.booking_id " +
-                     "WHERE b.customer_id = ? AND r.review_id IS NULL AND b.status = 'Confirmed' " +
+                     "WHERE b.customer_id = ? AND r.review_id IS NULL AND (b.status = 'Confirmed' OR b.status = 'Completed') " +
+                     "AND s.return_date <= CAST(GETDATE() AS DATE) " +
                      "ORDER BY b.booking_date DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, customerId);
@@ -101,6 +102,7 @@ public class ReviewDAO {
                     
                     b.setStatus(rs.getString("status"));
                     b.setDepartureDate(rs.getDate("departure_date"));
+                    b.setReturnDate(rs.getDate("return_date"));
                     b.setTourName(rs.getString("tour_name"));
                     list.add(b);
                 }
@@ -117,6 +119,42 @@ public class ReviewDAO {
             }
         }
         return list;
+    }
+
+    public boolean canCustomerReviewBooking(int bookingId, int customerId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+
+        String sql = "SELECT COUNT(*) FROM Booking b " +
+                     "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
+                     "LEFT JOIN Review r ON b.booking_id = r.booking_id " +
+                     "WHERE b.booking_id = ? AND b.customer_id = ? " +
+                     "AND (b.status = 'Confirmed' OR b.status = 'Completed') " +
+                     "AND s.return_date <= CAST(GETDATE() AS DATE) " +
+                     "AND r.review_id IS NULL";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ps.setInt(2, customerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     public boolean addReview(Review review) {
@@ -317,7 +355,7 @@ public class ReviewDAO {
                      "JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
-                     "WHERE s.tour_id = ? AND r.status = 'Visible' " +
+                     "WHERE s.tour_id = ? AND (r.status = 'Visible' OR r.status = 'Approved') " +
                      "ORDER BY r.created_at DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tourId);
