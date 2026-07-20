@@ -71,11 +71,12 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">Base Price (VND) <span class="text-danger">*</span></label>
+                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price)</label>
                         <div class="input-group">
-                            <input type="number" name="basePrice" class="form-control rounded-start-3" value="${tour.basePrice}" step="0.01" min="0" required>
+                            <input type="text" class="form-control rounded-start-3 bg-light" value="<fmt:formatNumber value='${not empty tour and tour.basePrice > 0 ? tour.basePrice : 0}' pattern='#,##0'/>" readonly disabled>
                             <span class="input-group-text rounded-end-3 border-start-0">VND</span>
                         </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Prices are managed per Schedule. Tour starting price automatically syncs from the lowest schedule price.</small>
                     </div>
 
                     <div class="col-md-6">

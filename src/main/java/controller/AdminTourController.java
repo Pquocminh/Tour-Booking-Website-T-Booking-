@@ -217,7 +217,20 @@ public class AdminTourController extends HttpServlet {
                     } catch (NumberFormatException e) {}
                 }
                 tour.setDurationDays(duration);
-                tour.setBasePrice(Double.parseDouble(request.getParameter("basePrice")));
+                String basePriceParam = request.getParameter("basePrice");
+                double basePrice = 0.0;
+                if ("update".equalsIgnoreCase(action)) {
+                    Tour existing = tourDAO.getTourByIdAdmin(tour.getTourId());
+                    if (existing != null) {
+                        basePrice = existing.getBasePrice();
+                    }
+                }
+                if (basePriceParam != null && !basePriceParam.trim().isEmpty()) {
+                    try {
+                        basePrice = Double.parseDouble(basePriceParam.trim());
+                    } catch (NumberFormatException e) {}
+                }
+                tour.setBasePrice(basePrice);
                 tour.setStatus(request.getParameter("status"));
                 tour.setThumbnailUrl(request.getParameter("thumbnailUrl"));
                 
@@ -232,11 +245,15 @@ public class AdminTourController extends HttpServlet {
                     success = tourDAO.updateTour(tour);
                     if (success) {
                         tourDAO.syncTourDurationFromSchedules(tour.getTourId());
+                        tourDAO.syncTourBasePriceFromSchedules(tour.getTourId());
                     }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour updated successfully!" : "Failed to update tour.");
                 } else {
                     success = tourDAO.addTour(tour);
+                    if (success) {
+                        tourDAO.syncTourBasePriceFromSchedules(tour.getTourId());
+                    }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour created successfully!" : "Failed to create tour.");
                 }

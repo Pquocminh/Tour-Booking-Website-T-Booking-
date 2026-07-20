@@ -951,7 +951,64 @@ public class TourDAO {
         }
         return false;
     }
+
+    public boolean updateTourBasePrice(int tourId, double basePrice) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "UPDATE Tour SET base_price = ? WHERE tour_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, basePrice);
+            ps.setInt(2, tourId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean syncTourBasePriceFromSchedules(int tourId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "SELECT MIN(price) AS min_price FROM TourSchedule WHERE tour_id = ? AND status != 'Cancelled'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tourId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double minPrice = rs.getDouble("min_price");
+                    if (!rs.wasNull() && minPrice > 0) {
+                        return updateTourBasePrice(tourId, minPrice);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 }
+
 
 
 

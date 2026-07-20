@@ -184,7 +184,7 @@
                     <span class="badge bg-primary rounded-pill py-2 px-3 align-self-start">${schedules.size()} Schedule(s)</span>
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-custom table-hover align-middle">
                         <thead class="table-light">
                             <tr>
@@ -200,7 +200,7 @@
                                 <th class="text-center">Available</th>
                                 <th>Assigned Staff</th>
                                 <th>Status</th>
-                                <th style="width: 320px;" class="text-center">Actions</th>
+                                <th style="width: 150px; position: sticky; right: 0; background-color: #f8f9fa; z-index: 1;" class="text-center shadow-sm">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,7 +218,7 @@
                                         <tr>
                                             <td><span class="text-muted small fw-bold">#${s.scheduleId}</span></td>
                                             <c:if test="${empty selectedTour}">
-                                                <td class="fw-semibold">${s.tourName}</td>
+                                                <td class="fw-semibold text-dark text-truncate" style="max-width: 200px;" title="${s.tourName}">${s.tourName}</td>
                                             </c:if>
                                             <td class="fw-semibold"><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></td>
                                             <td><fmt:formatDate value="${s.returnDate}" pattern="dd/MM/yyyy"/></td>
@@ -268,133 +268,32 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
-                                            <td class="text-center">
+                                            <td style="position: sticky; right: 0; background-color: #ffffff; z-index: 1;" class="text-center shadow-sm">
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <a class="btn btn-outline-primary btn-sm rounded-pill px-3" 
+                                                    <a class="btn btn-outline-info btn-icon shadow-sm" title="View Detail"
                                                        href="${pageContext.request.contextPath}/admin/capacity?${not empty selectedTourId ? 'tourId='.concat(selectedTourId).concat('&') : ''}detailScheduleId=${s.scheduleId}">
-                                                        <i class="fa-solid fa-eye me-1"></i>Detail
+                                                        <i class="fa-solid fa-eye"></i>
                                                     </a>
-                                                    <button class="btn btn-outline-success btn-sm rounded-pill px-3" 
+                                                    <button class="btn btn-outline-success btn-icon shadow-sm" title="Reserve Slots" 
                                                             ${(!'Open'.equalsIgnoreCase(s.status) || s.availableSlots <= 0) ? 'disabled' : ''}
                                                             data-bs-toggle="modal" data-bs-target="#reserveSlotsModal${s.scheduleId}">
-                                                        <i class="fa-solid fa-ticket me-1"></i>Reserve
+                                                        <i class="fa-solid fa-ticket"></i>
                                                     </button>
                                                     <c:choose>
                                                         <c:when test="${'Cancelled'.equalsIgnoreCase(s.status) || 'Completed'.equalsIgnoreCase(s.status)}">
-                                                            <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" disabled title="Cannot release slots for Cancelled/Completed schedules">
-                                                                <i class="fa-solid fa-plus me-1"></i>Release
+                                                            <button class="btn btn-outline-secondary btn-icon shadow-sm" disabled title="Cannot release slots for Cancelled/Completed schedules">
+                                                                <i class="fa-solid fa-plus"></i>
                                                             </button>
                                                         </c:when>
                                                         <c:otherwise>
-                                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
+                                                            <button class="btn btn-outline-primary btn-icon shadow-sm" title="Release Additional Slots" 
                                                                     data-bs-toggle="modal" data-bs-target="#releaseSlotsModal${s.scheduleId}">
-                                                                <i class="fa-solid fa-plus me-1"></i>Release
+                                                                <i class="fa-solid fa-plus"></i>
                                                             </button>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </div>
-
-                                                <!-- Release Slots Modal for Schedule #${s.scheduleId} -->
-                                                <div class="modal fade text-start" id="releaseSlotsModal${s.scheduleId}" tabindex="-1" aria-labelledby="releaseSlotsModalLabel${s.scheduleId}" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                                                            <div class="modal-header border-0 pb-0">
-                                                                <h5 class="modal-title fw-bold" id="releaseSlotsModalLabel${s.scheduleId}"><i class="fa-solid fa-circle-plus text-primary me-2"></i>Release Additional Slots</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <form method="POST" action="${pageContext.request.contextPath}/admin/capacity">
-                                                                <input type="hidden" name="action" value="release">
-                                                                <input type="hidden" name="scheduleId" value="${s.scheduleId}">
-                                                                <input type="hidden" name="tourId" value="${s.tourId}">
-                                                                
-                                                                <div class="modal-body py-4">
-                                                                    <div class="mb-3 bg-light p-3 rounded-3">
-                                                                        <div class="row g-2">
-                                                                            <div class="col-6">
-                                                                                <span class="text-muted small d-block">DEPARTURE DATE</span>
-                                                                                <span class="fw-bold text-dark"><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></span>
-                                                                            </div>
-                                                                            <div class="col-6">
-                                                                                <span class="text-muted small d-block">CURRENT CAPACITY (Avail/Total)</span>
-                                                                                <span class="fw-bold text-dark">${s.availableSlots} / ${s.totalSlots}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                    <div class="mb-3">
-                                                                        <label for="slotsToRelease${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to release (Bus capacity)</label>
-                                                                        <input type="number" class="form-control rounded-3" id="slotsToRelease${s.scheduleId}" name="slotsToRelease" min="44" step="44" value="44" required placeholder="44 (1 Bus)">
-                                                                        <div class="form-text">Each release adds 1 big bus (44 passenger slots).</div>
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <div class="modal-footer border-0 pt-0">
-                                                                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                                                                    <button type="submit" class="btn btn-primary px-4 rounded-pill text-white">Release Slots</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Reserve Slots Modal for Schedule #${s.scheduleId} -->
-                                                <div class="modal fade text-start" id="reserveSlotsModal${s.scheduleId}" tabindex="-1" aria-labelledby="reserveSlotsModalLabel${s.scheduleId}" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                                                            <div class="modal-header border-0 pb-0">
-                                                                <h5 class="modal-title fw-bold" id="reserveSlotsModalLabel${s.scheduleId}"><i class="fa-solid fa-ticket text-success me-2"></i>Reserve Tour Slots</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <form method="POST" action="${pageContext.request.contextPath}/admin/capacity">
-                                                                <input type="hidden" name="action" value="reserve">
-                                                                <input type="hidden" name="scheduleId" value="${s.scheduleId}">
-                                                                <input type="hidden" name="tourId" value="${s.tourId}">
-                                                                
-                                                                <div class="modal-body py-4">
-                                                                    <div class="mb-3 bg-light p-3 rounded-3 text-start">
-                                                                        <span class="text-muted small d-block">TOUR PACKAGE</span>
-                                                                        <span class="fw-bold text-dark">${empty selectedTour ? s.tourName : selectedTour.tourName}</span>
-                                                                    </div>
-
-                                                                    <div class="mb-3 bg-light p-3 rounded-3 text-start">
-                                                                        <span class="text-muted small d-block">AVAILABLE SLOTS</span>
-                                                                        <span class="fw-bold text-success">${s.availableSlots} slots left</span>
-                                                                    </div>
-
-                                                                    <div class="mb-3">
-                                                                        <label for="customerIdentifier${s.scheduleId}" class="form-label text-muted small fw-bold">Customer Username or Email</label>
-                                                                        <input type="text" class="form-control rounded-3" id="customerIdentifier${s.scheduleId}" name="customerIdentifier" placeholder="e.g. minhpq" required>
-                                                                        <div class="form-text text-muted small">Enter the username or email of a registered customer.</div>
-                                                                    </div>
-
-                                                                    <div class="row g-3 mb-3">
-                                                                        <div class="col-md-6">
-                                                                            <label for="reserveContactName${s.scheduleId}" class="form-label text-muted small fw-bold">Contact Name</label>
-                                                                            <input type="text" class="form-control rounded-3" id="reserveContactName${s.scheduleId}" name="contactName" placeholder="e.g. Pham Quoc Minh" required>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <label for="reserveContactPhone${s.scheduleId}" class="form-label text-muted small fw-bold">Contact Phone</label>
-                                                                            <input type="text" class="form-control rounded-3" id="reserveContactPhone${s.scheduleId}" name="contactPhone" placeholder="e.g. 0923456789" required>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="mb-3">
-                                                                        <label for="reserveNumSlots${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to reserve</label>
-                                                                        <input type="number" class="form-control rounded-3" id="reserveNumSlots${s.scheduleId}" name="numberOfPeople" min="1" max="${s.availableSlots}" required value="1">
-                                                                        <div class="form-text">Choose between 1 and ${s.availableSlots} slots.</div>
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <div class="modal-footer border-0 pt-0">
-                                                                    <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                                                                    <button type="submit" class="btn btn-success px-4 rounded-pill text-white">Reserve Slots</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </td>
-
                                         </tr>
                                     </c:forEach>
                                 </c:otherwise>
@@ -402,6 +301,111 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Modals rendered outside table structure -->
+                <c:if test="${not empty schedules}">
+                    <c:forEach var="s" items="${schedules}">
+                        <!-- Release Slots Modal for Schedule #${s.scheduleId} -->
+                        <div class="modal fade text-start" id="releaseSlotsModal${s.scheduleId}" tabindex="-1" aria-labelledby="releaseSlotsModalLabel${s.scheduleId}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                    <div class="modal-header border-0 pb-0">
+                                        <h5 class="modal-title fw-bold" id="releaseSlotsModalLabel${s.scheduleId}"><i class="fa-solid fa-circle-plus text-primary me-2"></i>Release Additional Slots</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="${pageContext.request.contextPath}/admin/capacity">
+                                        <input type="hidden" name="action" value="release">
+                                        <input type="hidden" name="scheduleId" value="${s.scheduleId}">
+                                        <input type="hidden" name="tourId" value="${s.tourId}">
+                                        
+                                        <div class="modal-body py-4">
+                                            <div class="mb-3 bg-light p-3 rounded-3">
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <span class="text-muted small d-block">DEPARTURE DATE</span>
+                                                        <span class="fw-bold text-dark"><fmt:formatDate value="${s.departureDate}" pattern="dd/MM/yyyy"/></span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="text-muted small d-block">CURRENT CAPACITY (Avail/Total)</span>
+                                                        <span class="fw-bold text-dark">${s.availableSlots} / ${s.totalSlots}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="slotsToRelease${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to release (Bus capacity)</label>
+                                                <input type="number" class="form-control rounded-3" id="slotsToRelease${s.scheduleId}" name="slotsToRelease" min="44" step="44" value="44" required placeholder="44 (1 Bus)">
+                                                <div class="form-text">Each release adds 1 big bus (44 passenger slots).</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="modal-footer border-0 pt-0">
+                                            <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary px-4 rounded-pill text-white">Release Slots</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reserve Slots Modal for Schedule #${s.scheduleId} -->
+                        <div class="modal fade text-start" id="reserveSlotsModal${s.scheduleId}" tabindex="-1" aria-labelledby="reserveSlotsModalLabel${s.scheduleId}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                    <div class="modal-header border-0 pb-0">
+                                        <h5 class="modal-title fw-bold" id="reserveSlotsModalLabel${s.scheduleId}"><i class="fa-solid fa-ticket text-success me-2"></i>Reserve Tour Slots</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST" action="${pageContext.request.contextPath}/admin/capacity">
+                                        <input type="hidden" name="action" value="reserve">
+                                        <input type="hidden" name="scheduleId" value="${s.scheduleId}">
+                                        <input type="hidden" name="tourId" value="${s.tourId}">
+                                        
+                                        <div class="modal-body py-4">
+                                            <div class="mb-3 bg-light p-3 rounded-3 text-start">
+                                                <span class="text-muted small d-block">TOUR PACKAGE</span>
+                                                <span class="fw-bold text-dark">${empty selectedTour ? s.tourName : selectedTour.tourName}</span>
+                                            </div>
+
+                                            <div class="mb-3 bg-light p-3 rounded-3 text-start">
+                                                <span class="text-muted small d-block">AVAILABLE SLOTS</span>
+                                                <span class="fw-bold text-success">${s.availableSlots} slots left</span>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="customerIdentifier${s.scheduleId}" class="form-label text-muted small fw-bold">Customer Username or Email</label>
+                                                <input type="text" class="form-control rounded-3" id="customerIdentifier${s.scheduleId}" name="customerIdentifier" placeholder="e.g. minhpq" required>
+                                                <div class="form-text text-muted small">Enter the username or email of a registered customer.</div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="reserveContactName${s.scheduleId}" class="form-label text-muted small fw-bold">Contact Name</label>
+                                                    <input type="text" class="form-control rounded-3" id="reserveContactName${s.scheduleId}" name="contactName" placeholder="e.g. Pham Quoc Minh" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="reserveContactPhone${s.scheduleId}" class="form-label text-muted small fw-bold">Contact Phone</label>
+                                                    <input type="text" class="form-control rounded-3" id="reserveContactPhone${s.scheduleId}" name="contactPhone" placeholder="e.g. 0923456789" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="reserveNumSlots${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to reserve</label>
+                                                <input type="number" class="form-control rounded-3" id="reserveNumSlots${s.scheduleId}" name="numberOfPeople" min="1" max="${s.availableSlots}" required value="1">
+                                                <div class="form-text">Choose between 1 and ${s.availableSlots} slots.</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="modal-footer border-0 pt-0">
+                                            <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-success px-4 rounded-pill text-white">Reserve Slots</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </c:if>
             </section>
         </c:if>
     </div>
