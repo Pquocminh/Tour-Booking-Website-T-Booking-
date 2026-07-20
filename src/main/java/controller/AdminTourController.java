@@ -203,7 +203,20 @@ public class AdminTourController extends HttpServlet {
                 tour.setDestinationId(Integer.parseInt(request.getParameter("destinationId")));
                 tour.setDepartureLocation(request.getParameter("departureLocation"));
                 tour.setDescription(request.getParameter("description"));
-                tour.setDurationDays(Integer.parseInt(request.getParameter("durationDays")));
+                String durationParam = request.getParameter("durationDays");
+                int duration = 1;
+                if ("update".equalsIgnoreCase(action)) {
+                    Tour existing = tourDAO.getTourByIdAdmin(tour.getTourId());
+                    if (existing != null && existing.getDurationDays() > 0) {
+                        duration = existing.getDurationDays();
+                    }
+                }
+                if (durationParam != null && !durationParam.trim().isEmpty()) {
+                    try {
+                        duration = Integer.parseInt(durationParam.trim());
+                    } catch (NumberFormatException e) {}
+                }
+                tour.setDurationDays(duration);
                 tour.setBasePrice(Double.parseDouble(request.getParameter("basePrice")));
                 tour.setStatus(request.getParameter("status"));
                 tour.setThumbnailUrl(request.getParameter("thumbnailUrl"));
@@ -217,6 +230,9 @@ public class AdminTourController extends HttpServlet {
                 boolean success;
                 if ("update".equalsIgnoreCase(action)) {
                     success = tourDAO.updateTour(tour);
+                    if (success) {
+                        tourDAO.syncTourDurationFromSchedules(tour.getTourId());
+                    }
                     request.getSession().setAttribute(success ? "successMessage" : "errorMessage", 
                         success ? "Tour updated successfully!" : "Failed to update tour.");
                 } else {

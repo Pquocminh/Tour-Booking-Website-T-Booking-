@@ -239,6 +239,7 @@ public class StaffController extends HttpServlet {
 
             boolean success = tourDAO.addTourSchedule(sched);
             if (success) {
+                tourDAO.syncTourDurationFromSchedules(tourId);
                 request.getSession().setAttribute("successMessage", "Created Tour Schedule successfully!");
             } else {
                 request.getSession().setAttribute("errorMessage", "Failed to create tour schedule in database!");

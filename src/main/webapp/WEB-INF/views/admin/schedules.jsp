@@ -223,7 +223,8 @@
 
                         <div class="mb-3">
                             <label for="editPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
-                            <input type="number" class="form-control rounded-3" id="editPrice" name="price" min="0" step="1000" required>
+                            <input type="number" class="form-control rounded-3 bg-light" id="editPrice" name="price" readonly>
+                            <div class="form-text text-muted small">Price is fixed for this schedule</div>
                         </div>
 
                         <div class="row g-3 mb-3">
@@ -238,7 +239,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="editTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                                <input type="number" class="form-control rounded-3" id="editTotalSlots" name="totalSlots" min="1" max="45" required>
+                                <input type="number" class="form-control rounded-3 bg-light" id="editTotalSlots" name="totalSlots" readonly>
                                 <div class="form-text text-primary small" id="editBookedSlotsInfo">Booked slots: 0</div>
                             </div>
                             <div class="col-md-6">

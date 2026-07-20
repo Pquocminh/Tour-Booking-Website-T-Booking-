@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -57,8 +57,9 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label text-muted small fw-bold">Duration (Days) <span class="text-danger">*</span></label>
-                        <input type="number" name="durationDays" class="form-control rounded-3" value="${tour.durationDays}" min="1" required>
+                        <label class="form-label text-muted small fw-bold">Duration (Days)</label>
+                        <input type="number" name="durationDays" class="form-control rounded-3 bg-light" value="${not empty tour and tour.durationDays > 0 ? tour.durationDays : 1}" readonly>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Calculated automatically from Tour Schedule dates</small>
                     </div>
 
                     <div class="col-md-3">

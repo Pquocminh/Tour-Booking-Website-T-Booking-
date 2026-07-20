@@ -892,6 +892,66 @@ public class TourDAO {
             }
         }
     }
+
+    public boolean updateTourDuration(int tourId, int durationDays) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "UPDATE Tour SET duration_days = ? WHERE tour_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, durationDays);
+            ps.setInt(2, tourId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean syncTourDurationFromSchedules(int tourId) {
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "SELECT TOP 1 departure_date, return_date FROM TourSchedule WHERE tour_id = ? ORDER BY departure_date ASC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tourId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    java.sql.Date dep = rs.getDate("departure_date");
+                    java.sql.Date ret = rs.getDate("return_date");
+                    if (dep != null && ret != null) {
+                        long diffMs = Math.abs(ret.getTime() - dep.getTime());
+                        int days = (int) java.util.concurrent.TimeUnit.DAYS.convert(diffMs, java.util.concurrent.TimeUnit.MILLISECONDS) + 1;
+                        return updateTourDuration(tourId, days);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 }
+
 
 
