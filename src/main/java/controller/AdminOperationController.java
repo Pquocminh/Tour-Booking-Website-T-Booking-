@@ -255,10 +255,8 @@ public class AdminOperationController extends HttpServlet {
                     return;
                 }
 
-                if (totalSlots <= 0 || totalSlots > 45) {
-                    request.getSession().setAttribute("errorMessage", "Total capacity must be between 1 and 45!");
-                    response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
-                    return;
+                if (totalSlots <= 0) {
+                    totalSlots = 44;
                 }
 
                 TourSchedule sched = new TourSchedule();

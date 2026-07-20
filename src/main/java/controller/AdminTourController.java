@@ -294,14 +294,14 @@ public class AdminTourController extends HttpServlet {
         if ("create".equalsIgnoreCase(action)) {
             String categoryName = request.getParameter("categoryName");
             String description = request.getParameter("description");
-            if (categoryName == null || categoryName.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Category name is required!");
+            if (categoryName == null || categoryName.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category name must be at least 3 characters long!");
+            } else if (description == null || description.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category description must be at least 3 characters long!");
             } else {
                 Category cat = new Category();
                 cat.setCategoryName(categoryName.trim());
-                if (description != null) {
-                    cat.setDescription(description.trim());
-                }
+                cat.setDescription(description.trim());
                 if (categoryDAO.addCategory(cat)) {
                     request.getSession().setAttribute("successMessage", "Category created successfully!");
                     response.sendRedirect(request.getContextPath() + "/admin/categories");
@@ -315,8 +315,13 @@ public class AdminTourController extends HttpServlet {
             String categoryName = request.getParameter("categoryName");
             String description = request.getParameter("description");
 
-            if (categoryName == null || categoryName.trim().isEmpty()) {
-                request.setAttribute("errorMessage", "Category name is required!");
+            if (categoryName == null || categoryName.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category name must be at least 3 characters long!");
+                reloadPageWithEditCategory(request, response, idParam);
+                return;
+            }
+            if (description == null || description.trim().length() < 3) {
+                request.setAttribute("errorMessage", "Category description must be at least 3 characters long!");
                 reloadPageWithEditCategory(request, response, idParam);
                 return;
             }
@@ -326,9 +331,7 @@ public class AdminTourController extends HttpServlet {
                 Category category = new Category();
                 category.setCategoryId(id);
                 category.setCategoryName(categoryName.trim());
-                if (description != null) {
-                    category.setDescription(description.trim());
-                }
+                category.setDescription(description.trim());
                 boolean success = categoryDAO.updateCategory(category);
                 if (success) {
                     request.getSession().setAttribute("successMessage", "Category updated successfully!");

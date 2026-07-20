@@ -322,9 +322,9 @@
                                                                     </div>
                                                                     
                                                                     <div class="mb-3">
-                                                                        <label for="slotsToRelease${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to add/release</label>
-                                                                        <input type="number" class="form-control rounded-3" id="slotsToRelease${s.scheduleId}" name="slotsToRelease" min="1" required placeholder="e.g. 5">
-                                                                        <div class="form-text">This will increase both the Total Capacity and Available Slots by the entered amount.</div>
+                                                                        <label for="slotsToRelease${s.scheduleId}" class="form-label text-muted small fw-bold">Number of slots to release (Bus capacity)</label>
+                                                                        <input type="number" class="form-control rounded-3" id="slotsToRelease${s.scheduleId}" name="slotsToRelease" min="44" step="44" value="44" required placeholder="44 (1 Bus)">
+                                                                        <div class="form-text">Each release adds 1 big bus (44 passenger slots).</div>
                                                                     </div>
                                                                 </div>
                                                                 

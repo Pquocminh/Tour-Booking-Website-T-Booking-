@@ -470,8 +470,9 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity</label>
-                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" max="45" placeholder="e.g. 20" required>
+                            <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity (Passengers)</label>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" value="44" step="44" placeholder="44 (1 Bus)" required>
+                            <div class="form-text text-muted small">Default 1 big bus (44 passenger seats)</div>
                         </div>
 
                         <div class="alert alert-danger d-none border-0 py-2 small rounded-3" id="createModalErrorAlert">
