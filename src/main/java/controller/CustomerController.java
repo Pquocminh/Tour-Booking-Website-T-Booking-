@@ -228,7 +228,7 @@ public class CustomerController extends HttpServlet {
                         response.sendRedirect(request.getContextPath() + "/customer/reviews");
                         return;
                     }
-                    if (!reviewDAO.hasReviewed(review.getBookingId())) {
+                    if (reviewDAO.canCustomerReviewBooking(review.getBookingId(), user.getAccountId())) {
                         review.setStatus("Approved");
                         success = reviewDAO.addReview(review);
                     }
@@ -236,7 +236,7 @@ public class CustomerController extends HttpServlet {
                 if (success) {
                     session.setAttribute("successMessage", "Review submitted successfully!");
                 } else {
-                    session.setAttribute("errorMessage", "Failed to submit review. You may have already reviewed this booking, or entered invalid ratings.");
+                    session.setAttribute("errorMessage", "Failed to submit review. You can only review confirmed bookings after the tour return date, or you may have already reviewed this booking.");
                 }
             } catch (NumberFormatException e) {
                 session.setAttribute("errorMessage", "Invalid review parameters.");

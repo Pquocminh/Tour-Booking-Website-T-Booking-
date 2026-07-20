@@ -181,7 +181,7 @@
                                         <div class="text-center py-5">
                                             <div class="mb-3 text-muted"><i class="fa-regular fa-clock fa-3x"></i></div>
                                             <h5 class="text-muted">No pending reviews found.</h5>
-                                            <p class="text-muted small">Only confirmed bookings can be reviewed.</p>
+                                            <p class="text-muted small">Only confirmed bookings whose tour return date has passed can be reviewed.</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
@@ -195,6 +195,7 @@
                                                                 <div class="text-muted small">
                                                                     <span class="me-3"><i class="fa-regular fa-calendar-check me-1"></i>Booked: <fmt:formatDate value="${booking.bookingDate}" pattern="dd/MM/yyyy"/></span>
                                                                     <span class="me-3"><i class="fa-solid fa-plane-departure me-1"></i>Departure: <fmt:formatDate value="${booking.departureDate}" pattern="dd/MM/yyyy"/></span>
+                                                                    <span class="me-3"><i class="fa-solid fa-plane-arrival me-1"></i>Return: <fmt:formatDate value="${booking.returnDate}" pattern="dd/MM/yyyy"/></span>
                                                                     <span><i class="fa-solid fa-wallet me-1"></i>Total Paid: <fmt:formatNumber value="${booking.totalPrice}" pattern="#,##0 ₫"/></span>
                                                                 </div>
                                                             </div>
