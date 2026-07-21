@@ -181,7 +181,7 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}" 
+                                            <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}&role=${acc.role}" 
                                                class="btn btn-outline-primary btn-sm rounded-pill" title="View Profile">
                                                 <i class="fa-regular fa-eye"></i>
                                             </a>
@@ -206,6 +206,7 @@
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#deleteAccountModal"
                                                     data-id="${acc.accountId}"
+                                                    data-role="${acc.role}"
                                                     data-username="${acc.username}">
                                                 <i class="fa-regular fa-trash-can"></i>
                                             </button>
@@ -303,7 +304,7 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}" 
+                                            <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}&role=${acc.role}" 
                                                class="btn btn-outline-primary btn-sm rounded-pill" title="View Profile">
                                                 <i class="fa-regular fa-eye"></i>
                                             </a>
@@ -328,6 +329,7 @@
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#deleteAccountModal"
                                                     data-id="${acc.accountId}"
+                                                    data-role="${acc.role}"
                                                     data-username="${acc.username}">
                                                 <i class="fa-regular fa-trash-can"></i>
                                             </button>
@@ -480,6 +482,7 @@
             </div>
             <form action="${pageContext.request.contextPath}/admin/accounts?action=delete" method="POST">
                 <input type="hidden" name="id" id="delete_id">
+                <input type="hidden" name="role" id="delete_role">
                 <div class="modal-body py-3">
                     <p class="mb-0 text-dark">Are you sure you want to delete the account <span class="fw-bold text-danger" id="delete_username_display"></span>?</p>
                     <p class="text-muted small mt-2 mb-0"><i class="fa-solid fa-info-circle me-1"></i>This action is permanent and cannot be undone.</p>
@@ -515,6 +518,7 @@
         deleteButtons.forEach(btn => {
             btn.addEventListener('click', function () {
                 document.getElementById('delete_id').value = this.getAttribute('data-id');
+                document.getElementById('delete_role').value = this.getAttribute('data-role');
                 document.getElementById('delete_username_display').textContent = '@' + this.getAttribute('data-username');
             });
         });
@@ -522,4 +526,3 @@
 </script>
 
 <jsp:include page="layout/footer.jsp" />
-

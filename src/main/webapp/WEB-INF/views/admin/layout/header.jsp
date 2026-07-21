@@ -79,13 +79,7 @@
             <div class="top-header">
                 <h2>${param.pageTitle}</h2>
                 <div class="header-right">
-                    <div class="search-bar">
-                        <i class="fa-solid fa-search text-gray"></i>
-                        <input type="text" placeholder="Search...">
-                        <div style="background: var(--primary-blue); color: white; width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                            <i class="fa-solid fa-search"></i>
-                        </div>
-                    </div>
+
                     <div class="profile-btn text-decoration-none">
                         <img src="https://ui-avatars.com/api/?name=${sessionScope.user.username}&background=random" alt="Avatar">
                         ${sessionScope.user.username}
@@ -94,4 +88,3 @@
             </div>
             
             <!-- Dynamic Content Starts Here -->
-
