@@ -97,7 +97,7 @@ public class AdminAccountController extends HttpServlet {
         // 1.1.3. getParameter("id")
         String idStr = request.getParameter("id");
         String role = request.getParameter("role");
-        if (idStr == null || idStr.trim().isEmpty() || role == null || role.trim().isEmpty()) {
+        if (idStr == null || idStr.trim().isEmpty()) {
             // alt id is invalid/empty -> 5. Redirect to /admin/accounts (invalid ID message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -108,7 +108,15 @@ public class AdminAccountController extends HttpServlet {
             int id = Integer.parseInt(idStr);
             
             // 1.1.4. getAccountById(id)
-            Account account = ("Customer".equalsIgnoreCase(role) ? customerDAO.getAccountById(id) : employeeDAO.getAccountById(id));
+            Account account = null;
+            if (role != null && !role.trim().isEmpty()) {
+                account = ("Customer".equalsIgnoreCase(role) ? customerDAO.getAccountById(id) : employeeDAO.getAccountById(id));
+            } else {
+                account = customerDAO.getAccountById(id);
+                if (account == null) {
+                    account = employeeDAO.getAccountById(id);
+                }
+            }
             
             // alt account != null
             if (account != null) {
@@ -381,7 +389,7 @@ public class AdminAccountController extends HttpServlet {
         // 1.1.3. Get and validate id parameter
         String idStr = request.getParameter("id");
         String role = request.getParameter("role");
-        if (idStr == null || idStr.trim().isEmpty() || role == null || role.trim().isEmpty()) {
+        if (idStr == null || idStr.trim().isEmpty()) {
             // alt id invalid -> 3. Redirect to /admin/accounts (error message)
             session.setAttribute("errorMessage", "Missing account ID.");
             response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -393,11 +401,24 @@ public class AdminAccountController extends HttpServlet {
             
             // Further validation: check if account exists
             Account existingAcc = null;
-            if ("Customer".equalsIgnoreCase(role)) {
-                existingAcc = customerDAO.getAccountById(id);
+            if (role != null && !role.trim().isEmpty()) {
+                if ("Customer".equalsIgnoreCase(role)) {
+                    existingAcc = customerDAO.getAccountById(id);
+                } else {
+                    existingAcc = employeeDAO.getAccountById(id);
+                }
             } else {
-                existingAcc = employeeDAO.getAccountById(id);
+                existingAcc = customerDAO.getAccountById(id);
+                if (existingAcc != null) {
+                    role = "Customer";
+                } else {
+                    existingAcc = employeeDAO.getAccountById(id);
+                    if (existingAcc != null) {
+                        role = existingAcc.getRole();
+                    }
+                }
             }
+
             if (existingAcc == null) {
                 session.setAttribute("errorMessage", "Account not found.");
                 response.sendRedirect(request.getContextPath() + "/admin/accounts");
@@ -436,4 +457,3 @@ public class AdminAccountController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/accounts");
     }
 }
-
