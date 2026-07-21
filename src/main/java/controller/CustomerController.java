@@ -90,7 +90,27 @@ public class CustomerController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        Account freshUser = user instanceof Employee ? employeeDAO.getAccountByEmail(user.getEmail()) : customerDAO.getAccountByEmail(user.getEmail());
+        if (freshUser != null) {
+            session.setAttribute("user", freshUser);
+        }
         request.getRequestDispatcher("/WEB-INF/views/customer/profile.jsp").forward(request, response);
+    }
+
+    private String capitalizeWords(String str) {
+        if (str == null || str.trim().isEmpty()) return "";
+        String[] words = str.trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0)));
+                if (word.length() > 1) {
+                    sb.append(word.substring(1).toLowerCase());
+                }
+                sb.append(" ");
+            }
+        }
+        return sb.toString().trim();
     }
 
     private void handleProfilePost(HttpServletRequest request, HttpServletResponse response)
@@ -109,36 +129,55 @@ public class CustomerController extends HttpServlet {
             String phone = request.getParameter("phone");
             String address = request.getParameter("address");
 
-            Account tempUser = new model.Customer();
-            tempUser.setAccountId(user.getAccountId());
-            tempUser.setFullName(fullName);
-            tempUser.setEmail(email);
-            tempUser.setPhone(phone);
-            tempUser.setAddress(address);
-
             String result = "Failed to update profile. Please try again.";
-            if (tempUser.getFullName() == null || tempUser.getFullName().trim().isEmpty()) {
+
+            if (fullName == null || fullName.trim().isEmpty()) {
                 result = "Full name cannot be empty!";
-            } else if (tempUser.getEmail() == null || tempUser.getEmail().trim().isEmpty()) {
-                result = "Email cannot be empty!";
             } else {
-                Account existing = tempUser instanceof Employee ? employeeDAO.getAccountByEmail(tempUser.getEmail()) : customerDAO.getAccountByEmail(tempUser.getEmail());
-                if (existing != null && existing.getAccountId() != tempUser.getAccountId()) {
-                    result = "Email is already in use by another account!";
+                fullName = capitalizeWords(fullName);
+                if (!fullName.matches("^[\\p{L}\\s]+$")) {
+                    result = "Full name cannot contain numbers or special characters!";
+                } else if (email == null || email.trim().isEmpty() || !email.trim().toLowerCase().matches("^[a-zA-Z0-9._%+-]+@gmail\\.com$")) {
+                    result = "Email address must be a valid @gmail.com address!";
+                } else if (phone == null || phone.trim().isEmpty()) {
+                    result = "Phone number cannot be empty!";
+                } else if (!phone.trim().matches("^\\d{9,11}$")) {
+                    result = "Phone number must contain digits only (9-11 numbers) without letters or special characters!";
                 } else {
-                    boolean updated = tempUser instanceof Employee ? employeeDAO.updateProfile((Employee)tempUser) : customerDAO.updateProfile((model.Customer)tempUser);
-                    if (updated) {
-                        result = "success";
+                    String cleanEmail = email.trim().toLowerCase();
+                    String cleanPhone = phone.trim();
+                    String cleanAddress = address != null ? address.trim() : "";
+
+                    Account tempUser = user instanceof Employee ? new model.Employee() : new model.Customer();
+                    tempUser.setAccountId(user.getAccountId());
+                    tempUser.setFullName(fullName);
+                    tempUser.setEmail(cleanEmail);
+                    tempUser.setPhone(cleanPhone);
+                    tempUser.setAddress(cleanAddress);
+
+                    Account existing = tempUser instanceof Employee ? employeeDAO.getAccountByEmail(cleanEmail) : customerDAO.getAccountByEmail(cleanEmail);
+                    if (existing != null && existing.getAccountId() != tempUser.getAccountId()) {
+                        result = "Email is already in use by another account!";
+                    } else {
+                        boolean updated = tempUser instanceof Employee ? employeeDAO.updateProfile((Employee)tempUser) : customerDAO.updateProfile((model.Customer)tempUser);
+                        if (updated) {
+                            result = "success";
+                        }
                     }
                 }
             }
 
             if ("success".equals(result)) {
-                user.setFullName(fullName);
-                user.setEmail(email);
-                user.setPhone(phone);
-                user.setAddress(address);
-                session.setAttribute("user", user);
+                Account freshUser = user instanceof Employee ? employeeDAO.getAccountByEmail(email.trim().toLowerCase()) : customerDAO.getAccountByEmail(email.trim().toLowerCase());
+                if (freshUser != null) {
+                    session.setAttribute("user", freshUser);
+                } else {
+                    user.setFullName(fullName);
+                    user.setEmail(email.trim().toLowerCase());
+                    user.setPhone(phone.trim());
+                    user.setAddress(address != null ? address.trim() : "");
+                    session.setAttribute("user", user);
+                }
                 session.setAttribute("successMessage", "Profile updated successfully!");
             } else {
                 session.setAttribute("errorMessage", result);

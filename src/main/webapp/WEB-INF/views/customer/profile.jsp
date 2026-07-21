@@ -114,7 +114,7 @@
                                         <i class="fa-regular fa-user"></i>
                                     </div>
                                     <h4 class="mb-1" style="font-weight: 700; color: var(--text-main);">${sessionScope.user.fullName}</h4>
-                                    <p class="text-muted mb-3" style="font-size: 0.85rem;">@${sessionScope.user.username}</p>
+                                    <p class="text-muted mb-3" style="font-size: 0.85rem;">${sessionScope.user.username}</p>
                                     <span class="badge rounded-pill px-3 py-2" style="background-color: rgba(79, 70, 229, 0.08); color: var(--primary); border: 1px solid rgba(79, 70, 229, 0.15);">
                                         Role: ${sessionScope.user.role}
                                     </span>
@@ -185,7 +185,7 @@
                                         <div class="col-12 col-sm-6">
                                             <div class="p-3 bg-white rounded-3 border border-color shadow-sm h-100">
                                                 <div class="info-label"><i class="fa-regular fa-user me-1 text-primary"></i>Username</div>
-                                                <div class="info-value mt-1" style="font-size: 1.1rem;">@${sessionScope.user.username}</div>
+                                                <div class="info-value mt-1" style="font-size: 1.1rem;">${sessionScope.user.username}</div>
                                             </div>
                                         </div>
 
@@ -236,23 +236,26 @@
             <h5 class="modal-title" id="editProfileModalLabel"><i class="fa-solid fa-user-pen me-2"></i>Edit Profile</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="${pageContext.request.contextPath}/profile" method="POST">
+          <form action="${pageContext.request.contextPath}/profile" method="POST" id="editProfileForm">
               <div class="modal-body p-4">
                   <input type="hidden" name="action" value="updateProfile">
                   
                   <div class="mb-3">
                       <label for="fullName" class="form-label font-weight-semibold">Full Name <span class="text-danger">*</span></label>
                       <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" value="${sessionScope.user.fullName}" required>
+                      <div class="form-text text-muted" style="font-size: 0.8rem;">Must contain only letters & spaces (auto-capitalizes first letters).</div>
                   </div>
                   
                   <div class="mb-3">
                       <label for="email" class="form-label font-weight-semibold">Email Address <span class="text-danger">*</span></label>
                       <input type="email" class="form-control form-control-lg" id="email" name="email" value="${sessionScope.user.email}" required>
+                      <div class="form-text text-muted" style="font-size: 0.8rem;">Must end with @gmail.com</div>
                   </div>
                   
                   <div class="mb-3">
-                      <label for="phone" class="form-label font-weight-semibold">Phone Number</label>
-                      <input type="text" class="form-control form-control-lg" id="phone" name="phone" value="${sessionScope.user.phone}">
+                      <label for="phone" class="form-label font-weight-semibold">Phone Number <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control form-control-lg" id="phone" name="phone" value="${sessionScope.user.phone}" required>
+                      <div class="form-text text-muted" style="font-size: 0.8rem;">Must contain 9-11 digits only (no characters or special symbols).</div>
                   </div>
                   
                   <div class="mb-3">
@@ -340,6 +343,49 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editForm = document.getElementById('editProfileForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    const fullNameInput = document.getElementById('fullName');
+                    const emailInput = document.getElementById('email');
+                    const phoneInput = document.getElementById('phone');
+
+                    const fullNameVal = fullNameInput.value.trim();
+                    const emailVal = emailInput.value.trim();
+                    const phoneVal = phoneInput.value.trim();
+
+                    // 1. Full Name check: non-empty, letters & spaces only
+                    const nameRegex = /^[\p{L}\s]+$/u;
+                    if (!fullNameVal || !nameRegex.test(fullNameVal)) {
+                        alert('Full name cannot be empty and cannot contain numbers or special characters.');
+                        fullNameInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // 2. Email check: must end with @gmail.com
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+                    if (!emailVal || !emailRegex.test(emailVal)) {
+                        alert('Email address must end with @gmail.com.');
+                        emailInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    // 3. Phone check: digits only, 9-11 numbers
+                    const phoneRegex = /^\d{9,11}$/;
+                    if (!phoneVal || !phoneRegex.test(phoneVal)) {
+                        alert('Phone number cannot be empty and must contain digits only (9-11 numbers).');
+                        phoneInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 
