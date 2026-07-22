@@ -60,10 +60,32 @@ public class AdminAccountController extends HttpServlet {
             accounts.addAll(employeeDAO.getAllAccounts(search, "Staff", status));
         }
 
+        // Determine active tab based on role search results
+        String activeTab = "employees"; // default
+        if ("Customer".equalsIgnoreCase(role)) {
+            activeTab = "customers";
+        } else if ("Staff".equalsIgnoreCase(role)) {
+            activeTab = "employees";
+        } else { // role is "All" or empty
+            boolean hasStaff = false;
+            boolean hasCustomer = false;
+            for (Account acc : accounts) {
+                if ("Staff".equalsIgnoreCase(acc.getRole())) {
+                    hasStaff = true;
+                } else if ("Customer".equalsIgnoreCase(acc.getRole())) {
+                    hasCustomer = true;
+                }
+            }
+            if (!hasStaff && hasCustomer) {
+                activeTab = "customers";
+            }
+        }
+
         request.setAttribute("accounts", accounts);
         request.setAttribute("searchKeyword", search);
         request.setAttribute("selectedRole", role);
         request.setAttribute("selectedStatus", status);
+        request.setAttribute("activeTab", activeTab);
 
         request.getRequestDispatcher("/WEB-INF/views/admin/accounts.jsp").forward(request, response);
     }
