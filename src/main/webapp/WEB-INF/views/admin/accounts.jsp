@@ -86,12 +86,12 @@
         <!-- Tabs Nav -->
         <ul class="nav nav-tabs mb-4" id="accountTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="true">
+                <button class="nav-link ${activeTab != 'customers' ? 'active' : ''} fw-bold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="${activeTab != 'customers'}">
                     <i class="fa-solid fa-user-tie me-2"></i>Staff
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab" aria-controls="customers" aria-selected="false">
+                <button class="nav-link ${activeTab == 'customers' ? 'active' : ''} fw-bold" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab" aria-controls="customers" aria-selected="${activeTab == 'customers'}">
                     <i class="fa-solid fa-users me-2"></i>Customers
                 </button>
             </li>
@@ -100,7 +100,7 @@
         <!-- Tabs Content -->
         <div class="tab-content" id="accountTabsContent">
             <!-- Employees Tab -->
-            <div class="tab-pane fade show active" id="employees" role="tabpanel" aria-labelledby="employees-tab">
+            <div class="tab-pane fade ${activeTab != 'customers' ? 'show active' : ''}" id="employees" role="tabpanel" aria-labelledby="employees-tab">
                 <div class="table-responsive">
 <table class="table table-custom table-hover align-middle">
                 <thead class="table-light">
@@ -128,7 +128,7 @@
                         </c:when>
                         <c:otherwise>
                             <c:forEach var="acc" items="${accounts}">
-                                <c:if test="${'Admin'.equalsIgnoreCase(acc.role) || 'Staff'.equalsIgnoreCase(acc.role)}">
+                                <c:if test="${'Staff'.equalsIgnoreCase(acc.role)}">
                                 <tr>
                                     <td>
                                         <img src="https://ui-avatars.com/api/?name=${acc.username}&background=random&size=128" 
@@ -223,7 +223,7 @@
             </div>
 
             <!-- Customers Tab -->
-            <div class="tab-pane fade" id="customers" role="tabpanel" aria-labelledby="customers-tab">
+            <div class="tab-pane fade ${activeTab == 'customers' ? 'show active' : ''}" id="customers" role="tabpanel" aria-labelledby="customers-tab">
                 <div class="table-responsive">
 <table class="table table-custom table-hover align-middle">
                 <thead class="table-light">
