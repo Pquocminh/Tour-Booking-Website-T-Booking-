@@ -37,11 +37,22 @@ public class AdminBookingController extends HttpServlet {
             if (bookingIdStr != null && status != null) {
                 try {
                     int bookingId = Integer.parseInt(bookingIdStr);
-                    boolean success = bookingDAO.updateBookingStatus(bookingId, status);
-                    if (success) {
-                        request.getSession().setAttribute("successMessage", "Updated Booking #" + bookingId + " status to " + status + ".");
+                    
+                    if ("Confirmed".equals(status)) {
+                        StringBuilder errorMsg = new StringBuilder();
+                        boolean success = bookingDAO.confirmBooking(bookingId, errorMsg);
+                        if (success) {
+                            request.getSession().setAttribute("successMessage", "Successfully confirmed Booking #" + bookingId + " and deducted slots.");
+                        } else {
+                            request.getSession().setAttribute("errorMessage", errorMsg.toString());
+                        }
                     } else {
-                        request.getSession().setAttribute("errorMessage", "Failed to update booking status.");
+                        boolean success = bookingDAO.updateBookingStatus(bookingId, status);
+                        if (success) {
+                            request.getSession().setAttribute("successMessage", "Updated Booking #" + bookingId + " status to " + status + ".");
+                        } else {
+                            request.getSession().setAttribute("errorMessage", "Failed to update booking status.");
+                        }
                     }
                 } catch (NumberFormatException e) {
                     request.getSession().setAttribute("errorMessage", "Invalid Booking ID.");

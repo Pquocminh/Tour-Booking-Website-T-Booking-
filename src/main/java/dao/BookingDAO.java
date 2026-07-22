@@ -13,7 +13,6 @@ public class BookingDAO extends DBContext {
 
     public boolean insertBooking(Booking booking) {
         String insertBookingSql = "INSERT INTO Booking (customer_id, schedule_id, booking_date, number_of_people, contact_name, contact_phone, total_price, deposit_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String updateScheduleSql = "UPDATE TourSchedule SET available_slots = available_slots - ? WHERE schedule_id = ? AND available_slots >= ?";
         String insertBookingVoucherSql = "INSERT INTO BookingVoucher (booking_id, voucher_id) VALUES (?, ?)";
 
         Connection connection = null;
@@ -21,21 +20,7 @@ public class BookingDAO extends DBContext {
             connection = getConnection();
             connection.setAutoCommit(false); // Start transaction
 
-            // 1. Update AvailableSlots first
-            try (PreparedStatement psUpdate = connection.prepareStatement(updateScheduleSql)) {
-                psUpdate.setInt(1, booking.getNumberOfPeople());
-                psUpdate.setInt(2, booking.getScheduleId());
-                psUpdate.setInt(3, booking.getNumberOfPeople());
-                int rowsUpdated = psUpdate.executeUpdate();
-                
-                if (rowsUpdated == 0) {
-                    // Not enough slots
-                    connection.rollback();
-                    return false;
-                }
-            }
-
-            // 2. Insert Booking
+            // 1. Insert Booking (Status should be Pending, no slots deducted yet)
             try (PreparedStatement psInsert = connection.prepareStatement(insertBookingSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 psInsert.setInt(1, booking.getCustomerId());
                 psInsert.setInt(2, booking.getScheduleId());
@@ -45,7 +30,7 @@ public class BookingDAO extends DBContext {
                 psInsert.setString(6, booking.getContactPhone());
                 psInsert.setDouble(7, booking.getTotalPrice());
                 psInsert.setDouble(8, booking.getDepositAmount());
-                psInsert.setString(9, booking.getStatus());
+                psInsert.setString(9, "Pending");
                 
                 int rowsInserted = psInsert.executeUpdate();
                 if (rowsInserted > 0) {
@@ -185,6 +170,89 @@ public class BookingDAO extends DBContext {
         return false;
     }
 
+    public boolean confirmBooking(int bookingId, StringBuilder errorMessage) {
+        String selectBookingSql = "SELECT * FROM Booking WHERE booking_id = ?";
+        String deductSlotsSql = "UPDATE TourSchedule SET available_slots = available_slots - ? WHERE schedule_id = ? AND available_slots >= ?";
+        String updateStatusSql = "UPDATE Booking SET status = 'Confirmed' WHERE booking_id = ?";
+
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Get booking details
+            Booking booking = null;
+            try (PreparedStatement psSelect = conn.prepareStatement(selectBookingSql)) {
+                psSelect.setInt(1, bookingId);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    if (rs.next()) {
+                        booking = new Booking();
+                        booking.setBookingId(rs.getInt("booking_id"));
+                        booking.setScheduleId(rs.getInt("schedule_id"));
+                        booking.setNumberOfPeople(rs.getInt("number_of_people"));
+                        booking.setStatus(rs.getString("status"));
+                    }
+                }
+            }
+
+            if (booking == null) {
+                errorMessage.append("Booking not found.");
+                conn.rollback();
+                return false;
+            }
+
+            // 2. Check if booking is already Confirmed or Cancelled
+            if (!"Pending".equalsIgnoreCase(booking.getStatus())) {
+                errorMessage.append("Only Pending bookings can be confirmed. Current status: ").append(booking.getStatus());
+                conn.rollback();
+                return false;
+            }
+
+            // 3. Deduct slots (with safety check)
+            try (PreparedStatement psDeduct = conn.prepareStatement(deductSlotsSql)) {
+                psDeduct.setInt(1, booking.getNumberOfPeople());
+                psDeduct.setInt(2, booking.getScheduleId());
+                psDeduct.setInt(3, booking.getNumberOfPeople());
+                int rowsUpdated = psDeduct.executeUpdate();
+                if (rowsUpdated == 0) {
+                    errorMessage.append("Failed to confirm: Not enough available seats left.");
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 4. Update Booking status to 'Confirmed'
+            try (PreparedStatement psStatus = conn.prepareStatement(updateStatusSql)) {
+                psStatus.setInt(1, bookingId);
+                int rowsUpdated = psStatus.executeUpdate();
+                if (rowsUpdated > 0) {
+                    conn.commit();
+                    return true;
+                } else {
+                    errorMessage.append("Failed to update booking status.");
+                    conn.rollback();
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (Exception ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace();
+            errorMessage.append("Database error occurred.");
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean cancelBooking(int bookingId) {
         Booking booking = getBookingById(bookingId);
         if (booking == null) {
@@ -232,19 +300,17 @@ public class BookingDAO extends DBContext {
                 }
             }
 
-            // 2. Add slots back to TourSchedule
-            try (PreparedStatement psUpdateSchedule = connection.prepareStatement(updateScheduleSql)) {
-                psUpdateSchedule.setInt(1, booking.getNumberOfPeople());
-                psUpdateSchedule.setInt(2, booking.getScheduleId());
-                int rowsUpdated = psUpdateSchedule.executeUpdate();
-                if (rowsUpdated > 0) {
-                    connection.commit();
-                    return true;
-                } else {
-                    connection.rollback();
-                    return false;
+            // 2. Add slots back to TourSchedule ONLY if it was previously Confirmed
+            if ("Confirmed".equalsIgnoreCase(booking.getStatus())) {
+                try (PreparedStatement psUpdateSchedule = connection.prepareStatement(updateScheduleSql)) {
+                    psUpdateSchedule.setInt(1, booking.getNumberOfPeople());
+                    psUpdateSchedule.setInt(2, booking.getScheduleId());
+                    psUpdateSchedule.executeUpdate();
                 }
             }
+            
+            connection.commit();
+            return true;
         } catch (Exception e) {
             if (connection != null) {
                 try {
