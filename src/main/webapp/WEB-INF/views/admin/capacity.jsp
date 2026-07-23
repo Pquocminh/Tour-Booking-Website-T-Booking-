@@ -28,25 +28,25 @@
             <c:remove var="successMessage" scope="session" />
         </c:if>
 
+
+
         <!-- Tour Selection Panel -->
         <section class="filter-panel">
-            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-route me-2 text-primary"></i>Select Tour Package</h4>
+            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-route me-2 text-primary"></i>Search Tour Package</h4>
             <form method="GET" action="${pageContext.request.contextPath}/admin/capacity">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
-                        <label class="form-label text-muted small fw-bold">Select Tour</label>
-                        <select name="tourId" class="form-select rounded-3" required>
-                            <option value="">-- Choose a tour --</option>
-                            <c:forEach var="t" items="${tours}">
-                                <option value="${t.tourId}" ${selectedTourId == t.tourId ? 'selected' : ''}>
-                                    ID: #${t.tourId} - ${t.tourName} (${t.status})
-                                </option>
-                            </c:forEach>
-                        </select>
+                    <div class="col-md-9 position-relative">
+                        <label class="form-label text-muted small fw-bold">Search Tour</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="tourSearchInput" name="tourId" class="form-control border-start-0 rounded-end-3" 
+                                   placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
+                        </div>
+
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100 rounded-3 text-white py-2">
-                            <i class="fa-solid fa-calendar-check me-2"></i>View Schedule
+                            <i class="fa-solid fa-calendar-check me-2"></i>Search
                         </button>
                     </div>
                 </div>
@@ -174,6 +174,9 @@
                             <c:choose>
                                 <c:when test="${not empty selectedTour}">
                                     ${selectedTour.tourName}
+                                </c:when>
+                                <c:when test="${not empty searchQuery}">
+                                    Search results for "${searchQuery}"
                                 </c:when>
                                 <c:otherwise>
                                     All Tour Packages
@@ -409,5 +412,7 @@
             </section>
         </c:if>
     </div>
+
+
 
     <jsp:include page="layout/footer.jsp" />

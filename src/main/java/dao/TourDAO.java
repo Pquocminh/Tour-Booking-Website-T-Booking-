@@ -321,6 +321,70 @@ public class TourDAO {
         return list;
     }
 
+    public List<TourSchedule> getAllTourSchedulesByKeyword(String keyword) {
+        List<TourSchedule> list = new ArrayList<>();
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return list;
+        }
+        StringBuilder sql = new StringBuilder("SELECT ts.*, t.tour_name FROM TourSchedule ts JOIN Tour t ON ts.tour_id = t.tour_id");
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        if (hasKeyword) {
+            sql.append(" WHERE t.tour_name LIKE ?");
+            try {
+                Integer.parseInt(keyword.trim());
+                sql.append(" OR ts.schedule_id = ? OR t.tour_id = ?");
+            } catch (NumberFormatException e) {
+                // Not an integer
+            }
+        }
+        sql.append(" ORDER BY ts.departure_date DESC");
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            if (hasKeyword) {
+                String likeKeyword = "%" + keyword.trim() + "%";
+                ps.setString(1, likeKeyword);
+                try {
+                    int id = Integer.parseInt(keyword.trim());
+                    ps.setInt(2, id);
+                    ps.setInt(3, id);
+                } catch (NumberFormatException e) {
+                    // Not an integer
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    TourSchedule sched = new TourSchedule();
+                    sched.setScheduleId(rs.getInt("schedule_id"));
+                    sched.setTourId(rs.getInt("tour_id"));
+                    sched.setDepartureDate(rs.getDate("departure_date"));
+                    sched.setReturnDate(rs.getDate("return_date"));
+                    sched.setPrice(rs.getDouble("price"));
+                    sched.setAvailableSlots(rs.getInt("available_slots"));
+                    sched.setTotalSlots(rs.getInt("total_slots"));
+                    sched.setStatus(rs.getString("status"));
+                    int staffId = rs.getInt("assigned_staff_id");
+                    if (!rs.wasNull()) {
+                        sched.setAssignedStaffId(staffId);
+                    }
+                    sched.setTourName(rs.getString("tour_name"));
+                    list.add(sched);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
     public TourSchedule getTourScheduleById(int scheduleId) {
         DBContext db = new DBContext();
         Connection conn = db.getConnection();
