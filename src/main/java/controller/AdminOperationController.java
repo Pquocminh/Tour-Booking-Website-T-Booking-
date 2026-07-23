@@ -424,25 +424,46 @@ public class AdminOperationController extends HttpServlet {
         List<Tour> tours = tourDAO.searchToursAdmin(null, null, null, null);
         request.setAttribute("tours", tours);
 
+        String searchQuery = "";
         if (tourIdParam != null && !tourIdParam.trim().isEmpty()) {
-            try {
-                int tourId = Integer.parseInt(tourIdParam.trim());
+            String query = tourIdParam.trim();
+            searchQuery = query;
+            int tourId = -1;
+            
+            if (query.startsWith("ID: #")) {
+                try {
+                    int dashIndex = query.indexOf(" - ");
+                    if (dashIndex != -1) {
+                        tourId = Integer.parseInt(query.substring(5, dashIndex).trim());
+                    } else {
+                        tourId = Integer.parseInt(query.substring(5).trim());
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore, fallback to text search
+                }
+            }
+
+            if (tourId > 0) {
                 Tour selectedTour = tourDAO.getTourByIdAdmin(tourId);
                 if (selectedTour != null) {
                     List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByTourId(tourId);
                     request.setAttribute("selectedTour", selectedTour);
                     request.setAttribute("schedules", schedules);
                     request.setAttribute("selectedTourId", tourId);
+                    searchQuery = "ID: #" + selectedTour.getTourId() + " - " + selectedTour.getTourName();
                 } else {
-                    request.setAttribute("errorMessage", "Tour not found!");
+                    List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByKeyword(query);
+                    request.setAttribute("schedules", schedules);
                 }
-            } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "Invalid Tour ID format!");
+            } else {
+                List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByKeyword(query);
+                request.setAttribute("schedules", schedules);
             }
         } else {
             List<TourSchedule> schedules = tourDAO.getAllTourSchedules(null);
             request.setAttribute("schedules", schedules);
         }
+        request.setAttribute("searchQuery", searchQuery);
 
         if (detailScheduleIdParam != null && !detailScheduleIdParam.trim().isEmpty()) {
             try {
