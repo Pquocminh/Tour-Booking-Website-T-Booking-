@@ -367,7 +367,13 @@
                     </div>
                     <h6 class="fw-bold text-main mb-1">${tour.destination.destinationName}</h6>
                     <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                        <i class="fa-solid fa-map-pin me-1 text-primary"></i>${tour.destination.province} | Region: ${tour.destination.region}
+                        <i class="fa-solid fa-map-pin me-1 text-primary"></i>${tour.destination.province} | Region: 
+                        <c:choose>
+                            <c:when test="${tour.destination.region == 'Miền Bắc' || tour.destination.region == 'North'}">North</c:when>
+                            <c:when test="${tour.destination.region == 'Miền Trung' || tour.destination.region == 'Central'}">Central</c:when>
+                            <c:when test="${tour.destination.region == 'Miền Nam' || tour.destination.region == 'South'}">South</c:when>
+                            <c:otherwise>${tour.destination.region}</c:otherwise>
+                        </c:choose>
                     </p>
                     <p class="text-secondary-emphasis" style="font-size: 0.9rem; line-height: 1.5;">${tour.destination.description}</p>
                 </div>

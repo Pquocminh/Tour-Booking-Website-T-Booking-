@@ -52,9 +52,10 @@
                         <div class="col-md-4">
                             <label class="form-label text-muted small fw-bold">Region <span class="text-danger">*</span></label>
                             <select name="region" class="form-select rounded-3" required>
-                                <option value="Miền Bắc" ${editDestination.region == 'Miền Bắc' ? 'selected' : ''}>Miền Bắc</option>
-                                <option value="Miền Trung" ${editDestination.region == 'Miền Trung' ? 'selected' : ''}>Miền Trung</option>
-                                <option value="Miền Nam" ${editDestination.region == 'Miền Nam' ? 'selected' : ''}>Miền Nam</option>
+                                <option value="North" ${editDestination.region == 'North' ? 'selected' : ''}>North</option>
+                                <option value="Central" ${editDestination.region == 'Central' ? 'selected' : ''}>Central</option>
+                                <option value="South" ${editDestination.region == 'South' ? 'selected' : ''}>South</option>
+                                <option value="International" ${editDestination.region == 'International' ? 'selected' : ''}>International</option>
                             </select>
                         </div>
                         <div class="col-md-8">
@@ -151,14 +152,17 @@
                                         </td>
                                         <td>
                                             <c:choose>
-                                                <c:when test="${dest.region == 'Miền Bắc'}">
-                                                    <span class="badge bg-info text-white rounded-pill px-3 py-1">Miền Bắc</span>
+                                                <c:when test="${dest.region == 'Miền Bắc' || dest.region == 'North'}">
+                                                    <span class="badge bg-info text-white rounded-pill px-3 py-1">North</span>
                                                 </c:when>
-                                                <c:when test="${dest.region == 'Miền Trung'}">
-                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Miền Trung</span>
+                                                <c:when test="${dest.region == 'Miền Trung' || dest.region == 'Central'}">
+                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Central</span>
+                                                </c:when>
+                                                <c:when test="${dest.region == 'Miền Nam' || dest.region == 'South'}">
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1">South</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1">${dest.region}</span>
+                                                    <span class="badge bg-secondary text-white rounded-pill px-3 py-1">${dest.region}</span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>
@@ -212,7 +216,14 @@
                                                         </div>
                                                         <div class="col-6">
                                                             <label class="text-muted small fw-bold">Region</label>
-                                                            <p class="fw-semibold text-dark mb-0">${dest.region}</p>
+                                                            <p class="fw-semibold text-dark mb-0">
+                                                                <c:choose>
+                                                                    <c:when test="${dest.region == 'Miền Bắc' || dest.region == 'North'}">North</c:when>
+                                                                    <c:when test="${dest.region == 'Miền Trung' || dest.region == 'Central'}">Central</c:when>
+                                                                    <c:when test="${dest.region == 'Miền Nam' || dest.region == 'South'}">South</c:when>
+                                                                    <c:otherwise>${dest.region}</c:otherwise>
+                                                                </c:choose>
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div class="mb-2">
@@ -261,9 +272,10 @@
                       <label class="form-label text-muted small fw-bold">Region <span class="text-danger">*</span></label>
                       <select name="region" class="form-select rounded-3" required>
                           <option value="">-- Select Region --</option>
-                          <option value="Miền Bắc">Miền Bắc</option>
-                          <option value="Miền Trung">Miền Trung</option>
-                          <option value="Miền Nam">Miền Nam</option>
+                          <option value="North">North</option>
+                          <option value="Central">Central</option>
+                          <option value="South">South</option>
+                          <option value="International">International</option>
                       </select>
                   </div>
                   <div class="col-md-6">
