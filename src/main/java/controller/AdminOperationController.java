@@ -263,9 +263,10 @@ public class AdminOperationController extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                     return;
                 }
-
-                if (totalSlots <= 0) {
+                if (totalSlots < 44) {
                     totalSlots = 44;
+                } else if (totalSlots % 44 != 0) {
+                    totalSlots = Math.round((float) totalSlots / 44) * 44;
                 }
 
                 TourSchedule sched = new TourSchedule();

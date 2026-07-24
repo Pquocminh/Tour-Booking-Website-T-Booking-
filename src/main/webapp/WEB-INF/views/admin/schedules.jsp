@@ -471,7 +471,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="createTotalSlots" class="form-label text-muted small fw-bold">Total Capacity (Passengers)</label>
-                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="1" value="44" step="44" placeholder="44 (1 Bus)" required>
+                            <input type="number" class="form-control rounded-3" id="createTotalSlots" name="totalSlots" min="44" value="44" step="44" placeholder="44 (1 Bus)" required>
                             <div class="form-text text-muted small">Default 1 big bus (44 passenger seats)</div>
                         </div>
 
@@ -812,6 +812,19 @@
         }
 
         window.addEventListener('DOMContentLoaded', (event) => {
+            // Ensure capacity field only accepts multiples of 44, and min 44
+            const createTotalSlots = document.getElementById('createTotalSlots');
+            if (createTotalSlots) {
+                createTotalSlots.addEventListener('change', function() {
+                    let val = parseInt(this.value);
+                    if (isNaN(val) || val < 44) {
+                        this.value = 44;
+                    } else {
+                        this.value = Math.round(val / 44) * 44;
+                    }
+                });
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('openCreate') === 'true') {
                 var createModal = new bootstrap.Modal(document.getElementById('createScheduleModal'));

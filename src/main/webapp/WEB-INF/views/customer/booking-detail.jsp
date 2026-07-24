@@ -206,6 +206,16 @@
                                         <span class="text-muted">Required Deposit</span>
                                         <span class="fw-bold text-dark"><fmt:formatNumber value="${booking.depositAmount}" pattern="#,##0 ₫" /></span>
                                     </div>
+
+                                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.9rem;">
+                                        <span class="text-muted">Paid Amount</span>
+                                        <span class="fw-bold text-success"><fmt:formatNumber value="${totalPaid}" pattern="#,##0 ₫" /></span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.9rem;">
+                                        <span class="text-muted">Remaining Balance</span>
+                                        <span class="fw-bold text-danger"><fmt:formatNumber value="${remainingAmount}" pattern="#,##0 ₫" /></span>
+                                    </div>
                                 </div>
 
                                  <!-- Actions for Pending Booking -->
