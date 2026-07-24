@@ -155,6 +155,7 @@
                                         <h6 class="fw-bold text-uppercase text-secondary border-bottom pb-2 small">Payment & Status</h6>
                                         <div class="mb-2"><strong>Total Price:</strong> <span class="fw-bold text-success"><fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/></span></div>
                                         <div class="mb-2"><strong>Deposit Paid:</strong> <fmt:formatNumber value="${b.depositAmount}" pattern="#,##0 ₫"/></div>
+                                        <div class="mb-2"><strong>Remaining Amount:</strong> <span class="fw-bold text-dark"><fmt:formatNumber value="${b.totalPrice - b.depositAmount}" pattern="#,##0 ₫"/></span></div>
                                         <div class="mb-2"><strong>Status:</strong> ${b.status}</div>
                                     </div>
                                 </div>
