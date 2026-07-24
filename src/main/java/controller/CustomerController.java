@@ -350,8 +350,35 @@ public class CustomerController extends HttpServlet {
                 PaymentDAO paymentDAO = new PaymentDAO();
                 List<Payment> payments = paymentDAO.getPaymentsByBookingId(bookingId);
                 
+                double totalPaid = 0;
+                if (payments != null) {
+                    for (Payment p : payments) {
+                        if ("Success".equalsIgnoreCase(p.getPaymentStatus()) || "COMPLETED".equalsIgnoreCase(p.getPaymentStatus())) {
+                            totalPaid += p.getAmount();
+                        }
+                    }
+                }
+                
+                // If the booking is already Confirmed or Approved, we assume the deposit has been paid.
+                if (("Confirmed".equalsIgnoreCase(booking.getStatus()) || "Approved".equalsIgnoreCase(booking.getStatus()))
+                        && totalPaid < booking.getDepositAmount()) {
+                    totalPaid = booking.getDepositAmount();
+                }
+                
+                // If the booking status is Paid, they have paid the full price.
+                if ("Paid".equalsIgnoreCase(booking.getStatus())) {
+                    totalPaid = booking.getTotalPrice();
+                }
+                
+                double remainingAmount = booking.getTotalPrice() - totalPaid;
+                if (remainingAmount < 0) {
+                    remainingAmount = 0;
+                }
+                
                 request.setAttribute("booking", booking);
                 request.setAttribute("payments", payments);
+                request.setAttribute("totalPaid", totalPaid);
+                request.setAttribute("remainingAmount", remainingAmount);
                 request.getRequestDispatcher("/WEB-INF/views/customer/booking-detail.jsp").forward(request, response);
                 return;
             } else {
