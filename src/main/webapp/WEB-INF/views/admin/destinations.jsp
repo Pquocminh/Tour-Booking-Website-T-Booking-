@@ -153,16 +153,16 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${dest.region == 'Miền Bắc' || dest.region == 'North'}">
-                                                    <span class="badge bg-info text-white rounded-pill px-3 py-1">North</span>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1">North</span>
                                                 </c:when>
                                                 <c:when test="${dest.region == 'Miền Trung' || dest.region == 'Central'}">
-                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Central</span>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1">Central</span>
                                                 </c:when>
                                                 <c:when test="${dest.region == 'Miền Nam' || dest.region == 'South'}">
                                                     <span class="badge bg-success text-white rounded-pill px-3 py-1">South</span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <span class="badge bg-secondary text-white rounded-pill px-3 py-1">${dest.region}</span>
+                                                    <span class="badge bg-success text-white rounded-pill px-3 py-1">${dest.region}</span>
                                                 </c:otherwise>
                                             </c:choose>
                                         </td>

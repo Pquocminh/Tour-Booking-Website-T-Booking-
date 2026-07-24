@@ -220,6 +220,12 @@ public class AdminAccountController extends HttpServlet {
             return;
         }
 
+        if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
+            session.setAttribute("errorMessage", "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+            response.sendRedirect(request.getContextPath() + "/admin/accounts");
+            return;
+        }
+
         // Safety check: Admin cannot create Admin accounts
         if ("Admin".equalsIgnoreCase(role)) {
             session.setAttribute("errorMessage", "You cannot create Admin accounts.");
@@ -347,6 +353,11 @@ public class AdminAccountController extends HttpServlet {
             // Update password optionally if provided
             String password = request.getParameter("password");
             if (password != null && !password.trim().isEmpty()) {
+                if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
+                    session.setAttribute("errorMessage", "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+                    response.sendRedirect(request.getContextPath() + "/admin/accounts");
+                    return;
+                }
                 String passwordHash = utils.PasswordUtils.hashMD5(password);
                 if ("Customer".equalsIgnoreCase(role)) customerDAO.updatePasswordById(id, passwordHash);
                 else employeeDAO.updatePasswordById(id, passwordHash);

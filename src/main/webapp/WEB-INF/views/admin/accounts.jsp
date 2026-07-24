@@ -26,59 +26,27 @@
         <c:remove var="errorMessage" scope="session" />
     </c:if>
 
-    <!-- Search & Filters Panel -->
-    <section class="filter-panel">
-        <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>Search & Filters</h4>
-        <form method="GET" action="${pageContext.request.contextPath}/admin/accounts">
-            <div class="row g-3">
-                <!-- Keyword search -->
-                <div class="col-md-4">
-                    <label class="form-label text-muted small fw-bold">Keyword Search</label>
-                    <input type="text" name="search" class="form-control rounded-3" placeholder="Username, email, name, phone..." value="${not empty searchKeyword ? searchKeyword : ''}">
-                </div>
-                
-                <!-- Role Filter -->
-                <div class="col-md-4">
-                    <label class="form-label text-muted small fw-bold">Role</label>
-                    <select name="role" class="form-select rounded-3">
-                        <option value="All" ${selectedRole == 'All' ? 'selected' : ''}>All Roles</option>
-                        <option value="Staff" ${selectedRole == 'Staff' ? 'selected' : ''}>Staff</option>
-                        <option value="Customer" ${selectedRole == 'Customer' ? 'selected' : ''}>Customer</option>
-                    </select>
-                </div>
-
-                <!-- Status Filter -->
-                <div class="col-md-4">
-                    <label class="form-label text-muted small fw-bold">Status</label>
-                    <select name="status" class="form-select rounded-3">
-                        <option value="All" ${selectedStatus == 'All' ? 'selected' : ''}>All Statuses</option>
-                        <option value="Active" ${selectedStatus == 'Active' ? 'selected' : ''}>Active</option>
-                        <option value="Inactive" ${selectedStatus == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                        <option value="Blocked" ${selectedStatus == 'Blocked' ? 'selected' : ''}>Blocked</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <a href="${pageContext.request.contextPath}/admin/accounts" class="btn btn-outline-secondary px-4 rounded-3">
-                    Clear
-                </a>
-                <button type="submit" class="btn btn-primary px-4 rounded-3 text-white">
-                    Filter
-                </button>
-            </div>
-        </form>
-    </section>
-
-    <!-- Accounts Table List -->
+    <!-- Accounts Table List with Search & Actions -->
     <section class="table-panel">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
             <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-users-gear me-2 text-primary"></i>User Accounts List</h4>
-            <div class="d-flex gap-2 align-items-center">
-                <span class="badge bg-primary rounded-pill py-2 px-3">${accounts.size()} Account(s)</span>
-                <button type="button" class="btn btn-success btn-sm rounded-pill px-3 text-white" data-bs-toggle="modal" data-bs-target="#createAccountModal">
-                    <i class="fa-solid fa-user-plus me-1"></i> Create Account
-                </button>
+            
+            <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 650px;">
+                <!-- Search Form -->
+                <form method="GET" action="${pageContext.request.contextPath}/admin/accounts" class="flex-grow-1 mb-0">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-start-0 rounded-end-3" 
+                               placeholder="Username, email, name, phone..." value="${not empty searchKeyword ? searchKeyword : ''}">
+                    </div>
+                </form>
+                
+                <div class="d-flex gap-2 align-items-center justify-content-between">
+                    <span class="badge bg-primary rounded-pill py-2 px-3 text-nowrap">${accounts.size()} Account(s)</span>
+                    <button type="button" class="btn btn-success btn-sm rounded-pill px-3 text-white text-nowrap" data-bs-toggle="modal" data-bs-target="#createAccountModal" style="height: 38px;">
+                        <i class="fa-solid fa-user-plus me-1"></i> Create Account
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -365,7 +333,9 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Password <span class="text-danger">*</span></label>
-                        <input type="password" name="password" class="form-control rounded-3" required>
+                        <input type="password" name="password" class="form-control rounded-3" required
+                               pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+                               title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.">
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Email <span class="text-danger">*</span></label>
@@ -427,7 +397,9 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">New Password (Leave blank to keep unchanged)</label>
-                        <input type="password" name="password" class="form-control rounded-3" placeholder="Enter new password">
+                        <input type="password" name="password" class="form-control rounded-3" placeholder="Enter new password"
+                               pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+                               title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.">
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">Email <span class="text-danger">*</span></label>
@@ -447,11 +419,12 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Role <span class="text-danger">*</span></label>
-                            <select name="role" id="edit_role" class="form-select rounded-3" required>
+                            <label class="form-label small fw-bold text-muted">Role</label>
+                            <select id="edit_role" class="form-select rounded-3 bg-light text-muted" disabled>
                                 <option value="Customer">Customer</option>
                                 <option value="Staff">Staff</option>
                             </select>
+                            <input type="hidden" name="role" id="edit_role_hidden">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label small fw-bold text-muted">Status <span class="text-danger">*</span></label>
@@ -508,7 +481,9 @@
                 document.getElementById('edit_fullname').value = this.getAttribute('data-fullname');
                 document.getElementById('edit_phone').value = this.getAttribute('data-phone');
                 document.getElementById('edit_address').value = this.getAttribute('data-address');
-                document.getElementById('edit_role').value = this.getAttribute('data-role');
+                const roleVal = this.getAttribute('data-role');
+                document.getElementById('edit_role').value = roleVal;
+                document.getElementById('edit_role_hidden').value = roleVal;
                 document.getElementById('edit_status').value = this.getAttribute('data-status');
             });
         });

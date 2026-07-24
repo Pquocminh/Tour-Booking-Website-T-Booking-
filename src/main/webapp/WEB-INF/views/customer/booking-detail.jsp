@@ -236,61 +236,7 @@
                             </div>
                         </div>
 
-                        <!-- Bottom Section: Transactions History -->
-                        <div class="mt-5 p-4 rounded-4 bg-white bg-opacity-50 border">
-                            <h5 class="mb-4" style="font-weight: 700;"><i class="fa-solid fa-money-bill-transfer text-primary me-2"></i>Payment History</h5>
-                            <c:choose>
-                                <c:when test="${empty payments}">
-                                    <div class="text-center py-4">
-                                        <p class="text-muted mb-0">No payment logs found for this booking yet.</p>
-                                    </div>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="table-responsive">
-                                        <table class="table align-middle mb-0">
-                                            <thead>
-                                                <tr class="text-muted">
-                                                    <th>Transaction Code</th>
-                                                    <th>Payment Date</th>
-                                                    <th>Method</th>
-                                                    <th>Type</th>
-                                                    <th class="text-end">Amount</th>
-                                                    <th class="text-center">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <c:forEach var="p" items="${payments}">
-                                                    <tr>
-                                                        <td class="fw-bold">${p.transactionCode}</td>
-                                                        <td><fmt:formatDate value="${p.paymentDate}" pattern="dd/MM/yyyy HH:mm" /></td>
-                                                        <td>${p.paymentMethod}</td>
-                                                        <td>
-                                                            <span class="badge rounded-pill bg-light text-dark px-3 py-1 border">${p.paymentType}</span>
-                                                        </td>
-                                                        <td class="text-end fw-bold text-success">
-                                                            <fmt:formatNumber value="${p.amount}" pattern="#,##0 ₫" />
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <c:choose>
-                                                                <c:when test="${p.paymentStatus == 'Success' || p.paymentStatus == 'COMPLETED'}">
-                                                                    <span class="badge bg-success text-white px-2 py-1.5 rounded-pill"><i class="fa-regular fa-circle-check me-1"></i>Completed</span>
-                                                                </c:when>
-                                                                <c:when test="${p.paymentStatus == 'Pending'}">
-                                                                    <span class="badge bg-warning text-dark px-2 py-1.5 rounded-pill"><i class="fa-regular fa-clock me-1"></i>Pending</span>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <span class="badge bg-secondary text-white px-2 py-1.5 rounded-pill">${p.paymentStatus}</span>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </td>
-                                                    </tr>
-                                                </c:forEach>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
+
 
                     </div>
                 </div>

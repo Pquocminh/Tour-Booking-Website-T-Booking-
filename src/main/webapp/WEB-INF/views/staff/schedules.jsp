@@ -288,7 +288,7 @@
                             </div>
                             <div>
                                 <div class="details-label">Price</div>
-                                <div class="details-value text-primary" id="detailPrice">d1,200,000</div>
+                                <div class="details-value text-primary" id="detailPrice">1,200,000d</div>
                             </div>
                             <div>
                                 <div class="details-label">Departure Date</div>
@@ -485,7 +485,7 @@
                     document.getElementById('detailTourName').innerText = tour.tourName || sched.tourName;
                     document.getElementById('detailDepartureLocation').innerText = tour.departureLocation || 'N/A';
                     document.getElementById('detailDuration').innerText = tour.durationDays + ' Days';
-                    document.getElementById('detailPrice').innerText = 'd' + Number(sched.price).toLocaleString('vi-VN');
+                    document.getElementById('detailPrice').innerText = Number(sched.price).toLocaleString('vi-VN') + 'd';
                     
                     // Format dates
                     var depDate = new Date(sched.departureDate);
@@ -550,7 +550,7 @@
                                 '<td class="fw-semibold">' + b.contactName + '</td>' +
                                 '<td>' + b.contactPhone + '</td>' +
                                 '<td class="text-center fw-bold">' + b.numberOfPeople + '</td>' +
-                                '<td class="text-end fw-bold text-primary">d' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
+                                '<td class="text-end fw-bold text-primary">' + Number(b.totalPrice).toLocaleString('vi-VN') + 'd</td>' +
                                 '<td>' + bStatusBadge + '</td>' +
                                 '<td>' + bDateStr + '</td>' +
                                 '</tr>';
