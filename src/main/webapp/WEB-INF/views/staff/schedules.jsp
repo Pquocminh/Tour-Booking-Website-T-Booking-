@@ -228,7 +228,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
+                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (d)</label>
                             <input type="number" class="form-control rounded-3" id="createPrice" name="price" min="0" step="1000" placeholder="e.g. 1500000" required>
                         </div>
 
@@ -288,7 +288,7 @@
                             </div>
                             <div>
                                 <div class="details-label">Price</div>
-                                <div class="details-value text-primary" id="detailPrice">đ1,200,000</div>
+                                <div class="details-value text-primary" id="detailPrice">d1,200,000</div>
                             </div>
                             <div>
                                 <div class="details-label">Departure Date</div>
@@ -485,7 +485,7 @@
                     document.getElementById('detailTourName').innerText = tour.tourName || sched.tourName;
                     document.getElementById('detailDepartureLocation').innerText = tour.departureLocation || 'N/A';
                     document.getElementById('detailDuration').innerText = tour.durationDays + ' Days';
-                    document.getElementById('detailPrice').innerText = 'đ' + Number(sched.price).toLocaleString('vi-VN');
+                    document.getElementById('detailPrice').innerText = 'd' + Number(sched.price).toLocaleString('vi-VN');
                     
                     // Format dates
                     var depDate = new Date(sched.departureDate);
@@ -550,7 +550,7 @@
                                 '<td class="fw-semibold">' + b.contactName + '</td>' +
                                 '<td>' + b.contactPhone + '</td>' +
                                 '<td class="text-center fw-bold">' + b.numberOfPeople + '</td>' +
-                                '<td class="text-end fw-bold text-primary">đ' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
+                                '<td class="text-end fw-bold text-primary">d' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
                                 '<td>' + bStatusBadge + '</td>' +
                                 '<td>' + bDateStr + '</td>' +
                                 '</tr>';

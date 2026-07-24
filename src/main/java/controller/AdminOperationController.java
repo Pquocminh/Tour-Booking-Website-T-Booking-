@@ -195,18 +195,49 @@ public class AdminOperationController extends HttpServlet {
         List<Tour> tours = tourDAO.searchToursAdmin(null, null, null, null);
         request.setAttribute("tours", tours);
 
-        Integer tourId = null;
-        if (tourIdParam != null && !tourIdParam.trim().isEmpty()) {
-            try {
-                tourId = Integer.parseInt(tourIdParam.trim());
-                request.setAttribute("selectedTourId", tourId);
-            } catch (NumberFormatException e) {
-                request.setAttribute("errorMessage", "Invalid Tour ID format!");
-            }
-        }
+        String searchQuery = "";
+        List<TourSchedule> schedules;
+        Tour selectedTour = null;
+        Integer selectedTourId = null;
 
-        List<TourSchedule> schedules = tourDAO.getAllTourSchedules(tourId);
+        if (tourIdParam != null && !tourIdParam.trim().isEmpty()) {
+            String query = tourIdParam.trim();
+            searchQuery = query;
+            int tourId = -1;
+            
+            if (query.startsWith("ID: #")) {
+                try {
+                    int dashIndex = query.indexOf(" - ");
+                    if (dashIndex != -1) {
+                        tourId = Integer.parseInt(query.substring(5, dashIndex).trim());
+                    } else {
+                        tourId = Integer.parseInt(query.substring(5).trim());
+                    }
+                } catch (NumberFormatException e) {
+                    // Ignore, fallback to text search
+                }
+            }
+
+            if (tourId > 0) {
+                selectedTour = tourDAO.getTourByIdAdmin(tourId);
+                if (selectedTour != null) {
+                    schedules = tourDAO.getAllTourSchedulesByTourId(tourId);
+                    selectedTourId = tourId;
+                    searchQuery = "ID: #" + selectedTour.getTourId() + " - " + selectedTour.getTourName();
+                } else {
+                    schedules = tourDAO.getAllTourSchedulesByKeyword(query);
+                }
+            } else {
+                schedules = tourDAO.getAllTourSchedulesByKeyword(query);
+            }
+        } else {
+            schedules = tourDAO.getAllTourSchedules(null);
+        }
+        
         request.setAttribute("schedules", schedules);
+        request.setAttribute("selectedTour", selectedTour);
+        request.setAttribute("selectedTourId", selectedTourId);
+        request.setAttribute("searchQuery", searchQuery);
 
         dao.EmployeeDAO employeeDAO = new dao.EmployeeDAO();
         List<model.Employee> staffList = employeeDAO.getAllAccounts(null, "Staff", "Active");

@@ -28,25 +28,22 @@
             <c:remove var="successMessage" scope="session" />
         </c:if>
 
-        <!-- Tour Filter Panel -->
+        <!-- Tour Selection Panel -->
         <section class="filter-panel">
-            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-route me-2 text-primary"></i>Filter Schedules by Tour</h4>
+            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-route me-2 text-primary"></i>Search Tour Package</h4>
             <form method="GET" action="${pageContext.request.contextPath}/admin/schedules">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
-                        <label class="form-label text-muted small fw-bold">Select Tour</label>
-                        <select name="tourId" class="form-select rounded-3">
-                            <option value="">-- All Tours --</option>
-                            <c:forEach var="t" items="${tours}">
-                                <option value="${t.tourId}" ${selectedTourId == t.tourId ? 'selected' : ''}>
-                                    ID: #${t.tourId} - ${t.tourName} (${t.status})
-                                </option>
-                            </c:forEach>
-                        </select>
+                    <div class="col-md-9 position-relative">
+                        <label class="form-label text-muted small fw-bold">Search Tour</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="tourSearchInput" name="tourId" class="form-control border-start-0 rounded-end-3" 
+                                   placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-primary w-100 rounded-3 text-white py-2">
-                            <i class="fa-solid fa-filter me-2"></i>Apply Filter
+                            <i class="fa-solid fa-magnifying-glass me-2"></i>Search
                         </button>
                     </div>
                 </div>
@@ -57,7 +54,21 @@
         <section class="table-panel">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
                 <div>
-                    <h4 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Schedules List</h4>
+                    <span class="text-muted small d-block">MANAGING SCHEDULES FOR</span>
+                    <h4 class="mb-0 fw-bold text-dark">
+                        <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
+                        <c:choose>
+                            <c:when test="${not empty selectedTour}">
+                                ${selectedTour.tourName}
+                            </c:when>
+                            <c:when test="${not empty searchQuery}">
+                                Search results for "${searchQuery}"
+                            </c:when>
+                            <c:otherwise>
+                                All Tour Packages
+                            </c:otherwise>
+                        </c:choose>
+                    </h4>
                 </div>
                 <div class="d-flex gap-2 align-self-start">
                     <button class="btn btn-success text-white rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
@@ -188,7 +199,7 @@
     <form id="cancelForm" method="POST" action="${pageContext.request.contextPath}/admin/schedules">
         <input type="hidden" name="action" value="cancel">
         <input type="hidden" id="cancelScheduleId" name="scheduleId">
-        <input type="hidden" name="tourId" value="${selectedTourId}">
+        <input type="hidden" name="tourId" value="${searchQuery}">
     </form>
 
     <!-- Update Schedule Modal -->
@@ -202,7 +213,7 @@
                 <form method="POST" action="${pageContext.request.contextPath}/admin/schedules">
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" id="editScheduleId" name="scheduleId">
-                    <input type="hidden" name="tourId" value="${selectedTourId}">
+                    <input type="hidden" name="tourId" value="${searchQuery}">
                     
                     <div class="modal-body py-4">
                         <div class="mb-3">
@@ -222,7 +233,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="editPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
+                            <label for="editPrice" class="form-label text-muted small fw-bold">Price (d)</label>
                             <input type="number" class="form-control rounded-3 bg-light" id="editPrice" name="price" readonly>
                             <div class="form-text text-muted small">Price is fixed for this schedule</div>
                         </div>
@@ -276,7 +287,7 @@
                 <form method="POST" action="${pageContext.request.contextPath}/admin/schedules">
                     <input type="hidden" name="action" value="reserve">
                     <input type="hidden" id="reserveScheduleId" name="scheduleId">
-                    <input type="hidden" name="tourId" value="${selectedTourId}">
+                    <input type="hidden" name="tourId" value="${searchQuery}">
                     
                     <div class="modal-body py-4">
                         <div class="mb-3">
@@ -360,7 +371,7 @@
                             </div>
                             <div>
                                 <div class="details-label">Price</div>
-                                <div class="details-value text-primary" id="detailPrice">đ1,200,000</div>
+                                <div class="details-value text-primary" id="detailPrice">d1,200,000</div>
                             </div>
                             <div>
                                 <div class="details-label">Departure Date</div>
@@ -429,7 +440,7 @@
                 </div>
                 <form method="POST" action="${pageContext.request.contextPath}/admin/schedules">
                     <input type="hidden" name="action" value="create">
-                    <input type="hidden" name="tourId" value="${selectedTourId}">
+                    <input type="hidden" name="tourId" value="${searchQuery}">
                     
                     <div class="modal-body py-4">
                         <div class="mb-3">
@@ -456,7 +467,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (đ)</label>
+                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (d)</label>
                             <input type="number" class="form-control rounded-3" id="createPrice" name="price" min="0" step="1000" placeholder="e.g. 1500000" required>
                         </div>
 
@@ -727,7 +738,7 @@
                     document.getElementById('detailTourName').innerText = tour.tourName || sched.tourName;
                     document.getElementById('detailDepartureLocation').innerText = tour.departureLocation || 'N/A';
                     document.getElementById('detailDuration').innerText = tour.durationDays + ' Days';
-                    document.getElementById('detailPrice').innerText = 'Ä‘' + Number(sched.price).toLocaleString('vi-VN');
+                    document.getElementById('detailPrice').innerText = 'd' + Number(sched.price).toLocaleString('vi-VN');
                     
                     // Format dates
                     var depDate = new Date(sched.departureDate);
@@ -792,7 +803,7 @@
                                 '<td class="fw-semibold">' + b.contactName + '</td>' +
                                 '<td>' + b.contactPhone + '</td>' +
                                 '<td class="text-center fw-bold">' + b.numberOfPeople + '</td>' +
-                                '<td class="text-end fw-bold text-primary">Ä‘' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
+                                '<td class="text-end fw-bold text-primary">d' + Number(b.totalPrice).toLocaleString('vi-VN') + '</td>' +
                                 '<td>' + bStatusBadge + '</td>' +
                                 '<td>' + bDateStr + '</td>' +
                                 '</tr>';
