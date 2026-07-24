@@ -415,28 +415,29 @@ public class StaffController extends HttpServlet {
 
                 boolean success = reviewDAO.updateReviewResponse(reviewId, responseText);
                 if (success) {
-                    session.setAttribute("successMessage", "Đã lưu câu trả lời thành công!");
+                    session.setAttribute("successMessage", "Response saved successfully.");
                 } else {
-                    session.setAttribute("errorMessage", "Không thể lưu câu trả lời. Vui lòng thử lại.");
+                    session.setAttribute("errorMessage", "Failed to save response. Please try again.");
                 }
             } catch (NumberFormatException e) {
-                session.setAttribute("errorMessage", "ID đánh giá không hợp lệ.");
+                session.setAttribute("errorMessage", "Invalid review ID.");
             }
         } else if ("toggleStatus".equals(action)) {
             try {
                 int reviewId = Integer.parseInt(request.getParameter("reviewId"));
                 String currentStatus = request.getParameter("currentStatus");
                 
-                String newStatus = "VISIBLE".equalsIgnoreCase(currentStatus) ? "HIDDEN" : "VISIBLE";
+                boolean isCurrentlyVisible = "VISIBLE".equalsIgnoreCase(currentStatus) || "APPROVED".equalsIgnoreCase(currentStatus);
+                String newStatus = isCurrentlyVisible ? "HIDDEN" : "Approved";
                 
                 boolean success = reviewDAO.updateReviewStatus(reviewId, newStatus);
                 if (success) {
-                    session.setAttribute("successMessage", "Đã chuyển trạng thái đánh giá thành " + newStatus + ".");
+                    session.setAttribute("successMessage", "Review status updated to " + newStatus + ".");
                 } else {
-                    session.setAttribute("errorMessage", "Không thể thay đổi trạng thái đánh giá.");
+                    session.setAttribute("errorMessage", "Failed to update review status.");
                 }
             } catch (NumberFormatException e) {
-                session.setAttribute("errorMessage", "ID đánh giá không hợp lệ.");
+                session.setAttribute("errorMessage", "Invalid review ID.");
             }
         }
 

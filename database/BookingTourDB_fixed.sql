@@ -169,17 +169,16 @@ CREATE TABLE BookingVoucher (
 
 CREATE TABLE Review (
     review_id INT IDENTITY(1,1) PRIMARY KEY,
-    tour_id INT NOT NULL,
+    booking_id INT NOT NULL, 
     customer_id INT NOT NULL,
     rating INT,
     comment NVARCHAR(MAX),
     staff_response NVARCHAR(MAX),
     response_date DATETIME,
-    created_at DATETIME DEFAULT GETDATE(),
     status VARCHAR(20),
-
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
-    FOREIGN KEY (tour_id) REFERENCES Tour(tour_id)
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
 );
 
 CREATE TABLE Wishlist (

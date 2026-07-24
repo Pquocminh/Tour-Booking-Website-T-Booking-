@@ -73,7 +73,7 @@ public class ReviewDAO {
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "JOIN Tour t ON s.tour_id = t.tour_id " +
                      "LEFT JOIN Review r ON b.booking_id = r.booking_id " +
-                     "WHERE b.customer_id = ? AND r.review_id IS NULL AND (b.status = 'Confirmed' OR b.status = 'Completed') " +
+                     "WHERE b.customer_id = ? AND r.review_id IS NULL AND (LOWER(b.status) IN ('confirmed', 'completed', 'paid', 'approved')) " +
                      "AND s.return_date <= CAST(GETDATE() AS DATE) " +
                      "ORDER BY b.booking_date DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -132,7 +132,7 @@ public class ReviewDAO {
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "LEFT JOIN Review r ON b.booking_id = r.booking_id " +
                      "WHERE b.booking_id = ? AND b.customer_id = ? " +
-                     "AND (b.status = 'Confirmed' OR b.status = 'Completed') " +
+                     "AND (LOWER(b.status) IN ('confirmed', 'completed', 'paid', 'approved')) " +
                      "AND s.return_date <= CAST(GETDATE() AS DATE) " +
                      "AND r.review_id IS NULL";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -250,10 +250,10 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, c.full_name AS customer_name, t.tour_name, s.departure_date " +
+        String sql = "SELECT r.*, COALESCE(c.full_name, b.contact_name, 'Guest Customer') AS customer_name, t.tour_name, s.departure_date " +
                      "FROM Review r " +
-                     "JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
+                     "LEFT JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
                      "JOIN Tour t ON s.tour_id = t.tour_id " +
                      "ORDER BY r.created_at DESC";
@@ -266,8 +266,16 @@ public class ReviewDAO {
                     r.setCustomerId(rs.getInt("customer_id"));
                     r.setRating(rs.getInt("rating"));
                     r.setComment(rs.getString("comment"));
-                    r.setStaffResponse(rs.getString("staff_response"));
-                    r.setResponseDate(rs.getTimestamp("response_date"));
+                    try {
+                        r.setStaffResponse(rs.getString("staff_response"));
+                    } catch (SQLException ignored) {
+                        r.setStaffResponse(null);
+                    }
+                    try {
+                        r.setResponseDate(rs.getTimestamp("response_date"));
+                    } catch (SQLException ignored) {
+                        r.setResponseDate(null);
+                    }
                     r.setStatus(rs.getString("status"));
                     r.setCreatedAt(rs.getTimestamp("created_at"));
                     r.setCustomerName(rs.getString("customer_name"));
@@ -350,12 +358,12 @@ public class ReviewDAO {
             return list;
         }
 
-        String sql = "SELECT r.*, c.full_name AS customer_name, s.departure_date " +
+        String sql = "SELECT r.*, COALESCE(c.full_name, b.contact_name, 'Guest Customer') AS customer_name, s.departure_date " +
                      "FROM Review r " +
-                     "JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN Booking b ON r.booking_id = b.booking_id " +
+                     "LEFT JOIN Customer c ON r.customer_id = c.customer_id " +
                      "JOIN TourSchedule s ON b.schedule_id = s.schedule_id " +
-                     "WHERE s.tour_id = ? AND (r.status = 'Visible' OR r.status = 'Approved') " +
+                     "WHERE s.tour_id = ? AND (LOWER(r.status) = 'visible' OR LOWER(r.status) = 'approved') " +
                      "ORDER BY r.created_at DESC";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, tourId);
@@ -367,8 +375,16 @@ public class ReviewDAO {
                     r.setCustomerId(rs.getInt("customer_id"));
                     r.setRating(rs.getInt("rating"));
                     r.setComment(rs.getString("comment"));
-                    r.setStaffResponse(rs.getString("staff_response"));
-                    r.setResponseDate(rs.getTimestamp("response_date"));
+                    try {
+                        r.setStaffResponse(rs.getString("staff_response"));
+                    } catch (SQLException ignored) {
+                        r.setStaffResponse(null);
+                    }
+                    try {
+                        r.setResponseDate(rs.getTimestamp("response_date"));
+                    } catch (SQLException ignored) {
+                        r.setResponseDate(null);
+                    }
                     r.setStatus(rs.getString("status"));
                     r.setCreatedAt(rs.getTimestamp("created_at"));
                     r.setCustomerName(rs.getString("customer_name"));
