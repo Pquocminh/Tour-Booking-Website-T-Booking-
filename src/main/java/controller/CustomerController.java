@@ -275,7 +275,11 @@ public class CustomerController extends HttpServlet {
                 if (success) {
                     session.setAttribute("successMessage", "Review submitted successfully!");
                 } else {
-                    session.setAttribute("errorMessage", "Failed to submit review. You can only review confirmed bookings after the tour return date, or you may have already reviewed this booking.");
+                    if (reviewDAO.hasReviewed(bookingId)) {
+                        session.setAttribute("errorMessage", "You have already reviewed this booking.");
+                    } else {
+                        session.setAttribute("errorMessage", "Failed to submit review. You can only review confirmed bookings after the tour return date.");
+                    }
                 }
             } catch (NumberFormatException e) {
                 session.setAttribute("errorMessage", "Invalid review parameters.");

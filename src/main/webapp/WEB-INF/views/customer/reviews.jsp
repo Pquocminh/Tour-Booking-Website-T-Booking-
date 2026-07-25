@@ -228,7 +228,7 @@
                     <h5 class="modal-title" id="rateModalLabel"><i class="fa-regular fa-star me-2"></i>Write a Review</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="${pageContext.request.contextPath}/customer/reviews" method="POST">
+                <form action="${pageContext.request.contextPath}/customer/reviews" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
                     <div class="modal-body p-4">
                         <input type="hidden" name="action" value="rate">
                         <input type="hidden" name="bookingId" id="modalBookingId">

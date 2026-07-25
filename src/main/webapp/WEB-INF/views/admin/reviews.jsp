@@ -102,7 +102,7 @@
                                                 <input type="hidden" name="reviewId" value="${r.reviewId}">
                                                 <input type="hidden" name="currentStatus" value="${r.status}">
                                                 <c:choose>
-                                                    <c:when test="${'VISIBLE'.equalsIgnoreCase(r.status)}">
+                                                    <c:when test="${'VISIBLE'.equalsIgnoreCase(r.status) || 'APPROVED'.equalsIgnoreCase(r.status)}">
                                                         <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 mb-1 toggle-btn" title="Click to Hide" onclick="return confirm('Hide this review from public view?');">
                                                             <i class="fa-solid fa-eye me-1"></i>Visible
                                                         </button>
