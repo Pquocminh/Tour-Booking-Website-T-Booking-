@@ -938,5 +938,41 @@ footer a:hover {
             background-color: var(--bs-primary) !important;
             border-color: var(--bs-primary) !important;
         }
+
+/* Guest Tour List Filter Styling */
+.filter-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: var(--transition-smooth);
+}
+
+.filter-card .form-control,
+.filter-card .form-select {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease-in-out;
+}
+
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    background-color: #ffffff !important;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.active-filters-wrapper .badge {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
     
 
