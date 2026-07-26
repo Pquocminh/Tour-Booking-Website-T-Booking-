@@ -641,6 +641,23 @@ public class TourDAO {
                 }
             }
             
+            if (tourId != -1 && tour.getItineraries() != null && !tour.getItineraries().isEmpty()) {
+                String itiSql = "INSERT INTO Itinerary (tour_id, day_number, title, description) VALUES (?, ?, ?, ?)";
+                try (PreparedStatement psIti = conn.prepareStatement(itiSql)) {
+                    for (model.Itinerary iti : tour.getItineraries()) {
+                        psIti.setInt(1, tourId);
+                        psIti.setInt(2, iti.getDayNumber());
+                        psIti.setString(3, iti.getTitle());
+                        psIti.setString(4, iti.getDescription());
+                        psIti.addBatch();
+                    }
+                    psIti.executeBatch();
+                } catch (SQLException e) {
+                    System.err.println("Failed to insert itineraries: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
             conn.commit();
             return true;
         } catch (SQLException e) {
@@ -709,6 +726,31 @@ public class TourDAO {
                         psIns.setInt(1, tour.getTourId());
                         psIns.setString(2, tour.getThumbnailUrl().trim());
                         psIns.executeUpdate();
+                    }
+                }
+            }
+            
+            if (tour.getItineraries() != null) {
+                String delSql = "DELETE FROM Itinerary WHERE tour_id = ?";
+                try (PreparedStatement psDel = conn.prepareStatement(delSql)) {
+                    psDel.setInt(1, tour.getTourId());
+                    psDel.executeUpdate();
+                }
+                
+                if (!tour.getItineraries().isEmpty()) {
+                    String itiSql = "INSERT INTO Itinerary (tour_id, day_number, title, description) VALUES (?, ?, ?, ?)";
+                    try (PreparedStatement psIti = conn.prepareStatement(itiSql)) {
+                        for (model.Itinerary iti : tour.getItineraries()) {
+                            psIti.setInt(1, tour.getTourId());
+                            psIti.setInt(2, iti.getDayNumber());
+                            psIti.setString(3, iti.getTitle());
+                            psIti.setString(4, iti.getDescription());
+                            psIti.addBatch();
+                        }
+                        psIti.executeBatch();
+                    } catch (SQLException e) {
+                        System.err.println("Failed to update itineraries: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
             }

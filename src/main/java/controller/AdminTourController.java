@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import model.Itinerary;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 
@@ -40,6 +42,9 @@ public class AdminTourController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         String path = request.getServletPath();
         
         if ("/admin/dashboard".equals(path)) {
@@ -56,6 +61,9 @@ public class AdminTourController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         String path = request.getServletPath();
         
         if ("/admin/tours".equals(path)) {
@@ -128,6 +136,7 @@ public class AdminTourController extends HttpServlet {
                     int id = Integer.parseInt(idParam);
                     Tour tour = tourDAO.getTourByIdAdmin(id);
                     if (tour != null) {
+                        tour.setItineraries(tourDAO.getTourItineraries(id));
                         request.setAttribute("tour", tour);
                         request.setAttribute("categories", tourDAO.getAllCategories());
                         request.setAttribute("destinations", tourDAO.getAllDestinations());
@@ -273,6 +282,7 @@ public class AdminTourController extends HttpServlet {
                 tour.setDestinationId(Integer.parseInt(request.getParameter("destinationId")));
                 tour.setDepartureLocation(request.getParameter("departureLocation"));
                 tour.setDescription(request.getParameter("description"));
+                tour.setItineraryPlan(request.getParameter("itineraryPlan"));
                 String durationParam = request.getParameter("durationDays");
                 int duration = 1;
                 if ("update".equalsIgnoreCase(action)) {
@@ -355,6 +365,30 @@ public class AdminTourController extends HttpServlet {
                 } else {
                     tour.setCreatedBy(1);
                 }
+
+                // Parse Itinerary Plan Day-by-Day
+                String[] dayNumbers = request.getParameterValues("itiDayNumber[]");
+                String[] titles = request.getParameterValues("itiTitle[]");
+                String[] descriptions = request.getParameterValues("itiDescription[]");
+                
+                List<Itinerary> itineraryList = new ArrayList<>();
+                if (dayNumbers != null && titles != null && descriptions != null) {
+                    for (int i = 0; i < dayNumbers.length; i++) {
+                        if (dayNumbers[i] != null && !dayNumbers[i].trim().isEmpty() &&
+                            titles[i] != null && !titles[i].trim().isEmpty()) {
+                            try {
+                                Itinerary iti = new Itinerary();
+                                iti.setDayNumber(Integer.parseInt(dayNumbers[i].trim()));
+                                iti.setTitle(titles[i].trim());
+                                iti.setDescription(descriptions[i].trim());
+                                itineraryList.add(iti);
+                            } catch (NumberFormatException e) {
+                                // Skip invalid day numbers
+                            }
+                        }
+                    }
+                }
+                tour.setItineraries(itineraryList);
 
                 boolean success;
                 if ("update".equalsIgnoreCase(action)) {

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -155,13 +155,7 @@
                 <div class="glass-card p-4">
                     <h4 class="details-section-title"><i class="fa-regular fa-compass me-2 text-primary"></i>Itinerary Plan</h4>
                     <c:choose>
-                        <c:when test="${empty tour.itineraries}">
-                            <div class="p-3 text-center text-muted">
-                                <i class="fa-solid fa-road-barrier display-6 mb-2"></i>
-                                <p>Itinerary is being updated. Please contact us for details.</p>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
+                        <c:when test="${not empty tour.itineraries}">
                             <div class="itinerary-timeline mt-4">
                                 <c:forEach var="iti" items="${tour.itineraries}">
                                     <div class="timeline-item">
@@ -174,6 +168,17 @@
                                         </div>
                                     </div>
                                 </c:forEach>
+                            </div>
+                        </c:when>
+                        <c:when test="${not empty tour.itineraryPlan}">
+                            <div class="mt-3 p-3 bg-white rounded-3 shadow-sm border border-light">
+                                <p class="mb-0 text-secondary-emphasis" style="white-space: pre-line; line-height: 1.7;">${tour.itineraryPlan}</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="p-3 text-center text-muted">
+                                <i class="fa-solid fa-road-barrier display-6 mb-2"></i>
+                                <p>Itinerary is being updated. Please contact us for details.</p>
                             </div>
                         </c:otherwise>
                     </c:choose>

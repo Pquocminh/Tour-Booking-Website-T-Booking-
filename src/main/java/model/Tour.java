@@ -11,6 +11,7 @@ public class Tour {
     private String tourName;
     private String departureLocation;
     private String description;
+    private String itineraryPlan;
     private int durationDays;
     private double basePrice;
     private String status;
@@ -99,6 +100,14 @@ public class Tour {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getItineraryPlan() {
+        return itineraryPlan;
+    }
+
+    public void setItineraryPlan(String itineraryPlan) {
+        this.itineraryPlan = itineraryPlan;
     }
 
     public int getDurationDays() {
