@@ -63,6 +63,32 @@ public class StaffController extends HttpServlet {
             handleGetDetails(request, response);
             return;
         }
+        
+        if ("edit".equalsIgnoreCase(action)) {
+            String scheduleIdParam = request.getParameter("id");
+            if (scheduleIdParam != null && !scheduleIdParam.trim().isEmpty()) {
+                try {
+                    int scheduleId = Integer.parseInt(scheduleIdParam.trim());
+                    TourSchedule schedule = tourDAO.getTourScheduleById(scheduleId);
+                    if (schedule != null) {
+                        request.setAttribute("schedule", schedule);
+                        Tour tour = tourDAO.getTourById(schedule.getTourId());
+                        request.setAttribute("tour", tour);
+                        
+                        dao.EmployeeDAO employeeDAO = new dao.EmployeeDAO();
+                        List<model.Employee> staffList = employeeDAO.getAllAccounts(null, "Staff", "Active");
+                        request.setAttribute("staffList", staffList);
+                        
+                        request.getRequestDispatcher("/WEB-INF/views/staff/schedule-form.jsp").forward(request, response);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
+            }
+            response.sendRedirect(request.getContextPath() + "/admin/staff/schedules");
+            return;
+        }
 
         String tourIdParam = request.getParameter("tourId");
         
@@ -189,6 +215,74 @@ public class StaffController extends HttpServlet {
             return;
         }
 
+        if ("update".equalsIgnoreCase(action)) {
+            handleUpdateSchedule(request, response, tourIdParam);
+            return;
+        }
+
+        response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
+    }
+
+    private void handleUpdateSchedule(HttpServletRequest request, HttpServletResponse response, String tourIdParam) throws IOException {
+        String scheduleIdParam = request.getParameter("scheduleId");
+        String departureDateStr = request.getParameter("departureDate");
+        String returnDateStr = request.getParameter("returnDate");
+        String status = request.getParameter("status");
+
+        if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null) {
+            request.getSession().setAttribute("errorMessage", "Missing required fields for update!");
+            response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+            return;
+        }
+
+        try {
+            int scheduleId = Integer.parseInt(scheduleIdParam.trim());
+            Date departureDate = Date.valueOf(departureDateStr.trim());
+            Date returnDate = Date.valueOf(returnDateStr.trim());
+
+            TourSchedule sched = tourDAO.getTourScheduleById(scheduleId);
+            if (sched == null) {
+                request.getSession().setAttribute("errorMessage", "Tour schedule not found!");
+            } else {
+                if (!sched.getDepartureDate().equals(departureDate) && tourDAO.isScheduleDateExists(sched.getTourId(), departureDate)) {
+                    request.getSession().setAttribute("errorMessage", "A schedule with this departure date already exists for this tour!");
+                    response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+
+                int bookedSlots = sched.getTotalSlots() - sched.getAvailableSlots();
+                int availableSlots = sched.getTotalSlots() - bookedSlots;
+                
+                if ("Open".equalsIgnoreCase(status) && availableSlots == 0) {
+                    status = "Full";
+                } else if ("Full".equalsIgnoreCase(status) && availableSlots > 0) {
+                    status = "Open";
+                }
+
+                sched.setDepartureDate(departureDate);
+                sched.setReturnDate(returnDate);
+                sched.setStatus(status);
+                
+                String assignedStaffIdParam = request.getParameter("assignedStaffId");
+                if (assignedStaffIdParam != null && !assignedStaffIdParam.trim().isEmpty()) {
+                    sched.setAssignedStaffId(Integer.parseInt(assignedStaffIdParam.trim()));
+                } else {
+                    sched.setAssignedStaffId(null);
+                }
+
+                boolean success = tourDAO.updateTourSchedule(sched);
+                if (success) {
+                    tourDAO.syncTourBasePriceFromSchedules(sched.getTourId());
+                    request.getSession().setAttribute("successMessage", "Updated Tour Schedule #" + scheduleId + " successfully!");
+                } else {
+                    request.getSession().setAttribute("errorMessage", "Failed to update tour schedule in database!");
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            request.getSession().setAttribute("errorMessage", "Invalid date format! Use YYYY-MM-DD.");
+        } catch (Exception e) {
+            request.getSession().setAttribute("errorMessage", "An error occurred: " + e.getMessage());
+        }
         response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null && !tourIdParam.trim().isEmpty() ? "?tourId=" + tourIdParam : ""));
     }
 
@@ -197,7 +291,7 @@ public class StaffController extends HttpServlet {
         if (scheduleIdParam != null && !scheduleIdParam.trim().isEmpty()) {
             try {
                 int scheduleId = Integer.parseInt(scheduleIdParam.trim());
-                model.Account account = (model.Account) request.getSession().getAttribute("account");
+                model.Account account = (model.Account) request.getSession().getAttribute("user");
                 if (account != null) {
                     TourSchedule sched = tourDAO.getTourScheduleById(scheduleId);
                     if (sched != null) {
