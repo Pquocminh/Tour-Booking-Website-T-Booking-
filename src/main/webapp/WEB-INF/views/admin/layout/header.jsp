@@ -22,13 +22,15 @@
         
         <!-- Left Sidebar -->
         <div class="sidebar">
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="logo">
+            <a href="${pageContext.request.contextPath}/admin/${sessionScope.user.role == 'Admin' ? 'dashboard' : 'staff/schedules'}" class="logo">
                 <i class="fa-solid fa-plane-departure"></i> T-Booking
             </a>
             
-            <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-item-custom ${param.activeMenu == 'dashboard' ? 'active' : ''}">
-                <i class="fa-solid fa-border-all"></i> Dashboard
-            </a>
+            <c:if test="${sessionScope.user.role == 'Admin'}">
+                <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-item-custom ${param.activeMenu == 'dashboard' ? 'active' : ''}">
+                    <i class="fa-solid fa-border-all"></i> Dashboard
+                </a>
+            </c:if>
             <a href="${pageContext.request.contextPath}/admin/tours" class="nav-item-custom ${param.activeMenu == 'tours' ? 'active' : ''}">
                 <i class="fa-solid fa-map-location-dot"></i> Manage Tours
             </a>

@@ -73,7 +73,15 @@ public class AdminTourController extends HttpServlet {
         HttpSession session = request.getSession();
         Account user = (Account) session.getAttribute("user");
         
-        if (user == null || (!"Admin".equalsIgnoreCase(user.getRole()) && !"Staff".equalsIgnoreCase(user.getRole()))) {
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if ("Staff".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/admin/staff/schedules");
+            return;
+        }
+        if (!"Admin".equalsIgnoreCase(user.getRole())) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
