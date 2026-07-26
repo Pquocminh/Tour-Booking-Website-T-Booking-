@@ -155,15 +155,62 @@ public class AdminTourController extends HttpServlet {
             } catch (NumberFormatException e) {}
         }
 
-        List<Tour> tours = tourDAO.searchToursAdmin(search, status, categoryId, destinationId);
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 tours per page as requested
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) {
+                    pageSize = parsedSize;
+                }
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        List<Tour> allTours = tourDAO.searchToursAdmin(search, status, categoryId, destinationId);
+        int totalTours = (allTours != null) ? allTours.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalTours / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalTours);
+        List<Tour> tours = (allTours != null && fromIndex < totalTours)
+                ? allTours.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
         List<Category> categories = tourDAO.getAllCategories();
         List<Destination> destinations = tourDAO.getAllDestinations();
 
+        java.util.List<Integer> tourIds = new java.util.ArrayList<>();
+        if (tours != null) {
+            for (Tour t : tours) {
+                tourIds.add(t.getTourId());
+            }
+        }
+        java.util.Set<Integer> schedTourIds = tourDAO.getTourIdsWithSchedules(tourIds);
         java.util.Map<Integer, Boolean> tourHasSchedules = new java.util.HashMap<>();
         if (tours != null) {
             for (Tour t : tours) {
-                List<model.TourSchedule> scheds = tourDAO.getAllTourSchedules(t.getTourId());
-                tourHasSchedules.put(t.getTourId(), scheds != null && !scheds.isEmpty());
+                tourHasSchedules.put(t.getTourId(), schedTourIds.contains(t.getTourId()));
             }
         }
 
@@ -175,6 +222,10 @@ public class AdminTourController extends HttpServlet {
         request.setAttribute("selectedStatus", status);
         request.setAttribute("selectedCategory", categoryId);
         request.setAttribute("selectedDestination", destinationId);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalTours", totalTours);
+        request.setAttribute("pageSize", pageSize);
 
         request.getRequestDispatcher("/WEB-INF/views/admin/tours.jsp").forward(request, response);
     }
@@ -291,8 +342,53 @@ public class AdminTourController extends HttpServlet {
             }
         }
 
-        List<Category> categories = categoryDAO.getAllCategories();
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 categories per page
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) {
+                    pageSize = parsedSize;
+                }
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        List<Category> allCategories = categoryDAO.getAllCategories();
+        int totalCategories = (allCategories != null) ? allCategories.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalCategories / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalCategories);
+        List<Category> categories = (allCategories != null && fromIndex < totalCategories)
+                ? allCategories.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
         request.setAttribute("categories", categories);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalCategories", totalCategories);
+        request.setAttribute("pageSize", pageSize);
         request.getRequestDispatcher("/WEB-INF/views/admin/categories.jsp").forward(request, response);
     }
 

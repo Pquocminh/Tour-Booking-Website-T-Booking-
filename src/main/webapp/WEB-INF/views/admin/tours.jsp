@@ -70,7 +70,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-list me-2 text-primary"></i>Tours List</h4>
                 <div>
-                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${tours.size()} Package(s)</span>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${not empty totalTours ? totalTours : tours.size()} Package(s)</span>
                     <a href="${pageContext.request.contextPath}/admin/tours?action=create" class="btn btn-primary rounded-pill px-4 shadow-sm">
                         <i class="fa-solid fa-plus me-1"></i> New Tour
                     </a>
@@ -107,10 +107,31 @@
                                 <c:forEach var="t" items="${tours}">
                                     <tr>
                                         <td>
-                                            <img src="${not empty t.thumbnailUrl ? pageContext.request.contextPath.concat(t.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&auto=format&fit=crop'}" 
-                                                 alt="Tour Thumbnail" 
-                                                 class="tour-thumbnail"
-                                                 onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=100&auto=format&fit=crop'">
+                                            <c:choose>
+                                                <c:when test="${not empty t.thumbnailUrl}">
+                                                    <c:choose>
+                                                        <c:when test="${t.thumbnailUrl.startsWith('http')}">
+                                                            <c:set var="adminImgSrc" value="${t.thumbnailUrl}" />
+                                                        </c:when>
+                                                        <c:when test="${t.thumbnailUrl.startsWith('/')}">
+                                                            <c:set var="adminImgSrc" value="${pageContext.request.contextPath}${t.thumbnailUrl}" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <c:set var="adminImgSrc" value="${pageContext.request.contextPath}/${t.thumbnailUrl}" />
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    <img src="${adminImgSrc}" 
+                                                         alt="Tour Thumbnail" 
+                                                         class="tour-thumbnail"
+                                                         loading="lazy"
+                                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=200&auto=format&fit=crop';">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="tour-thumbnail d-flex align-items-center justify-content-center bg-light text-secondary rounded border shadow-sm" style="width: 70px; height: 50px; font-size: 0.75rem; font-weight: 600;">
+                                                        <i class="fa-solid fa-image me-1 text-muted"></i>No Pic
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
                                         <td>
                                             <span class="text-muted small d-block">ID: #${t.tourId}</span>
@@ -170,6 +191,57 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Bar matching reference design -->
+            <c:if test="${not empty totalPages and totalPages >= 1}">
+                <nav aria-label="Tour list pagination" class="d-flex justify-content-center mt-4">
+                    <ul class="pagination custom-pagination mb-0" style="display: flex !important; list-style: none !important; padding-left: 0 !important; margin: 0 !important;">
+                        <!-- Previous Button -->
+                        <c:choose>
+                            <c:when test="${currentPage <= 1}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/tours?page=${currentPage - 1}&search=${not empty searchKeyword ? searchKeyword : ''}&status=${not empty selectedStatus ? selectedStatus : ''}&category=${not empty selectedCategory ? selectedCategory : ''}&destination=${not empty selectedDestination ? selectedDestination : ''}">Previous</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <!-- Page Numbers -->
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <c:choose>
+                                <c:when test="${currentPage == i}">
+                                    <li class="page-item active" style="list-style: none !important;">
+                                        <a class="page-link" href="javascript:void(0);">${i}</a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li class="page-item" style="list-style: none !important;">
+                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/tours?page=${i}&search=${not empty searchKeyword ? searchKeyword : ''}&status=${not empty selectedStatus ? selectedStatus : ''}&category=${not empty selectedCategory ? selectedCategory : ''}&destination=${not empty selectedDestination ? selectedDestination : ''}">${i}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+
+                        <!-- Next Button -->
+                        <c:choose>
+                            <c:when test="${currentPage >= totalPages}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Next</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/tours?page=${currentPage + 1}&search=${not empty searchKeyword ? searchKeyword : ''}&status=${not empty selectedStatus ? selectedStatus : ''}&category=${not empty selectedCategory ? selectedCategory : ''}&destination=${not empty selectedDestination ? selectedDestination : ''}">Next</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </ul>
+                </nav>
+            </c:if>
         </section>
     </div>
 

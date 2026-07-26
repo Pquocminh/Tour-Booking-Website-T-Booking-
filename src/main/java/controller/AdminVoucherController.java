@@ -66,8 +66,53 @@ public class AdminVoucherController extends HttpServlet {
             }
         }
 
-        List<Voucher> vouchers = voucherDAO.getAllVouchers();
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 vouchers per page
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) {
+                    pageSize = parsedSize;
+                }
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        List<Voucher> allVouchers = voucherDAO.getAllVouchers();
+        int totalVouchers = (allVouchers != null) ? allVouchers.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalVouchers / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalVouchers);
+        List<Voucher> vouchers = (allVouchers != null && fromIndex < totalVouchers)
+                ? allVouchers.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
         request.setAttribute("vouchers", vouchers);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalVouchers", totalVouchers);
+        request.setAttribute("pageSize", pageSize);
         request.getRequestDispatcher("/WEB-INF/views/admin/vouchers.jsp").forward(request, response);
     }
 

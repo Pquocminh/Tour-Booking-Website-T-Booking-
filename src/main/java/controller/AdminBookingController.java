@@ -19,9 +19,45 @@ public class AdminBookingController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        List<Booking> bookings = bookingDAO.getAllBookings();
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 bookings per page
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) pageSize = parsedSize;
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        List<Booking> allBookings = bookingDAO.getAllBookings();
+        int totalBookings = (allBookings != null) ? allBookings.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalBookings / pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalBookings);
+        List<Booking> bookings = (allBookings != null && fromIndex < totalBookings)
+                ? allBookings.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
         request.setAttribute("bookings", bookings);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalBookings", totalBookings);
+        request.setAttribute("pageSize", pageSize);
         
         request.getRequestDispatcher("/WEB-INF/views/admin/bookings.jsp").forward(request, response);
     }

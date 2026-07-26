@@ -40,52 +40,84 @@ public class AdminAccountController extends HttpServlet {
         String search = request.getParameter("search");
         String role = request.getParameter("role");
         String status = request.getParameter("status");
+        String tabParam = request.getParameter("tab");
 
-        // Defaults to "All" if empty
-        if (role == null) {
-            role = "All";
-        }
-        if (status == null) {
-            status = "All";
-        }
+        // Defaults
+        if (role == null) role = "All";
+        if (status == null) status = "All";
 
-        List<Account> accounts = new java.util.ArrayList<>();
-        if ("Customer".equals(role)) {
-            accounts.addAll(customerDAO.getAllAccounts(search, status));
-        } else if ("Staff".equals(role)) {
-            accounts.addAll(employeeDAO.getAllAccounts(search, "Staff", status));
-        } else {
-            // role is "All" (or any other invalid role, we only show Customer and Staff)
-            accounts.addAll(customerDAO.getAllAccounts(search, status));
-            accounts.addAll(employeeDAO.getAllAccounts(search, "Staff", status));
-        }
-
-        // Determine active tab based on role search results
-        String activeTab = "employees"; // default
-        if ("Customer".equalsIgnoreCase(role)) {
+        // Determine active tab
+        String activeTab = "employees";
+        if ("customers".equalsIgnoreCase(tabParam) || "Customer".equalsIgnoreCase(role)) {
             activeTab = "customers";
-        } else if ("Staff".equalsIgnoreCase(role)) {
+        } else if ("employees".equalsIgnoreCase(tabParam) || "Staff".equalsIgnoreCase(role)) {
             activeTab = "employees";
-        } else { // role is "All" or empty
-            boolean hasStaff = false;
-            boolean hasCustomer = false;
-            for (Account acc : accounts) {
-                if ("Staff".equalsIgnoreCase(acc.getRole())) {
-                    hasStaff = true;
-                } else if ("Customer".equalsIgnoreCase(acc.getRole())) {
-                    hasCustomer = true;
+        }
+
+        List<Account> staffAccounts = new java.util.ArrayList<>(employeeDAO.getAllAccounts(search, "Staff", status));
+        List<Account> customerAccounts = new java.util.ArrayList<>(customerDAO.getAllAccounts(search, status));
+
+        int totalStaff = (staffAccounts != null) ? staffAccounts.size() : 0;
+        int totalCustomers = (customerAccounts != null) ? customerAccounts.size() : 0;
+        int totalAccounts = totalStaff + totalCustomers;
+
+        List<Account> activeList = "customers".equalsIgnoreCase(activeTab) ? customerAccounts : staffAccounts;
+
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 accounts per page
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) {
+                    pageSize = parsedSize;
                 }
-            }
-            if (!hasStaff && hasCustomer) {
-                activeTab = "customers";
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+            } catch (NumberFormatException e) {
+                currentPage = 1;
             }
         }
 
-        request.setAttribute("accounts", accounts);
+        int activeListSize = (activeList != null) ? activeList.size() : 0;
+        int totalPages = (int) Math.ceil((double) activeListSize / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, activeListSize);
+        List<Account> pagedActiveAccounts = (activeList != null && fromIndex < activeListSize)
+                ? activeList.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
+        // If tab is employees, pass paged staff; if customers, pass paged customers
+        request.setAttribute("accounts", pagedActiveAccounts);
+        request.setAttribute("staffAccounts", "employees".equals(activeTab) ? pagedActiveAccounts : staffAccounts);
+        request.setAttribute("customerAccounts", "customers".equals(activeTab) ? pagedActiveAccounts : customerAccounts);
         request.setAttribute("searchKeyword", search);
         request.setAttribute("selectedRole", role);
         request.setAttribute("selectedStatus", status);
         request.setAttribute("activeTab", activeTab);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalAccounts", totalAccounts);
+        request.setAttribute("totalStaff", totalStaff);
+        request.setAttribute("totalCustomers", totalCustomers);
+        request.setAttribute("pageSize", pageSize);
 
         request.getRequestDispatcher("/WEB-INF/views/admin/accounts.jsp").forward(request, response);
     }

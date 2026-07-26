@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -25,8 +25,25 @@
             </div>
 
             <c:if test="${not empty tour}">
-                <!-- Cover Image -->
-                <img src="${not empty tour.thumbnailUrl ? pageContext.request.contextPath.concat(tour.thumbnailUrl) : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop'}" 
+                <c:choose>
+                    <c:when test="${not empty tour.thumbnailUrl}">
+                        <c:choose>
+                            <c:when test="${tour.thumbnailUrl.startsWith('http')}">
+                                <c:set var="coverSrc" value="${tour.thumbnailUrl}" />
+                            </c:when>
+                            <c:when test="${tour.thumbnailUrl.startsWith('/')}">
+                                <c:set var="coverSrc" value="${pageContext.request.contextPath}${tour.thumbnailUrl}" />
+                            </c:when>
+                            <c:otherwise>
+                                <c:set var="coverSrc" value="${pageContext.request.contextPath}/${tour.thumbnailUrl}" />
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <c:set var="coverSrc" value="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop" />
+                    </c:otherwise>
+                </c:choose>
+                <img src="${coverSrc}" 
                      alt="Cover" class="cover-img shadow-sm"
                      onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop'">
 
