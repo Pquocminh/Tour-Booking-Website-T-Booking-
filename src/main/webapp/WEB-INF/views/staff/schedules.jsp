@@ -141,7 +141,7 @@
                                                     </c:forEach>
                                                     <span class="badge bg-info-subtle text-info border border-info px-2 py-1 rounded-pill">
                                                         <i class="fa-solid fa-user me-1"></i>${staffName}
-                                                        <c:if test="${sessionScope.account.accountId == s.assignedStaffId}"> (You)</c:if>
+                                                        <c:if test="${sessionScope.user.accountId == s.assignedStaffId}"> (You)</c:if>
                                                     </span>
                                                 </c:when>
                                                 <c:otherwise>
@@ -166,6 +166,9 @@
                                                         </button>
                                                     </form>
                                                 </c:if>
+                                                <a href="${pageContext.request.contextPath}/admin/staff/schedules?action=edit&id=${s.scheduleId}" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+                                                    <i class="fa-solid fa-pen-to-square me-1"></i>Edit
+                                                </a>
                                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
                                                         onclick="viewDetails(${s.scheduleId})">
                                                     <i class="fa-solid fa-eye me-1"></i>Detail
@@ -651,6 +654,8 @@
             }
             validateCreateDates();
         }
+
+
 
         function openReserveModal(scheduleId, tourName, availableSlots) {
             document.getElementById('reserveScheduleId').value = scheduleId;
