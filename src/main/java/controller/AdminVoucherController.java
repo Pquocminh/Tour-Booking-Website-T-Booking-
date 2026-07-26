@@ -152,8 +152,9 @@ public class AdminVoucherController extends HttpServlet {
                 Date startDate = Date.valueOf(startDateParam);
                 Date endDate = Date.valueOf(endDateParam);
 
-                if (startDate.after(endDate)) {
-                    request.setAttribute("errorMessage", "Start date cannot be after end date!");
+                String validationError = validateVoucherInput(discountPercent, minOrder, maxDiscount, quantity, startDate, endDate);
+                if (validationError != null) {
+                    request.setAttribute("errorMessage", validationError);
                     reloadVouchersDashboard(request, response);
                     return;
                 }
@@ -219,8 +220,9 @@ public class AdminVoucherController extends HttpServlet {
                 Date startDate = Date.valueOf(startDateParam);
                 Date endDate = Date.valueOf(endDateParam);
 
-                if (startDate.after(endDate)) {
-                    request.setAttribute("errorMessage", "Start date cannot be after end date!");
+                String validationError = validateVoucherInput(discountPercent, minOrder, maxDiscount, quantity, startDate, endDate);
+                if (validationError != null) {
+                    request.setAttribute("errorMessage", validationError);
                     reloadVoucherEditPage(id, request, response);
                     return;
                 }
@@ -264,5 +266,24 @@ public class AdminVoucherController extends HttpServlet {
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/vouchers");
         }
+    }
+
+    private String validateVoucherInput(double discountPercent, double minOrder, double maxDiscount, int quantity, Date startDate, Date endDate) {
+        if (discountPercent <= 0 || discountPercent > 100) {
+            return "Discount percentage must be between 1 and 100!";
+        }
+        if (minOrder < 0 || maxDiscount < 0) {
+            return "Minimum Order Value and Max Discount Amount must be greater than or equal to 0!";
+        }
+        if (maxDiscount > 0 && minOrder > maxDiscount) {
+            return "Minimum Order Value cannot be greater than Max Discount Amount!";
+        }
+        if (quantity <= 0) {
+            return "Quantity must be greater than 0!";
+        }
+        if (startDate.after(endDate)) {
+            return "Start Date must be before or equal to End Date";
+        }
+        return null;
     }
 }
