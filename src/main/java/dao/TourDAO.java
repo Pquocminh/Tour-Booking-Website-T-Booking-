@@ -39,11 +39,22 @@ public class TourDAO {
     }
     
     public List<Tour> searchTours(String keyword) {
-        String sql = TOUR_SELECT_QUERY + 
-            "WHERE t.status = 'Active' AND " +
-            "(t.tour_name LIKE ? OR t.description LIKE ? OR d.destination_name LIKE ? OR c.category_name LIKE ?)";
-        String searchKeyword = "%" + keyword + "%";
-        return executeTourQuery(sql, new Object[]{searchKeyword, searchKeyword, searchKeyword, searchKeyword});
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAvailableTours();
+        }
+        String[] tokens = keyword.trim().split("\\s+");
+        StringBuilder sql = new StringBuilder(TOUR_SELECT_QUERY + "WHERE t.status = 'Active' ");
+        List<Object> params = new ArrayList<>();
+        
+        for (String token : tokens) {
+            sql.append("AND (t.tour_name LIKE ? OR t.description LIKE ? OR d.destination_name LIKE ? OR c.category_name LIKE ?) ");
+            String param = "%" + token + "%";
+            params.add(param);
+            params.add(param);
+            params.add(param);
+            params.add(param);
+        }
+        return executeTourQuery(sql.toString(), params.toArray());
     }
     
     public List<Tour> searchToursByCategory(int categoryId) {

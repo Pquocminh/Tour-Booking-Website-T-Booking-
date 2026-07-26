@@ -556,5 +556,6 @@
             calculateTotalPrice();
         });
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/security.js"></script>
 </body>
 </html>

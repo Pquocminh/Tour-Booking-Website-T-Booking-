@@ -347,6 +347,7 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/security.js"></script>
 </body>
 </html>
 
