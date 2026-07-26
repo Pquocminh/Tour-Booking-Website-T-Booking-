@@ -66,6 +66,80 @@ public class TourDAO {
         String sql = TOUR_SELECT_QUERY + "WHERE t.status = 'Active' AND t.destination_id = ?";
         return executeTourQuery(sql, new Object[]{destinationId});
     }
+
+    public List<Tour> filterTours(String keyword, Integer categoryId, Integer destinationId,
+                                  Double minPrice, Double maxPrice,
+                                  Integer minDuration, Integer maxDuration, String sortBy) {
+        StringBuilder sql = new StringBuilder(TOUR_SELECT_QUERY + "WHERE t.status = 'Active' ");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String[] tokens = keyword.trim().split("\\s+");
+            for (String token : tokens) {
+                sql.append("AND (t.tour_name LIKE ? OR t.description LIKE ? OR d.destination_name LIKE ? OR c.category_name LIKE ?) ");
+                String param = "%" + token + "%";
+                params.add(param);
+                params.add(param);
+                params.add(param);
+                params.add(param);
+            }
+        }
+
+        if (categoryId != null && categoryId > 0) {
+            sql.append("AND t.category_id = ? ");
+            params.add(categoryId);
+        }
+
+        if (destinationId != null && destinationId > 0) {
+            sql.append("AND t.destination_id = ? ");
+            params.add(destinationId);
+        }
+
+        if (minPrice != null && minPrice >= 0) {
+            sql.append("AND t.base_price >= ? ");
+            params.add(minPrice);
+        }
+
+        if (maxPrice != null && maxPrice >= 0) {
+            sql.append("AND t.base_price <= ? ");
+            params.add(maxPrice);
+        }
+
+        if (minDuration != null && minDuration >= 0) {
+            sql.append("AND t.duration_days >= ? ");
+            params.add(minDuration);
+        }
+
+        if (maxDuration != null && maxDuration >= 0) {
+            sql.append("AND t.duration_days <= ? ");
+            params.add(maxDuration);
+        }
+
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            switch (sortBy.trim().toLowerCase()) {
+                case "price_asc":
+                    sql.append("ORDER BY t.base_price ASC ");
+                    break;
+                case "price_desc":
+                    sql.append("ORDER BY t.base_price DESC ");
+                    break;
+                case "duration_asc":
+                    sql.append("ORDER BY t.duration_days ASC ");
+                    break;
+                case "duration_desc":
+                    sql.append("ORDER BY t.duration_days DESC ");
+                    break;
+                case "newest":
+                default:
+                    sql.append("ORDER BY t.created_at DESC, t.tour_id DESC ");
+                    break;
+            }
+        } else {
+            sql.append("ORDER BY t.created_at DESC, t.tour_id DESC ");
+        }
+
+        return executeTourQuery(sql.toString(), params.toArray());
+    }
     
     private List<Tour> executeTourQuery(String sql, Object[] params) {
         List<Tour> list = new ArrayList<>();

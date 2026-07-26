@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import dao.WishlistDAO;
+import dao.CategoryDAO;
+import dao.DestinationDAO;
 
 import model.Tour;
 import dao.PromotionDAO;
@@ -21,6 +23,8 @@ import dao.TourDAO;
 public class PublicTourController extends HttpServlet {
     private final TourDAO tourDAO = new TourDAO();
     private final PromotionDAO promotionDAO = new PromotionDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final DestinationDAO destinationDAO = new DestinationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,39 +44,99 @@ public class PublicTourController extends HttpServlet {
     private void handlePublicTourList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String searchKeyword = request.getParameter("search");
-        String categoryFilter = request.getParameter("category");
-        String destinationFilter = request.getParameter("destination");
+        String categoryParam = request.getParameter("category");
+        String destinationParam = request.getParameter("destination");
+        String minPriceParam = request.getParameter("minPrice");
+        String maxPriceParam = request.getParameter("maxPrice");
+        String minDurationParam = request.getParameter("minDuration");
+        String maxDurationParam = request.getParameter("maxDuration");
+        String sortBy = request.getParameter("sortBy");
 
-        List<Tour> rawTours;
-        boolean isSearchResult = false;
+        List<String> filterErrors = new java.util.ArrayList<>();
 
-        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            rawTours = tourDAO.searchTours(searchKeyword.trim());
-            request.setAttribute("searchKeyword", searchKeyword.trim());
-            isSearchResult = true;
-        } else if (categoryFilter != null && !categoryFilter.isEmpty()) {
+        Integer categoryFilter = null;
+        if (categoryParam != null && !categoryParam.trim().isEmpty()) {
             try {
-                int catId = Integer.parseInt(categoryFilter.trim());
-                rawTours = tourDAO.searchToursByCategory(catId);
-                request.setAttribute("categoryFilter", catId);
+                categoryFilter = Integer.parseInt(categoryParam.trim());
             } catch (NumberFormatException e) {
-                rawTours = tourDAO.getAvailableTours();
+                filterErrors.add("Invalid category selected.");
             }
-        } else if (destinationFilter != null && !destinationFilter.isEmpty()) {
-            try {
-                int destId = Integer.parseInt(destinationFilter.trim());
-                rawTours = tourDAO.searchToursByDestination(destId);
-                request.setAttribute("destinationFilter", destId);
-            } catch (NumberFormatException e) {
-                rawTours = tourDAO.getAvailableTours();
-            }
-        } else {
-            rawTours = tourDAO.getAvailableTours();
         }
+
+        Integer destinationFilter = null;
+        if (destinationParam != null && !destinationParam.trim().isEmpty()) {
+            try {
+                destinationFilter = Integer.parseInt(destinationParam.trim());
+            } catch (NumberFormatException e) {
+                filterErrors.add("Invalid destination selected.");
+            }
+        }
+
+        Double minPriceFilter = parseAndValidatePrice(minPriceParam, "Minimum price", filterErrors);
+        Double maxPriceFilter = parseAndValidatePrice(maxPriceParam, "Maximum price", filterErrors);
+
+        if (minPriceFilter != null && maxPriceFilter != null && minPriceFilter > maxPriceFilter) {
+            filterErrors.add("Minimum price cannot be greater than maximum price.");
+            minPriceFilter = null;
+            maxPriceFilter = null;
+        }
+
+        Integer minDurationFilter = null;
+        if (minDurationParam != null && !minDurationParam.trim().isEmpty()) {
+            try {
+                int parsedMinDur = Integer.parseInt(minDurationParam.trim());
+                if (parsedMinDur < 1) {
+                    filterErrors.add("Minimum duration must be at least 1 day.");
+                } else {
+                    minDurationFilter = parsedMinDur;
+                }
+            } catch (NumberFormatException e) {
+                filterErrors.add("Minimum duration must be a valid integer value.");
+            }
+        }
+
+        Integer maxDurationFilter = null;
+        if (maxDurationParam != null && !maxDurationParam.trim().isEmpty()) {
+            try {
+                int parsedMaxDur = Integer.parseInt(maxDurationParam.trim());
+                if (parsedMaxDur < 1) {
+                    filterErrors.add("Maximum duration must be at least 1 day.");
+                } else {
+                    maxDurationFilter = parsedMaxDur;
+                }
+            } catch (NumberFormatException e) {
+                filterErrors.add("Maximum duration must be a valid integer value.");
+            }
+        }
+
+        if (minDurationFilter != null && maxDurationFilter != null && minDurationFilter > maxDurationFilter) {
+            filterErrors.add("Minimum duration cannot be greater than maximum duration.");
+            minDurationFilter = null;
+            maxDurationFilter = null;
+        }
+
+        if (searchKeyword != null) searchKeyword = searchKeyword.trim();
+        if (searchKeyword != null && searchKeyword.isEmpty()) searchKeyword = null;
+
+        List<Tour> rawTours = tourDAO.filterTours(
+                searchKeyword,
+                categoryFilter,
+                destinationFilter,
+                minPriceFilter,
+                maxPriceFilter,
+                minDurationFilter,
+                maxDurationFilter,
+                sortBy
+        );
+
+        boolean hasActiveFilters = (searchKeyword != null) || (categoryFilter != null) || (destinationFilter != null)
+                || (minPriceFilter != null) || (maxPriceFilter != null)
+                || (minDurationFilter != null) || (maxDurationFilter != null)
+                || (sortBy != null && !sortBy.trim().isEmpty());
 
         // Parse pagination parameters
         int currentPage = 1;
-        int pageSize = 10; // Default 10 tours per page for guests and customers
+        int pageSize = 9; // 9 tours per page for 3x3 grid layout
 
         String pageSizeParam = request.getParameter("pageSize");
         if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
@@ -104,8 +168,8 @@ public class PublicTourController extends HttpServlet {
                 : new java.util.ArrayList<>();
 
         if (totalTours == 0) {
-            if (isSearchResult) {
-                request.setAttribute("message", "No tours found matching your search.");
+            if (hasActiveFilters) {
+                request.setAttribute("message", "No tours found matching your selected filter criteria.");
             } else {
                 request.setAttribute("message", "Currently, there aren't any tours being sold.");
             }
@@ -116,7 +180,19 @@ public class PublicTourController extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalTours", totalTours);
         request.setAttribute("pageSize", pageSize);
-        request.setAttribute("isSearchResult", isSearchResult);
+        request.setAttribute("hasActiveFilters", hasActiveFilters);
+        request.setAttribute("searchKeyword", searchKeyword);
+        request.setAttribute("categoryFilter", categoryFilter);
+        request.setAttribute("destinationFilter", destinationFilter);
+        request.setAttribute("minPriceFilter", minPriceFilter);
+        request.setAttribute("maxPriceFilter", maxPriceFilter);
+        request.setAttribute("minDurationFilter", minDurationFilter);
+        request.setAttribute("maxDurationFilter", maxDurationFilter);
+        request.setAttribute("sortByFilter", sortBy);
+
+        request.setAttribute("filterErrors", filterErrors);
+        request.setAttribute("categories", categoryDAO.getAllCategories());
+        request.setAttribute("destinations", destinationDAO.getAllDestinations());
         request.setAttribute("activePromotions", promotionDAO.getActivePromotions());
 
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
@@ -195,6 +271,46 @@ public class PublicTourController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/guest/tour-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/tours");
+        }
+    }
+
+    private Double parseAndValidatePrice(String priceParam, String fieldName, List<String> errors) {
+        if (priceParam == null || priceParam.trim().isEmpty()) {
+            return null;
+        }
+        String trimmed = priceParam.trim();
+
+        boolean hasComma = trimmed.contains(",");
+        boolean hasDot = trimmed.contains(".");
+
+        if (hasComma) {
+            if (!trimmed.matches("^\\d{1,3}(,\\d{3})+$")) {
+                errors.add(fieldName + ": If comma is used, it must be followed by exactly 3 digits (e.g. 1,000 or 1,234).");
+                return null;
+            }
+        } else if (hasDot) {
+            if (!trimmed.matches("^\\d{1,3}(\\.\\d{3})+$")) {
+                errors.add(fieldName + ": If dot separator is used, it must be followed by exactly 3 digits (e.g. 1.000 or 1.234).");
+                return null;
+            }
+        } else {
+            if (!trimmed.matches("^\\d+$")) {
+                errors.add(fieldName + " must be a valid positive number.");
+                return null;
+            }
+        }
+
+        try {
+            String cleanVal = trimmed.replace(",", "").replace(".", "");
+            double parsed = Double.parseDouble(cleanVal);
+            if (parsed < 1000) {
+                errors.add(fieldName + " must be at least 1,000 VND.");
+                return null;
+            }
+            return parsed;
+        } catch (NumberFormatException e) {
+            errors.add(fieldName + " must be a valid numeric value.");
+            return null;
         }
     }
 }
