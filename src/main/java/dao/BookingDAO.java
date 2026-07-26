@@ -85,19 +85,35 @@ public class BookingDAO extends DBContext {
         return false;
     }
 
-    public List<Booking> getAllBookings() {
+    public List<Booking> getAllBookings(String search) {
         List<Booking> list = new ArrayList<>();
-        String sql = "SELECT b.*, bv.voucher_id, t.tour_name, ts.departure_date, c.username AS customer_username, c.email AS customer_email " +
-                     "FROM Booking b " +
-                     "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
-                     "JOIN Tour t ON ts.tour_id = t.tour_id " +
-                     "LEFT JOIN Customer c ON b.customer_id = c.customer_id " +
-                     "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id " +
-                     "ORDER BY b.booking_date DESC";
+        StringBuilder sql = new StringBuilder(
+            "SELECT b.*, bv.voucher_id, t.tour_name, ts.departure_date, c.username AS customer_username, c.email AS customer_email " +
+            "FROM Booking b " +
+            "JOIN TourSchedule ts ON b.schedule_id = ts.schedule_id " +
+            "JOIN Tour t ON ts.tour_id = t.tour_id " +
+            "LEFT JOIN Customer c ON b.customer_id = c.customer_id " +
+            "LEFT JOIN BookingVoucher bv ON b.booking_id = bv.booking_id "
+        );
+
+        boolean hasSearch = (search != null && !search.trim().isEmpty());
+        if (hasSearch) {
+            sql.append("WHERE b.booking_id LIKE ? OR t.tour_name LIKE ? OR b.contact_name LIKE ? OR b.contact_phone LIKE ? ");
+        }
+        sql.append("ORDER BY b.booking_date DESC");
+
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             
+            if (hasSearch) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(1, searchPattern);
+                ps.setString(2, searchPattern);
+                ps.setString(3, searchPattern);
+                ps.setString(4, searchPattern);
+            }
             
+            try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Booking b = new Booking();
                 b.setBookingId(rs.getInt("booking_id"));
@@ -120,6 +136,7 @@ public class BookingDAO extends DBContext {
                 b.setCustomerEmail(rs.getString("customer_email"));
                 
                 list.add(b);
+            }
             }
         } catch (Exception e) {
             e.printStackTrace();
