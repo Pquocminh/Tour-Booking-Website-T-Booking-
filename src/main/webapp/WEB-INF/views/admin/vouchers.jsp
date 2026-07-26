@@ -72,7 +72,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-muted small fw-bold">Discount Percent (%)</label>
-                        <input type="number" name="discountPercent" step="0.01" class="form-control rounded-3" min="0" max="100" placeholder="10.5" required>
+                        <input type="number" name="discountPercent" step="0.01" class="form-control rounded-3" min="0.01" max="100" placeholder="10.5" required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label text-muted small fw-bold">Quantity (Uses)</label>
@@ -259,5 +259,68 @@
             </c:if>
         </section>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form[action*="/admin/vouchers"]');
+        forms.forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                const discountInput = form.querySelector('input[name="discountPercent"]');
+                const quantityInput = form.querySelector('input[name="quantity"]');
+                const minOrderInput = form.querySelector('input[name="minimumOrderValue"]');
+                const maxDiscountInput = form.querySelector('input[name="maxDiscountAmount"]');
+                const startDateInput = form.querySelector('input[name="startDate"]');
+                const endDateInput = form.querySelector('input[name="endDate"]');
+
+                if (!discountInput || !quantityInput || !minOrderInput || !maxDiscountInput || !startDateInput || !endDateInput) {
+                    return;
+                }
+
+                const discount = parseFloat(discountInput.value);
+                const quantity = parseInt(quantityInput.value, 10);
+                const minOrder = parseFloat(minOrderInput.value);
+                const maxDiscount = parseFloat(maxDiscountInput.value);
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+
+                if (isNaN(discount) || discount <= 0 || discount > 100) {
+                    event.preventDefault();
+                    alert("Discount Percent (%) must be greater than 0 and between 1 and 100!");
+                    discountInput.focus();
+                    return;
+                }
+
+                if (isNaN(quantity) || quantity <= 0) {
+                    event.preventDefault();
+                    alert("Quantity must be greater than 0!");
+                    quantityInput.focus();
+                    return;
+                }
+
+                if (isNaN(minOrder) || minOrder < 0 || isNaN(maxDiscount) || maxDiscount < 0) {
+                    event.preventDefault();
+                    alert("Minimum Order Value and Max Discount Amount must be greater than or equal to 0!");
+                    if (minOrder < 0) minOrderInput.focus();
+                    else maxDiscountInput.focus();
+                    return;
+                }
+
+                if (maxDiscount > 0 && minOrder > maxDiscount) {
+                    event.preventDefault();
+                    alert("Minimum Order Value cannot be greater than Max Discount Amount!");
+                    minOrderInput.focus();
+                    return;
+                }
+
+                if (startDate && endDate && startDate > endDate) {
+                    event.preventDefault();
+                    alert("Start Date must be before or equal to End Date");
+                    startDateInput.focus();
+                    return;
+                }
+            });
+        });
+    });
+</script>
 
 <jsp:include page="layout/footer.jsp" />
