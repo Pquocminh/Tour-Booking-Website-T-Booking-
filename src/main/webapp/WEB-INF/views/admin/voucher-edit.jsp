@@ -18,6 +18,7 @@
     </div>
 
     <!-- Notification Alerts -->
+    <div id="clientAlertContainer"></div>
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
             <i class="fa-solid fa-triangle-exclamation me-2"></i>${errorMessage}
@@ -80,6 +81,24 @@
 </div>
 
 <script>
+    function showClientAlert(message) {
+        let container = document.getElementById('clientAlertContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'clientAlertContainer';
+            const formPanel = document.querySelector('.filter-panel');
+            if (formPanel) {
+                formPanel.parentNode.insertBefore(container, formPanel);
+            }
+        }
+        container.innerHTML = 
+            '<div class="alert alert-danger border-0 rounded-3 mb-4 alert-dismissible fade show" role="alert" style="background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(185, 28, 28, 0.08);">' +
+                '<i class="fa-solid fa-triangle-exclamation me-2"></i>' + message +
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+            '</div>';
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const forms = document.querySelectorAll('form[action*="/admin/vouchers"]');
         forms.forEach(function(form) {
@@ -104,21 +123,21 @@
 
                 if (isNaN(discount) || discount <= 0 || discount > 100) {
                     event.preventDefault();
-                    alert("Discount Percent (%) must be greater than 0 and between 1 and 100!");
+                    showClientAlert("Discount Percent (%) must be greater than 0 and between 1 and 100!");
                     discountInput.focus();
                     return;
                 }
 
                 if (isNaN(quantity) || quantity <= 0) {
                     event.preventDefault();
-                    alert("Quantity must be greater than 0!");
+                    showClientAlert("Quantity must be greater than 0!");
                     quantityInput.focus();
                     return;
                 }
 
                 if (isNaN(minOrder) || minOrder < 0 || isNaN(maxDiscount) || maxDiscount < 0) {
                     event.preventDefault();
-                    alert("Minimum Order Value and Max Discount Amount must be greater than or equal to 0!");
+                    showClientAlert("Minimum Order Value and Max Discount Amount must be greater than or equal to 0!");
                     if (minOrder < 0) minOrderInput.focus();
                     else maxDiscountInput.focus();
                     return;
@@ -126,14 +145,14 @@
 
                 if (maxDiscount > 0 && minOrder > maxDiscount) {
                     event.preventDefault();
-                    alert("Minimum Order Value cannot be greater than Max Discount Amount!");
+                    showClientAlert("Minimum Order Value cannot be greater than Max Discount Amount!");
                     minOrderInput.focus();
                     return;
                 }
 
                 if (startDate && endDate && startDate > endDate) {
                     event.preventDefault();
-                    alert("Start Date must be before or equal to End Date");
+                    showClientAlert("Start Date must be before or equal to End Date");
                     startDateInput.focus();
                     return;
                 }
