@@ -29,47 +29,51 @@
         </c:if>
 
         <!-- Schedules Table List -->
-        <section class="table-panel">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <div>
-                    <span class="text-muted small d-block">MANAGING SCHEDULES FOR</span>
-                    <h4 class="mb-0 fw-bold text-dark">
-                        <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
-                        <c:choose>
-                            <c:when test="${not empty selectedTour}">
-                                ${selectedTour.tourName}
-                            </c:when>
-                            <c:when test="${not empty searchQuery}">
-                                Search results for "${searchQuery}"
-                            </c:when>
-                            <c:otherwise>
-                                All Tour Packages
-                            </c:otherwise>
-                        </c:choose>
-                    </h4>
-                </div>
-                
-                <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 700px;">
-                    <!-- Search Form -->
-                    <form method="GET" action="${pageContext.request.contextPath}/admin/staff/schedules" class="flex-grow-1 mb-0" style="max-width: 400px;">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                            <input type="text" name="tourId" class="form-control border-start-0 rounded-end-3" 
-                                   placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
-                        </div>
-                    </form>
+        <!-- Schedules Table List -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <span class="text-muted small d-block">MANAGING SCHEDULES FOR</span>
+                        <h4 class="mb-0 fw-bold text-dark">
+                            <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
+                            <c:choose>
+                                <c:when test="${not empty selectedTour}">
+                                    ${selectedTour.tourName}
+                                </c:when>
+                                <c:when test="${not empty searchQuery}">
+                                    Search results for "${searchQuery}"
+                                </c:when>
+                                <c:otherwise>
+                                    All Tour Packages
+                                </c:otherwise>
+                            </c:choose>
+                        </h4>
+                    </div>
                     
-                    <div class="d-flex gap-2 align-items-center">
-                        <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center text-nowrap">${schedules.size()} Schedule(s)</span>
-                        <button class="btn btn-success text-white rounded-pill px-4 text-nowrap" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
-                            <i class="fa-solid fa-plus me-2"></i>Create New Schedule
-                        </button>
+                    <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 700px;">
+                        <!-- Search Form -->
+                        <form method="GET" action="${pageContext.request.contextPath}/admin/staff/schedules" class="flex-grow-1 mb-0" style="max-width: 400px;">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                <input type="text" name="tourId" class="form-control border-start-0 rounded-end-3" 
+                                       placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
+                            </div>
+                        </form>
+                        
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center text-nowrap">${schedules.size()} Schedule(s)</span>
+                            <button class="btn btn-success text-white rounded-pill px-4 text-nowrap" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                                <i class="fa-solid fa-plus me-2"></i>Create New Schedule
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-custom table-hover align-middle">
+            <div class="card-body p-0 px-4 pb-4">
+                <div class="table-responsive" style="max-height: 650px; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-custom table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 80px;">Sched ID</th>
@@ -180,8 +184,9 @@
                     </tbody>
                 </table>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+</div>
 
     <!-- Hidden Form for Deletion -->
     <form id="deleteForm" method="POST" action="${pageContext.request.contextPath}/admin/staff/schedules">
@@ -405,14 +410,6 @@
     </div>
 
 
-    <!-- Footer -->
-    <footer class="text-center p-4 border-top border-secondary text-muted" style="background: rgba(15, 23, 42, 0.95); margin-top: 50px;">
-        &copy; 2026 T-Booking Staff Dashboard. All rights reserved.
-    </footer>
-
-    <!-- Bootstrap JS Bundle -->
-    <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
-    
     <script>
         function validateCreateDates() {
             var depDateVal = document.getElementById('createDepartureDate').value;
@@ -705,8 +702,6 @@
                 });
             }
         });
-    </script>
-
-</div>
+</script>
 
 <jsp:include page="../admin/layout/footer.jsp" />
