@@ -8,6 +8,21 @@
 
 <!-- Main Content -->
 <div class="container-fluid p-0">
+    <style>
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .bg-indigo-light { background-color: #e0e7ff !important; }
+        .text-indigo { color: #4338ca !important; }
+        .bg-sky-light { background-color: #e0f2fe !important; }
+        .bg-danger-subtle { background-color: #fee2e2 !important; }
+    </style>
 
         <!-- Notification Alerts -->
         <c:if test="${not empty errorMessage}">
@@ -71,7 +86,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="policy-card p-4 bg-white rounded-4 shadow-sm border h-100">
                         <div class="icon-circle bg-danger-subtle mb-3">
-                            <i class="fa-solid fa-ban text-danger fa-2x"></i>
+                            <i class="fa-solid fa-calendar-xmark text-danger fa-2x"></i>
                         </div>
                         <h4 class="fw-bold mb-3 text-dark">Cancellation Window</h4>
                         <p class="text-muted small mb-4">Minimum days before departure that a customer is allowed to cancel their booking without penalty.</p>

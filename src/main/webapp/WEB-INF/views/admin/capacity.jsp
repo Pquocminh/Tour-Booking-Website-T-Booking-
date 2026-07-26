@@ -33,32 +33,7 @@
 
 
 
-                <!-- Tour Selection Panel -->
-                <section class="filter-panel">
-                    <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i
-                            class="fa-solid fa-route me-2 text-primary"></i>Search Tour Package</h4>
-                    <form method="GET" action="${pageContext.request.contextPath}/admin/capacity">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-9 position-relative">
-                                <label class="form-label text-muted small fw-bold">Search Tour</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white border-end-0 rounded-start-3"><i
-                                            class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                                    <input type="text" id="tourSearchInput" name="tourId"
-                                        class="form-control border-start-0 rounded-end-3"
-                                        placeholder="Search tour by ID or Name (Leave empty for all)..."
-                                        value="${searchQuery}" autocomplete="off">
-                                </div>
 
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary w-100 rounded-3 text-white py-2">
-                                    <i class="fa-solid fa-magnifying-glass me-2"></i>Search
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </section>
                 <!-- Dynamic Schedule Details Panel (No JavaScript) -->
                 <c:if test="${not empty detailSchedule}">
                     <section class="filter-panel mb-4"
@@ -194,7 +169,7 @@
                 <c:if test="${schedules != null}">
                     <section class="table-panel">
                         <div
-                            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+                            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                             <div>
                                 <span class="text-muted small d-block">MANAGING CAPACITY FOR</span>
                                 <h4 class="mb-0 fw-bold text-dark">
@@ -212,7 +187,18 @@
                                     </c:choose>
                                 </h4>
                             </div>
-                            <span class="badge bg-primary rounded-pill py-2 px-3 align-self-start">${not empty totalSchedules ? totalSchedules : schedules.size()} Schedule(s)</span>
+                            
+                            <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 500px;">
+                                <!-- Search Form -->
+                                <form method="GET" action="${pageContext.request.contextPath}/admin/capacity" class="flex-grow-1 mb-0">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" name="tourId" class="form-control border-start-0 rounded-end-3" 
+                                               placeholder="Search tour by ID or Name..." value="${searchQuery}" autocomplete="off">
+                                    </div>
+                                </form>
+                                <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center text-nowrap">${not empty totalSchedules ? totalSchedules : schedules.size()} Schedule(s)</span>
+                            </div>
                         </div>
 
                         <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">

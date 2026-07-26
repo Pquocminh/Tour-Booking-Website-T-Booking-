@@ -449,4 +449,17 @@ ul.custom-pagination .page-link:hover:not(.active) {
     border-color: #ddd !important;
 }
 
-
+/* Global Policy & Card Icons */
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.bg-indigo-light { background-color: #e0e7ff !important; }
+.text-indigo { color: #4338ca !important; }
+.bg-sky-light { background-color: #e0f2fe !important; }
+.bg-danger-subtle { background-color: #fee2e2 !important; }
