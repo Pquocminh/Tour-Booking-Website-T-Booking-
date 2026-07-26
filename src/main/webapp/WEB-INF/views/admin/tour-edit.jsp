@@ -8,6 +8,26 @@
 
 
 <div class="container-fluid p-0">
+        <c:if test="${not empty errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+        <c:if test="${not empty sessionScope.errorMessage}">
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>${sessionScope.errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="errorMessage" scope="session" />
+        </c:if>
+        <c:if test="${not empty sessionScope.successMessage}">
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>${sessionScope.successMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <c:remove var="successMessage" scope="session" />
+        </c:if>
         <div class="form-panel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="section-title mb-0 border-0 pb-0">
@@ -19,8 +39,9 @@
                 </a>
             </div>
 
-            <form method="POST" action="${pageContext.request.contextPath}/admin/tours">
+            <form id="tourForm" method="POST" action="${pageContext.request.contextPath}/admin/tours" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="${not empty tour ? 'update' : 'create'}">
+                <input type="hidden" name="existingThumbnailUrl" value="${tour.thumbnailUrl}">
                 <c:if test="${not empty tour}">
                     <input type="hidden" name="id" value="${tour.tourId}">
                 </c:if>
@@ -71,17 +92,40 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price)</label>
+                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price) <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="text" class="form-control rounded-start-3 bg-light" value="<fmt:formatNumber value='${not empty tour and tour.basePrice > 0 ? tour.basePrice : 0}' pattern='#,##0'/>" readonly disabled>
+                            <input type="number" min="1" step="any" name="basePrice" class="form-control rounded-start-3" value="<c:if test='${not empty tour and tour.basePrice > 0}'><fmt:formatNumber value='${tour.basePrice}' pattern='0'/></c:if>" placeholder="e.g. 1500000" required>
                             <span class="input-group-text rounded-end-3 border-start-0">VND</span>
                         </div>
-                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Prices are managed per Schedule. Tour starting price automatically syncs from the lowest schedule price.</small>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Set the starting / base price for this tour package. Must be greater than 0.</small>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">Thumbnail URL</label>
-                        <input type="text" name="thumbnailUrl" class="form-control rounded-3" value="${tour.thumbnailUrl}" placeholder="/assets/images/tour1.jpg">
+                        <label class="form-label text-muted small fw-bold">Thumbnail Image</label>
+                        <input type="file" id="thumbnailFileInput" name="thumbnailFile" class="d-none" accept="image/*">
+                        <div class="input-group">
+                            <button type="button" class="btn btn-outline-primary rounded-start-3 px-3" onclick="document.getElementById('thumbnailFileInput').click();">
+                                <i class="fa-solid fa-folder-open me-2"></i>Choose File
+                            </button>
+                            <input type="text" id="fileNameDisplay" class="form-control rounded-end-3 bg-white text-muted" value="No file chosen" readonly onclick="document.getElementById('thumbnailFileInput').click();" style="cursor: pointer;">
+                        </div>
+                        <div id="imagePreviewContainer" class="mt-3 text-center p-2 border rounded-3 bg-light ${empty tour.thumbnailUrl ? 'd-none' : ''}">
+                            <c:set var="previewSrc" value="" />
+                            <c:if test="${not empty tour.thumbnailUrl}">
+                                <c:choose>
+                                    <c:when test="${tour.thumbnailUrl.startsWith('http')}">
+                                        <c:set var="previewSrc" value="${tour.thumbnailUrl}" />
+                                    </c:when>
+                                    <c:when test="${tour.thumbnailUrl.startsWith('/')}">
+                                        <c:set var="previewSrc" value="${pageContext.request.contextPath}${tour.thumbnailUrl}" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:set var="previewSrc" value="${pageContext.request.contextPath}/${tour.thumbnailUrl}" />
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
+                            <img id="imagePreview" src="${previewSrc}" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height: 160px;">
+                        </div>
                     </div>
 
                     <div class="col-12">
@@ -103,6 +147,50 @@
     </div>
     
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('thumbnailFileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImage = document.getElementById('imagePreview');
+            
+            if (file) {
+                fileNameDisplay.value = file.name;
+                fileNameDisplay.classList.remove('text-muted');
+                fileNameDisplay.classList.add('text-dark', 'fw-500');
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileNameDisplay.value = "No file chosen";
+                fileNameDisplay.classList.add('text-muted');
+                fileNameDisplay.classList.remove('text-dark', 'fw-500');
+                
+                if (!previewImage.getAttribute('src') || previewImage.getAttribute('src') === window.location.href) {
+                    previewContainer.classList.add('d-none');
+                }
+            }
+        });
+
+        document.getElementById('tourForm').addEventListener('submit', function(event) {
+            const basePriceInput = document.querySelector('input[name="basePrice"]');
+            let basePriceVal = 0;
+            if (basePriceInput && basePriceInput.value) {
+                basePriceVal = parseFloat(basePriceInput.value.replace(/[,\\s]/g, ''));
+            }
+            if (isNaN(basePriceVal) || basePriceVal <= 0) {
+                event.preventDefault();
+                alert("Starting price must be greater than 0");
+                if (basePriceInput) {
+                    basePriceInput.focus();
+                }
+            }
+        });
+    </script>
 
 
 

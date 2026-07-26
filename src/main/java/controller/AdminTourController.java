@@ -8,8 +8,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Part;
 
 import model.Account;
 import model.Booking;
@@ -20,6 +26,11 @@ import dao.CategoryDAO;
 import dao.TourDAO;
 
 @WebServlet(name = "AdminTourController", urlPatterns = {"/admin/dashboard", "/admin/tours", "/admin/categories"})
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 2,  // 2 MB
+    maxFileSize = 1024 * 1024 * 10,       // 10 MB
+    maxRequestSize = 1024 * 1024 * 50     // 50 MB
+)
 public class AdminTourController extends HttpServlet {
 
     private final DashboardDAO dashboardDAO = new DashboardDAO();
@@ -278,12 +289,58 @@ public class AdminTourController extends HttpServlet {
                 }
                 if (basePriceParam != null && !basePriceParam.trim().isEmpty()) {
                     try {
-                        basePrice = Double.parseDouble(basePriceParam.trim());
+                        String cleanPrice = basePriceParam.trim().replaceAll("[,\\s]", "");
+                        basePrice = Double.parseDouble(cleanPrice);
                     } catch (NumberFormatException e) {}
+                }
+                if (basePrice <= 0) {
+                    request.getSession().setAttribute("errorMessage", "Starting price must be a positive number");
+                    if ("update".equalsIgnoreCase(action)) {
+                        response.sendRedirect(request.getContextPath() + "/admin/tours?action=edit&id=" + tour.getTourId());
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/tours?action=create");
+                    }
+                    return;
                 }
                 tour.setBasePrice(basePrice);
                 tour.setStatus(request.getParameter("status"));
-                tour.setThumbnailUrl(request.getParameter("thumbnailUrl"));
+                String thumbnailUrl = request.getParameter("existingThumbnailUrl");
+                if (thumbnailUrl == null) {
+                    thumbnailUrl = request.getParameter("thumbnailUrl");
+                }
+                
+                try {
+                    Part filePart = request.getPart("thumbnailFile");
+                    if (filePart != null && filePart.getSize() > 0 && filePart.getSubmittedFileName() != null && !filePart.getSubmittedFileName().trim().isEmpty()) {
+                        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+                        String cleanName = fileName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+                        String uniqueFileName = "tour_" + System.currentTimeMillis() + "_" + cleanName;
+                        
+                        String relPath = "/assets/images/tours";
+                        String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "images" + File.separator + "tours";
+                        File uploadDir = new File(uploadPath);
+                        if (!uploadDir.exists()) {
+                            uploadDir.mkdirs();
+                        }
+                        File targetFile = new File(uploadDir, uniqueFileName);
+                        filePart.write(targetFile.getAbsolutePath());
+                        
+                        try {
+                            String srcPath = "D:" + File.separator + "HocTap" + File.separator + "SWP" + File.separator + "Tour-Booking-Website-T-Booking-" + File.separator + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "assets" + File.separator + "images" + File.separator + "tours";
+                            File srcDir = new File(srcPath);
+                            if (srcDir.exists() || srcDir.mkdirs()) {
+                                Files.copy(targetFile.toPath(), new File(srcDir, uniqueFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        } catch (Exception exSrc) {
+                            // ignore if source folder not writable or accessible
+                        }
+                        
+                        thumbnailUrl = relPath + "/" + uniqueFileName;
+                    }
+                } catch (Exception exPart) {
+                    // ignore if request was not multipart or part not found
+                }
+                tour.setThumbnailUrl(thumbnailUrl);
                 
                 if (currentUser != null) {
                     tour.setCreatedBy(currentUser.getAccountId());
