@@ -28,44 +28,43 @@
             <c:remove var="successMessage" scope="session" />
         </c:if>
 
-        <!-- Tour Filter Panel -->
-        <section class="filter-panel">
-            <h4 class="mb-4 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-route me-2 text-primary"></i>Filter Schedules by Tour</h4>
-            <form method="GET" action="${pageContext.request.contextPath}/admin/staff/schedules">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-9">
-                        <label class="form-label text-muted small fw-bold">Select Tour</label>
-                        <select name="tourId" class="form-select rounded-3">
-                            <option value="">-- All Tours --</option>
-                            <c:forEach var="t" items="${tours}">
-                                <c:if test="${t.status == 'Active'}">
-                                    <option value="${t.tourId}" ${selectedTourId == t.tourId ? 'selected' : ''}>
-                                        ID: #${t.tourId} - ${t.tourName}
-                                    </option>
-                                </c:if>
-                            </c:forEach>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100 rounded-3 text-white py-2">
-                            <i class="fa-solid fa-filter me-2"></i>Apply Filter
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </section>
-
         <!-- Schedules Table List -->
         <section class="table-panel">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                 <div>
-                    <h4 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-calendar-days me-2 text-primary"></i>Schedules List</h4>
+                    <span class="text-muted small d-block">MANAGING SCHEDULES FOR</span>
+                    <h4 class="mb-0 fw-bold text-dark">
+                        <i class="fa-solid fa-calendar-days me-2 text-primary"></i>
+                        <c:choose>
+                            <c:when test="${not empty selectedTour}">
+                                ${selectedTour.tourName}
+                            </c:when>
+                            <c:when test="${not empty searchQuery}">
+                                Search results for "${searchQuery}"
+                            </c:when>
+                            <c:otherwise>
+                                All Tour Packages
+                            </c:otherwise>
+                        </c:choose>
+                    </h4>
                 </div>
-                <div class="d-flex gap-2 align-self-start">
-                    <button class="btn btn-success text-white rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
-                        <i class="fa-solid fa-plus me-2"></i>Create New Schedule
-                    </button>
-                    <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center">${schedules.size()} Schedule(s)</span>
+                
+                <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 700px;">
+                    <!-- Search Form -->
+                    <form method="GET" action="${pageContext.request.contextPath}/admin/staff/schedules" class="flex-grow-1 mb-0" style="max-width: 400px;">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" name="tourId" class="form-control border-start-0 rounded-end-3" 
+                                   placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
+                        </div>
+                    </form>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="badge bg-primary rounded-pill py-2 px-3 align-self-center text-nowrap">${schedules.size()} Schedule(s)</span>
+                        <button class="btn btn-success text-white rounded-pill px-4 text-nowrap" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                            <i class="fa-solid fa-plus me-2"></i>Create New Schedule
+                        </button>
+                    </div>
                 </div>
             </div>
 

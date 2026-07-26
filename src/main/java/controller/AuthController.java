@@ -78,8 +78,10 @@ public class AuthController extends HttpServlet {
         HttpSession session = request.getSession();
         Account loggedInUser = (Account) session.getAttribute("user");
         if (loggedInUser != null) {
-            if ("Admin".equalsIgnoreCase(loggedInUser.getRole()) || "Staff".equalsIgnoreCase(loggedInUser.getRole())) {
+            if ("Admin".equalsIgnoreCase(loggedInUser.getRole())) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if ("Staff".equalsIgnoreCase(loggedInUser.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin/staff/schedules");
             } else {
                 response.sendRedirect(request.getContextPath() + "/tours");
             }
@@ -101,8 +103,10 @@ public class AuthController extends HttpServlet {
         if (acc != null) {
             HttpSession session = request.getSession();
             session.setAttribute("user", acc);
-            if ("Admin".equalsIgnoreCase(acc.getRole()) || "Staff".equalsIgnoreCase(acc.getRole())) {
+            if ("Admin".equalsIgnoreCase(acc.getRole())) {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else if ("Staff".equalsIgnoreCase(acc.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin/staff/schedules");
             } else {
                 response.sendRedirect(request.getContextPath() + "/tours");
             }
@@ -217,8 +221,10 @@ public class AuthController extends HttpServlet {
             if (acc != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", acc);
-                if ("Admin".equalsIgnoreCase(acc.getRole()) || "Staff".equalsIgnoreCase(acc.getRole())) {
+                if ("Admin".equalsIgnoreCase(acc.getRole())) {
                     response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                } else if ("Staff".equalsIgnoreCase(acc.getRole())) {
+                    response.sendRedirect(request.getContextPath() + "/admin/staff/schedules");
                 } else {
                     response.sendRedirect(request.getContextPath() + "/tours");
                 }

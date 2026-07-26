@@ -57,7 +57,7 @@
                         <div class="input-group">
                             <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                             <input type="text" name="tourId" class="form-control border-start-0 rounded-end-3" 
-                                   placeholder="Search tour by ID or Name..." value="${searchQuery}" autocomplete="off">
+                                   placeholder="Search tour by ID or Name (Leave empty for all)..." value="${searchQuery}" autocomplete="off">
                         </div>
                     </form>
                     
