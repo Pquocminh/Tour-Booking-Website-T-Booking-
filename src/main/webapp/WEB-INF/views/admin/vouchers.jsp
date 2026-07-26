@@ -189,7 +189,7 @@
                                                             <input type="hidden" name="action" value="delete">
                                                             <input type="hidden" name="id" value="${v.voucherId}">
                                                             <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                                                <i class="fa-solid fa-trash"></i>
+                                                                <i class="fa-solid fa-trash me-1"></i>Delete
                                                             </button>
                                                         </form>
                                                     </c:when>
