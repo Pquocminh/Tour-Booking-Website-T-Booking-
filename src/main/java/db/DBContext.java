@@ -14,7 +14,7 @@ public class DBContext {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             conn = DriverManager.getConnection(
-                "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false",
+                "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false;sendStringParametersAsUnicode=true;characterEncoding=UTF-8",
                 "sa",
                 "123456"
             );
@@ -28,7 +28,7 @@ public class DBContext {
             if (conn == null || conn.isClosed()) {
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
                 conn = DriverManager.getConnection(
-                    "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false",
+                    "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false;sendStringParametersAsUnicode=true;characterEncoding=UTF-8",
                     "sa",
                     "123456"
                 );

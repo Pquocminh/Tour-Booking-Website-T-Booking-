@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <jsp:include page="layout/header.jsp">
@@ -132,6 +132,57 @@
                         <label class="form-label text-muted small fw-bold">Description</label>
                         <textarea name="description" class="form-control rounded-3" rows="6" placeholder="Write a captivating description about the tour...">${tour.description}</textarea>
                     </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label text-muted small fw-bold mb-0">Day-by-Day Itinerary</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="addItineraryDay()">
+                                <i class="fa-solid fa-plus me-1"></i> Add Day
+                            </button>
+                        </div>
+                        <div id="itineraryContainer">
+                            <c:choose>
+                                <c:when test="${not empty tour.itineraries}">
+                                    <c:forEach var="iti" items="${tour.itineraries}">
+                                        <div class="itinerary-card card mb-3 border-light shadow-sm">
+                                            <div class="card-body position-relative">
+                                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding: 0;" onclick="this.closest('.itinerary-card').remove()">
+                                                    <i class="fa-solid fa-times"></i>
+                                                </button>
+                                                <div class="row g-2 mb-2 pe-4">
+                                                    <div class="col-md-3">
+                                                        <input type="number" name="itiDayNumber[]" class="form-control" placeholder="Day (e.g. 1)" value="${iti.dayNumber}" min="1" required>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <input type="text" name="itiTitle[]" class="form-control" placeholder="Title / Location" value="${iti.title}" required>
+                                                    </div>
+                                                </div>
+                                                <textarea name="itiDescription[]" class="form-control" rows="2" placeholder="Description / Activities">${iti.description}</textarea>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="itinerary-card card mb-3 border-light shadow-sm">
+                                        <div class="card-body position-relative">
+                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding: 0;" onclick="this.closest('.itinerary-card').remove()">
+                                                <i class="fa-solid fa-times"></i>
+                                            </button>
+                                            <div class="row g-2 mb-2 pe-4">
+                                                <div class="col-md-3">
+                                                    <input type="number" name="itiDayNumber[]" class="form-control" placeholder="Day (e.g. 1)" value="1" min="1" required>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <input type="text" name="itiTitle[]" class="form-control" placeholder="Title / Location" required>
+                                                </div>
+                                            </div>
+                                            <textarea name="itiDescription[]" class="form-control" rows="2" placeholder="Description / Activities"></textarea>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-5 text-end border-top pt-4">
@@ -177,6 +228,35 @@
         });
 
         document.getElementById('tourForm').addEventListener('submit', function(event) {
+            const durationInput = document.querySelector('input[name="durationDays"]');
+            const duration = durationInput ? parseInt(durationInput.value) : 1;
+            
+            const dayInputs = document.querySelectorAll('input[name="itiDayNumber[]"]');
+            
+            if (dayInputs.length > duration) {
+                event.preventDefault();
+                alert(`You have added ${dayInputs.length} itinerary days, but the tour duration is only ${duration} days. Please remove excess days or increase the duration.`);
+                if (durationInput) durationInput.focus();
+                return;
+            }
+            
+            let invalidDay = false;
+            dayInputs.forEach(input => {
+                const dayVal = parseInt(input.value);
+                if (isNaN(dayVal) || dayVal <= 0 || dayVal > duration) {
+                    invalidDay = true;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            if (invalidDay) {
+                event.preventDefault();
+                alert(`Itinerary day numbers must be strictly positive and cannot exceed the Tour Duration (${duration} days).`);
+                return;
+            }
+
             const basePriceInput = document.querySelector('input[name="basePrice"]');
             let basePriceVal = 0;
             if (basePriceInput && basePriceInput.value) {
@@ -190,6 +270,40 @@
                 }
             }
         });
+
+        function addItineraryDay() {
+            const durationInput = document.querySelector('input[name="durationDays"]');
+            const duration = durationInput ? parseInt(durationInput.value) : 1;
+            
+            const container = document.getElementById('itineraryContainer');
+            const dayCount = container.querySelectorAll('.itinerary-card').length;
+            
+            if (dayCount >= duration) {
+                alert(`Cannot add more itinerary days than Tour Duration (${duration} days).`);
+                return;
+            }
+            
+            const nextDayNumber = dayCount + 1;
+            const cardHtml = `
+                <div class="itinerary-card card mb-3 border-light shadow-sm">
+                    <div class="card-body position-relative">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding: 0;" onclick="this.closest('.itinerary-card').remove()">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                        <div class="row g-2 mb-2 pe-4">
+                            <div class="col-md-3">
+                                <input type="number" name="itiDayNumber[]" class="form-control" placeholder="Day (e.g. 1)" value="${nextDayNumber}" min="1" max="${duration}" required>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" name="itiTitle[]" class="form-control" placeholder="Title / Location" required>
+                            </div>
+                        </div>
+                        <textarea name="itiDescription[]" class="form-control" rows="2" placeholder="Description / Activities"></textarea>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        }
     </script>
 
 
