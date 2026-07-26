@@ -21,7 +21,7 @@ public class PromotionDAO {
         if (conn == null) {
             return list;
         }
-        String sql = "SELECT promotion_id, promotion_name, discount_percent, start_date, end_date, status FROM Promotion ORDER BY start_date DESC, promotion_id DESC";
+        String sql = "SELECT promotion_id, promotion_name, discount_percent, start_date, end_date, status FROM Promotion ORDER BY promotion_id ASC";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

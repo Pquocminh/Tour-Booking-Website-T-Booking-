@@ -30,64 +30,92 @@ public class PublicTourController extends HttpServlet {
         if ("/tour-detail".equals(path)) {
             viewTourDetail(request, response);
         } else if ("/tours".equals(path)) {
-            String searchKeyword = request.getParameter("search");
-            String categoryFilter = request.getParameter("category");
-            String destinationFilter = request.getParameter("destination");
-            
-            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-                searchTours(request, response, searchKeyword);
-            } else if (categoryFilter != null && !categoryFilter.isEmpty()) {
-                filterByCategory(request, response, Integer.parseInt(categoryFilter));
-            } else if (destinationFilter != null && !destinationFilter.isEmpty()) {
-                filterByDestination(request, response, Integer.parseInt(destinationFilter));
-            } else {
-                viewTourList(request, response);
+            handlePublicTourList(request, response);
+        }
+    }
+    
+    private void handlePublicTourList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String searchKeyword = request.getParameter("search");
+        String categoryFilter = request.getParameter("category");
+        String destinationFilter = request.getParameter("destination");
+
+        List<Tour> rawTours;
+        boolean isSearchResult = false;
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            rawTours = tourDAO.searchTours(searchKeyword.trim());
+            request.setAttribute("searchKeyword", searchKeyword.trim());
+            isSearchResult = true;
+        } else if (categoryFilter != null && !categoryFilter.isEmpty()) {
+            try {
+                int catId = Integer.parseInt(categoryFilter.trim());
+                rawTours = tourDAO.searchToursByCategory(catId);
+                request.setAttribute("categoryFilter", catId);
+            } catch (NumberFormatException e) {
+                rawTours = tourDAO.getAvailableTours();
+            }
+        } else if (destinationFilter != null && !destinationFilter.isEmpty()) {
+            try {
+                int destId = Integer.parseInt(destinationFilter.trim());
+                rawTours = tourDAO.searchToursByDestination(destId);
+                request.setAttribute("destinationFilter", destId);
+            } catch (NumberFormatException e) {
+                rawTours = tourDAO.getAvailableTours();
+            }
+        } else {
+            rawTours = tourDAO.getAvailableTours();
+        }
+
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 tours per page for guests and customers
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) pageSize = parsedSize;
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                currentPage = 1;
             }
         }
-    }
-    
-    private void viewTourList(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        List<Tour> tours = tourDAO.getAvailableTours();
-        if (tours == null || tours.isEmpty()) {
-            request.setAttribute("message", "Currently, there aren't any tours being sold.");
+
+        int totalTours = (rawTours != null) ? rawTours.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalTours / pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalTours);
+        List<Tour> pagedTours = (rawTours != null && fromIndex < totalTours)
+                ? rawTours.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
+        if (totalTours == 0) {
+            if (isSearchResult) {
+                request.setAttribute("message", "No tours found matching your search.");
+            } else {
+                request.setAttribute("message", "Currently, there aren't any tours being sold.");
+            }
         }
-        request.setAttribute("tours", tours);
+
+        request.setAttribute("tours", pagedTours);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalTours", totalTours);
+        request.setAttribute("pageSize", pageSize);
+        request.setAttribute("isSearchResult", isSearchResult);
         request.setAttribute("activePromotions", promotionDAO.getActivePromotions());
-        request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
-    }
-    
-    private void searchTours(HttpServletRequest request, HttpServletResponse response, String keyword)
-            throws ServletException, IOException {
-        List<Tour> tours = tourDAO.searchTours(keyword.trim());
-        if (tours == null || tours.isEmpty()) {
-            request.setAttribute("message", "No tours found matching your search.");
-        }
-        request.setAttribute("tours", tours);
-        request.setAttribute("searchKeyword", keyword);
-        request.setAttribute("isSearchResult", true);
-        request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
-    }
-    
-    private void filterByCategory(HttpServletRequest request, HttpServletResponse response, int categoryId)
-            throws ServletException, IOException {
-        List<Tour> tours = tourDAO.searchToursByCategory(categoryId);
-        if (tours == null || tours.isEmpty()) {
-            request.setAttribute("message", "No tours available in this category.");
-        }
-        request.setAttribute("tours", tours);
-        request.setAttribute("filterType", "category");
-        request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
-    }
-    
-    private void filterByDestination(HttpServletRequest request, HttpServletResponse response, int destinationId)
-            throws ServletException, IOException {
-        List<Tour> tours = tourDAO.searchToursByDestination(destinationId);
-        if (tours == null || tours.isEmpty()) {
-            request.setAttribute("message", "No tours available for this destination.");
-        }
-        request.setAttribute("tours", tours);
-        request.setAttribute("filterType", "destination");
+
         request.getRequestDispatcher("/WEB-INF/views/guest/tours.jsp").forward(request, response);
     }
     

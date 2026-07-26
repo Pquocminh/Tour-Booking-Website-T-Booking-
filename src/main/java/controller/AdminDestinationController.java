@@ -46,9 +46,55 @@ public class AdminDestinationController extends HttpServlet {
         }
 
         String search = request.getParameter("search");
-        List<Destination> destinations = destinationDAO.searchDestinations(search);
+
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10; // Default 10 destinations per page
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) {
+                    pageSize = parsedSize;
+                }
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        List<Destination> allDestinations = destinationDAO.searchDestinations(search);
+        int totalDestinations = (allDestinations != null) ? allDestinations.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalDestinations / pageSize);
+        if (totalPages < 1) {
+            totalPages = 1;
+        }
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalDestinations);
+        List<Destination> destinations = (allDestinations != null && fromIndex < totalDestinations)
+                ? allDestinations.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
         request.setAttribute("destinations", destinations);
         request.setAttribute("searchKeyword", search);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalDestinations", totalDestinations);
+        request.setAttribute("pageSize", pageSize);
         request.getRequestDispatcher("/WEB-INF/views/admin/destinations.jsp").forward(request, response);
     }
 

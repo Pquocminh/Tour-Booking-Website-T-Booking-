@@ -192,6 +192,57 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Bar matching reference design -->
+            <c:if test="${not empty totalPages and totalPages >= 1}">
+                <nav aria-label="Schedules list pagination" class="d-flex justify-content-center mt-4">
+                    <ul class="pagination custom-pagination mb-0" style="display: flex !important; list-style: none !important; padding-left: 0 !important; margin: 0 !important;">
+                        <!-- Previous Button -->
+                        <c:choose>
+                            <c:when test="${currentPage <= 1}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/schedules?page=${currentPage - 1}&tourId=${not empty searchQuery ? searchQuery : ''}">Previous</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <!-- Page Numbers -->
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <c:choose>
+                                <c:when test="${currentPage == i}">
+                                    <li class="page-item active" style="list-style: none !important;">
+                                        <a class="page-link" href="javascript:void(0);">${i}</a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li class="page-item" style="list-style: none !important;">
+                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/schedules?page=${i}&tourId=${not empty searchQuery ? searchQuery : ''}">${i}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+
+                        <!-- Next Button -->
+                        <c:choose>
+                            <c:when test="${currentPage >= totalPages}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Next</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/schedules?page=${currentPage + 1}&tourId=${not empty searchQuery ? searchQuery : ''}">Next</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </ul>
+                </nav>
+            </c:if>
         </section>
     </div>
 

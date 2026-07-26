@@ -230,6 +230,44 @@ public class TourDAO {
         return list;
     }
 
+    public java.util.Set<Integer> getTourIdsWithSchedules(List<Integer> tourIds) {
+        java.util.Set<Integer> set = new java.util.HashSet<>();
+        if (tourIds == null || tourIds.isEmpty()) {
+            return set;
+        }
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return set;
+        }
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT tour_id FROM TourSchedule WHERE tour_id IN (");
+        for (int i = 0; i < tourIds.size(); i++) {
+            sql.append(i > 0 ? ",?" : "?");
+        }
+        sql.append(")");
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < tourIds.size(); i++) {
+                ps.setInt(i + 1, tourIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    set.add(rs.getInt("tour_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return set;
+    }
+
     public List<TourSchedule> getAllTourSchedulesByTourId(int tourId) {
         List<TourSchedule> list = new ArrayList<>();
         DBContext db = new DBContext();

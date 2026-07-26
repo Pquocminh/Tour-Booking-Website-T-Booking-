@@ -233,8 +233,45 @@ public class AdminOperationController extends HttpServlet {
         } else {
             schedules = tourDAO.getAllTourSchedules(null);
         }
-        
-        request.setAttribute("schedules", schedules);
+
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10;
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) pageSize = parsedSize;
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        int totalSchedules = (schedules != null) ? schedules.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalSchedules / pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalSchedules);
+        List<TourSchedule> pagedSchedules = (schedules != null && fromIndex < totalSchedules)
+                ? schedules.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
+        request.setAttribute("schedules", pagedSchedules);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalSchedules", totalSchedules);
+        request.setAttribute("pageSize", pageSize);
         request.setAttribute("selectedTour", selectedTour);
         request.setAttribute("selectedTourId", selectedTourId);
         request.setAttribute("searchQuery", searchQuery);
@@ -457,6 +494,7 @@ public class AdminOperationController extends HttpServlet {
         request.setAttribute("tours", tours);
 
         String searchQuery = "";
+        List<TourSchedule> rawSchedules = new java.util.ArrayList<>();
         if (tourIdParam != null && !tourIdParam.trim().isEmpty()) {
             String query = tourIdParam.trim();
             searchQuery = query;
@@ -470,31 +508,64 @@ public class AdminOperationController extends HttpServlet {
                     } else {
                         tourId = Integer.parseInt(query.substring(5).trim());
                     }
-                } catch (NumberFormatException e) {
-                    // Ignore, fallback to text search
-                }
+                } catch (NumberFormatException e) {}
             }
 
             if (tourId > 0) {
                 Tour selectedTour = tourDAO.getTourByIdAdmin(tourId);
                 if (selectedTour != null) {
-                    List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByTourId(tourId);
+                    rawSchedules = tourDAO.getAllTourSchedulesByTourId(tourId);
                     request.setAttribute("selectedTour", selectedTour);
-                    request.setAttribute("schedules", schedules);
                     request.setAttribute("selectedTourId", tourId);
                     searchQuery = "ID: #" + selectedTour.getTourId() + " - " + selectedTour.getTourName();
                 } else {
-                    List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByKeyword(query);
-                    request.setAttribute("schedules", schedules);
+                    rawSchedules = tourDAO.getAllTourSchedulesByKeyword(query);
                 }
             } else {
-                List<TourSchedule> schedules = tourDAO.getAllTourSchedulesByKeyword(query);
-                request.setAttribute("schedules", schedules);
+                rawSchedules = tourDAO.getAllTourSchedulesByKeyword(query);
             }
         } else {
-            List<TourSchedule> schedules = tourDAO.getAllTourSchedules(null);
-            request.setAttribute("schedules", schedules);
+            rawSchedules = tourDAO.getAllTourSchedules(null);
         }
+
+        // Parse pagination parameters
+        int currentPage = 1;
+        int pageSize = 10;
+
+        String pageSizeParam = request.getParameter("pageSize");
+        if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
+            try {
+                int parsedSize = Integer.parseInt(pageSizeParam.trim());
+                if (parsedSize > 0) pageSize = parsedSize;
+            } catch (NumberFormatException e) {}
+        }
+
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageParam.trim());
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        int totalSchedules = (rawSchedules != null) ? rawSchedules.size() : 0;
+        int totalPages = (int) Math.ceil((double) totalSchedules / pageSize);
+        if (totalPages < 1) totalPages = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalSchedules);
+        List<TourSchedule> schedules = (rawSchedules != null && fromIndex < totalSchedules)
+                ? rawSchedules.subList(fromIndex, toIndex)
+                : new java.util.ArrayList<>();
+
+        request.setAttribute("schedules", schedules);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalSchedules", totalSchedules);
+        request.setAttribute("pageSize", pageSize);
         request.setAttribute("searchQuery", searchQuery);
 
         if (detailScheduleIdParam != null && !detailScheduleIdParam.trim().isEmpty()) {

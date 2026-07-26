@@ -138,7 +138,7 @@
                 <p class="text-muted">
                     <c:choose>
                         <c:when test="${isSearchResult}">
-                            Found ${tours.size()} matching tour(s)
+                            Found ${not empty totalTours ? totalTours : tours.size()} matching tour(s)
                         </c:when>
                         <c:otherwise>
                             Select your next amazing destination
@@ -148,7 +148,7 @@
             </div>
             <div>
                 <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
-                    ${tours.size()} Tour<c:if test="${tours.size() != 1}">s</c:if>
+                    ${not empty totalTours ? totalTours : tours.size()} Tour<c:if test="${(not empty totalTours ? totalTours : tours.size()) != 1}">s</c:if>
                 </span>
             </div>
         </div>
@@ -188,8 +188,25 @@
                                     <span class="tour-category-tag">
                                         <i class="fa-solid fa-tag me-1"></i>${t.category.categoryName}
                                     </span>
-                                    <!-- Fallback image in case the local one does not exist -->
-                                    <img src="${not empty t.thumbnailUrl ? pageContext.request.contextPath.concat(t.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop'}"
+                                    <c:choose>
+                                        <c:when test="${not empty t.thumbnailUrl}">
+                                            <c:choose>
+                                                <c:when test="${t.thumbnailUrl.startsWith('http')}">
+                                                    <c:set var="imgSrc" value="${t.thumbnailUrl}" />
+                                                </c:when>
+                                                <c:when test="${t.thumbnailUrl.startsWith('/')}">
+                                                    <c:set var="imgSrc" value="${pageContext.request.contextPath}${t.thumbnailUrl}" />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="imgSrc" value="${pageContext.request.contextPath}/${t.thumbnailUrl}" />
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:set var="imgSrc" value="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop" />
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <img src="${imgSrc}"
                                          alt="${t.tourName}"
                                          class="tour-img"
                                          onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop'">
@@ -237,6 +254,62 @@
                 </c:otherwise>
             </c:choose>
         </div>
+
+        <!-- Pagination Bar matching reference design -->
+        <c:if test="${not empty totalPages and totalPages >= 1}">
+            <c:set var="urlParams" value="" />
+            <c:if test="${not empty searchKeyword}"><c:set var="urlParams" value="&search=${searchKeyword}" /></c:if>
+            <c:if test="${not empty categoryFilter}"><c:set var="urlParams" value="&category=${categoryFilter}" /></c:if>
+            <c:if test="${not empty destinationFilter}"><c:set var="urlParams" value="&destination=${destinationFilter}" /></c:if>
+
+            <nav aria-label="Public tours list pagination" class="d-flex justify-content-center mt-5">
+                <ul class="pagination custom-pagination mb-0" style="display: flex !important; list-style: none !important; padding-left: 0 !important; margin: 0 !important;">
+                    <!-- Previous Button -->
+                    <c:choose>
+                        <c:when test="${currentPage <= 1}">
+                            <li class="page-item disabled" style="list-style: none !important;">
+                                <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Previous</a>
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <li class="page-item" style="list-style: none !important;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/tours?page=${currentPage - 1}${urlParams}">Previous</a>
+                            </li>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <!-- Page Numbers -->
+                    <c:forEach var="i" begin="1" end="${totalPages}">
+                        <c:choose>
+                            <c:when test="${currentPage == i}">
+                                <li class="page-item active" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);">${i}</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/tours?page=${i}${urlParams}">${i}</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+
+                    <!-- Next Button -->
+                    <c:choose>
+                        <c:when test="${currentPage >= totalPages}">
+                            <li class="page-item disabled" style="list-style: none !important;">
+                                <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Next</a>
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <li class="page-item" style="list-style: none !important;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/tours?page=${currentPage + 1}${urlParams}">Next</a>
+                            </li>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
+            </nav>
+        </c:if>
     </main>
 
     <!-- Footer -->

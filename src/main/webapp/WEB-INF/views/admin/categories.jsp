@@ -66,7 +66,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="mb-0 fw-bold" style="color: var(--text-main);"><i class="fa-solid fa-tags me-2 text-primary"></i>Categories List</h4>
                 <div>
-                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${categories.size()} Category(ies)</span>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 me-2">${not empty totalCategories ? totalCategories : categories.size()} Category(ies)</span>
                     <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
                         <i class="fa-solid fa-plus me-1"></i> New Category
                     </button>
@@ -157,6 +157,57 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination Bar matching reference design -->
+            <c:if test="${not empty totalPages and totalPages >= 1}">
+                <nav aria-label="Category list pagination" class="d-flex justify-content-center mt-4">
+                    <ul class="pagination custom-pagination mb-0" style="display: flex !important; list-style: none !important; padding-left: 0 !important; margin: 0 !important;">
+                        <!-- Previous Button -->
+                        <c:choose>
+                            <c:when test="${currentPage <= 1}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/categories?page=${currentPage - 1}">Previous</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+
+                        <!-- Page Numbers -->
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <c:choose>
+                                <c:when test="${currentPage == i}">
+                                    <li class="page-item active" style="list-style: none !important;">
+                                        <a class="page-link" href="javascript:void(0);">${i}</a>
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li class="page-item" style="list-style: none !important;">
+                                        <a class="page-link" href="${pageContext.request.contextPath}/admin/categories?page=${i}">${i}</a>
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+
+                        <!-- Next Button -->
+                        <c:choose>
+                            <c:when test="${currentPage >= totalPages}">
+                                <li class="page-item disabled" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Next</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/categories?page=${currentPage + 1}">Next</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </ul>
+                </nav>
+            </c:if>
         </section>
     </main>
 

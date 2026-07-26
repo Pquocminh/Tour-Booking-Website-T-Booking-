@@ -42,7 +42,7 @@
                 </form>
                 
                 <div class="d-flex gap-2 align-items-center justify-content-between">
-                    <span class="badge bg-primary rounded-pill py-2 px-3 text-nowrap">${accounts.size()} Account(s)</span>
+                    <span class="badge bg-primary rounded-pill py-2 px-3 text-nowrap">${not empty totalAccounts ? totalAccounts : accounts.size()} Account(s)</span>
                     <button type="button" class="btn btn-success btn-sm rounded-pill px-3 text-white text-nowrap" data-bs-toggle="modal" data-bs-target="#createAccountModal" style="height: 38px;">
                         <i class="fa-solid fa-user-plus me-1"></i> Create Account
                     </button>
@@ -54,14 +54,14 @@
         <!-- Tabs Nav -->
         <ul class="nav nav-tabs mb-4" id="accountTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link ${activeTab != 'customers' ? 'active' : ''} fw-bold" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="${activeTab != 'customers'}">
-                    <i class="fa-solid fa-user-tie me-2"></i>Staff
-                </button>
+                <a class="nav-link ${activeTab != 'customers' ? 'active' : ''} fw-bold" href="${pageContext.request.contextPath}/admin/accounts?tab=employees&search=${not empty searchKeyword ? searchKeyword : ''}&status=${not empty selectedStatus ? selectedStatus : ''}">
+                    <i class="fa-solid fa-user-tie me-2"></i>Staff (${not empty totalStaff ? totalStaff : '0'})
+                </a>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link ${activeTab == 'customers' ? 'active' : ''} fw-bold" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab" aria-controls="customers" aria-selected="${activeTab == 'customers'}">
-                    <i class="fa-solid fa-users me-2"></i>Customers
-                </button>
+                <a class="nav-link ${activeTab == 'customers' ? 'active' : ''} fw-bold" href="${pageContext.request.contextPath}/admin/accounts?tab=customers&search=${not empty searchKeyword ? searchKeyword : ''}&status=${not empty selectedStatus ? selectedStatus : ''}">
+                    <i class="fa-solid fa-users me-2"></i>Customers (${not empty totalCustomers ? totalCustomers : '0'})
+                </a>
             </li>
         </ul>
 
@@ -86,22 +86,22 @@
 
                 <tbody>
                     <c:choose>
-                        <c:when test="${empty accounts}">
+                        <c:when test="${empty staffAccounts}">
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
-                                    No accounts found matching the selected search criteria.
+                                    No staff accounts found matching the selected search criteria.
                                 </td>
                             </tr>
                         </c:when>
                         <c:otherwise>
-                            <c:forEach var="acc" items="${accounts}">
-                                <c:if test="${'Staff'.equalsIgnoreCase(acc.role)}">
+                            <c:forEach var="acc" items="${staffAccounts}">
                                 <tr>
                                     <td>
-                                        <img src="https://ui-avatars.com/api/?name=${acc.username}&background=random&size=128" 
-                                             alt="User Avatar" 
-                                             class="user-avatar">
+                                        <div class="d-inline-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                                             style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); font-size: 1.1rem; flex-shrink: 0;">
+                                            <c:out value="${not empty acc.username ? acc.username.substring(0, 1).toUpperCase() : 'S'}" />
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="text-muted small d-block">ID: #${acc.accountId}</span>
@@ -148,13 +148,13 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
+                                        <div class="d-flex justify-content-center gap-2">
                                             <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}&role=${acc.role}" 
-                                               class="btn btn-outline-primary btn-sm rounded-pill" title="View Profile">
+                                               class="btn btn-outline-info btn-sm rounded-pill" title="View Details">
                                                 <i class="fa-regular fa-eye"></i>
                                             </a>
                                             <button type="button" 
-                                                    class="btn btn-outline-warning btn-sm rounded-pill edit-btn" 
+                                                    class="btn btn-outline-primary btn-sm rounded-pill edit-btn" 
                                                     title="Edit Account"
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#editAccountModal"
@@ -163,7 +163,6 @@
                                                     data-fullname="${acc.fullName}"
                                                     data-email="${acc.email}"
                                                     data-phone="${acc.phone}"
-                                                    data-address="${acc.address}"
                                                     data-role="${acc.role}"
                                                     data-status="${acc.status}">
                                                 <i class="fa-regular fa-pen-to-square"></i>
@@ -181,7 +180,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                            </c:if>
                             </c:forEach>
                         </c:otherwise>
                     </c:choose>
@@ -209,22 +207,22 @@
 
                 <tbody>
                     <c:choose>
-                        <c:when test="${empty accounts}">
+                        <c:when test="${empty customerAccounts}">
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="fa-regular fa-folder-open display-4 mb-3 d-block text-secondary"></i>
-                                    No accounts found matching the selected search criteria.
+                                    No customer accounts found matching the selected search criteria.
                                 </td>
                             </tr>
                         </c:when>
                         <c:otherwise>
-                            <c:forEach var="acc" items="${accounts}">
-                                <c:if test="${'Customer'.equalsIgnoreCase(acc.role)}">
+                            <c:forEach var="acc" items="${customerAccounts}">
                                 <tr>
                                     <td>
-                                        <img src="https://ui-avatars.com/api/?name=${acc.username}&background=random&size=128" 
-                                             alt="User Avatar" 
-                                             class="user-avatar">
+                                        <div class="d-inline-flex align-items-center justify-content-center fw-bold text-white shadow-sm" 
+                                             style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #047857 100%); font-size: 1.1rem; flex-shrink: 0;">
+                                            <c:out value="${not empty acc.username ? acc.username.substring(0, 1).toUpperCase() : 'C'}" />
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="text-muted small d-block">ID: #${acc.accountId}</span>
@@ -271,13 +269,13 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
+                                        <div class="d-flex justify-content-center gap-2">
                                             <a href="${pageContext.request.contextPath}/admin/accounts?action=view&id=${acc.accountId}&role=${acc.role}" 
-                                               class="btn btn-outline-primary btn-sm rounded-pill" title="View Profile">
+                                               class="btn btn-outline-info btn-sm rounded-pill" title="View Details">
                                                 <i class="fa-regular fa-eye"></i>
                                             </a>
                                             <button type="button" 
-                                                    class="btn btn-outline-warning btn-sm rounded-pill edit-btn" 
+                                                    class="btn btn-outline-primary btn-sm rounded-pill edit-btn" 
                                                     title="Edit Account"
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#editAccountModal"
@@ -286,7 +284,6 @@
                                                     data-fullname="${acc.fullName}"
                                                     data-email="${acc.email}"
                                                     data-phone="${acc.phone}"
-                                                    data-address="${acc.address}"
                                                     data-role="${acc.role}"
                                                     data-status="${acc.status}">
                                                 <i class="fa-regular fa-pen-to-square"></i>
@@ -304,7 +301,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                            </c:if>
                             </c:forEach>
                         </c:otherwise>
                     </c:choose>
@@ -313,6 +309,57 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pagination Bar matching reference design -->
+        <c:if test="${not empty totalPages and totalPages >= 1}">
+            <nav aria-label="Accounts list pagination" class="d-flex justify-content-center mt-4">
+                <ul class="pagination custom-pagination mb-0" style="display: flex !important; list-style: none !important; padding-left: 0 !important; margin: 0 !important;">
+                    <!-- Previous Button -->
+                    <c:choose>
+                        <c:when test="${currentPage <= 1}">
+                            <li class="page-item disabled" style="list-style: none !important;">
+                                <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Previous</a>
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <li class="page-item" style="list-style: none !important;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/accounts?tab=${activeTab}&page=${currentPage - 1}&search=${not empty searchKeyword ? searchKeyword : ''}&role=${not empty selectedRole ? selectedRole : ''}&status=${not empty selectedStatus ? selectedStatus : ''}">Previous</a>
+                            </li>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <!-- Page Numbers -->
+                    <c:forEach var="i" begin="1" end="${totalPages}">
+                        <c:choose>
+                            <c:when test="${currentPage == i}">
+                                <li class="page-item active" style="list-style: none !important;">
+                                    <a class="page-link" href="javascript:void(0);">${i}</a>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item" style="list-style: none !important;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/accounts?tab=${activeTab}&page=${i}&search=${not empty searchKeyword ? searchKeyword : ''}&role=${not empty selectedRole ? selectedRole : ''}&status=${not empty selectedStatus ? selectedStatus : ''}">${i}</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+
+                    <!-- Next Button -->
+                    <c:choose>
+                        <c:when test="${currentPage >= totalPages}">
+                            <li class="page-item disabled" style="list-style: none !important;">
+                                <a class="page-link" href="javascript:void(0);" tabindex="-1" aria-disabled="true">Next</a>
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <li class="page-item" style="list-style: none !important;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/accounts?tab=${activeTab}&page=${currentPage + 1}&search=${not empty searchKeyword ? searchKeyword : ''}&role=${not empty selectedRole ? selectedRole : ''}&status=${not empty selectedStatus ? selectedStatus : ''}">Next</a>
+                            </li>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
+            </nav>
+        </c:if>
 
     </section>
 </div>

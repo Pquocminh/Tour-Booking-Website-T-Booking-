@@ -14,7 +14,7 @@ public class VoucherDAO {
     public List<Voucher> getAllVouchers() {
         List<Voucher> list = new ArrayList<>();
         String sql = "SELECT voucher_id, voucher_code, discount_percent, minimum_order_value, max_discount_amount, quantity, start_date, end_date, status " +
-                     "FROM Voucher ORDER BY voucher_id DESC";
+                     "FROM Voucher ORDER BY voucher_id ASC";
         DBContext db = new DBContext();
         try (Connection conn = db.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
