@@ -23,6 +23,7 @@ public class AdminBookingController extends HttpServlet {
         int currentPage = 1;
         int pageSize = 10; // Default 10 bookings per page
 
+        String search = request.getParameter("search");
         String pageSizeParam = request.getParameter("pageSize");
         if (pageSizeParam != null && !pageSizeParam.trim().isEmpty()) {
             try {
@@ -41,7 +42,7 @@ public class AdminBookingController extends HttpServlet {
             }
         }
 
-        List<Booking> allBookings = bookingDAO.getAllBookings();
+        List<Booking> allBookings = bookingDAO.getAllBookings(search);
         int totalBookings = (allBookings != null) ? allBookings.size() : 0;
         int totalPages = (int) Math.ceil((double) totalBookings / pageSize);
         if (totalPages < 1) totalPages = 1;
@@ -58,6 +59,7 @@ public class AdminBookingController extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalBookings", totalBookings);
         request.setAttribute("pageSize", pageSize);
+        request.setAttribute("searchKeyword", search);
         
         request.getRequestDispatcher("/WEB-INF/views/admin/bookings.jsp").forward(request, response);
     }

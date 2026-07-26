@@ -23,10 +23,21 @@
 <!-- Main Content -->
 <div class="container-fluid p-0">
     <!-- Header Page -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-2 text-primary"></i>Manage Bookings</h3>
             <p class="text-muted mb-0">View all customer bookings</p>
+        </div>
+        
+        <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 500px;">
+            <!-- Search Form -->
+            <form method="GET" action="${pageContext.request.contextPath}/admin/bookings" class="flex-grow-1 mb-0">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="search" class="form-control border-start-0 rounded-end-3" 
+                           placeholder="Search by Booking ID, Tour, Customer name, phone..." value="${not empty searchKeyword ? searchKeyword : ''}">
+                </div>
+            </form>
         </div>
     </div>
 
