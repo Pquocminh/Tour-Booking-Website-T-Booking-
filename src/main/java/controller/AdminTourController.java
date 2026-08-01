@@ -27,7 +27,7 @@ import model.Tour;
 import dao.CategoryDAO;
 import dao.TourDAO;
 
-@WebServlet(name = "AdminTourController", urlPatterns = {"/admin/dashboard", "/admin/tours", "/admin/categories"})
+@WebServlet(name = "AdminTourController", urlPatterns = {"/admin/dashboard", "/admin/tours", "/admin/categories", "/admin/api/revenue"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2,  // 2 MB
     maxFileSize = 1024 * 1024 * 10,       // 10 MB
@@ -53,6 +53,8 @@ public class AdminTourController extends HttpServlet {
             handleToursGet(request, response);
         } else if ("/admin/categories".equals(path)) {
             handleCategoriesGet(request, response);
+        } else if ("/admin/api/revenue".equals(path)) {
+            handleApiRevenueGet(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -104,19 +106,61 @@ public class AdminTourController extends HttpServlet {
         request.setAttribute("totalBookings", totalBookings);
         request.setAttribute("totalRevenue", totalRevenue);
 
-        List<Booking> recentBookings = dashboardDAO.getRecentBookings(5);
+        List<Booking> recentBookings = dashboardDAO.getRecentBookings(6);
         request.setAttribute("recentBookings", recentBookings);
 
-        String[] revenueData = dashboardDAO.getRevenueLast7Days();
-        request.setAttribute("salesLabels", revenueData[0]);
-        request.setAttribute("salesData", revenueData[1]);
+        String[] weeklyData = dashboardDAO.getWeeklyRevenueData();
+        request.setAttribute("weeklyLabels", weeklyData[0]);
+        request.setAttribute("weeklyData", weeklyData[1]);
+
+        String[] monthlyData = dashboardDAO.getMonthlyRevenueData();
+        request.setAttribute("monthlyLabels", monthlyData[0]);
+        request.setAttribute("monthlyData", monthlyData[1]);
         
-        request.setAttribute("donutData", dashboardDAO.getBookingStatusDistribution());
+        String[] yearlyData = dashboardDAO.getYearlyRevenueData();
+        request.setAttribute("yearlyLabels", yearlyData[0]);
+        request.setAttribute("yearlyData", yearlyData[1]);
         
-        request.setAttribute("barData1", "[60, 45, 80, 50, 70]");
-        request.setAttribute("barData2", "[40, 30, 50, 30, 50]");
+        // Backward compatibility
+        request.setAttribute("salesLabels", weeklyData[0]);
+        request.setAttribute("salesData", weeklyData[1]);
+
+        java.util.Map<String, Object> statusDetails = dashboardDAO.getBookingStatusDistributionDetails();
+        request.setAttribute("statusDetails", statusDetails);
+        
+        // Backward compatibility
+        request.setAttribute("donutData", statusDetails.get("distributionJson"));
+        request.setAttribute("completionRate", statusDetails.get("completionRate"));
+
+        String[] analyticsData = dashboardDAO.getTourAnalytics();
+        request.setAttribute("analyticsLabels", analyticsData[0]);
+        request.setAttribute("analyticsData1", analyticsData[1]); // Booked
+        request.setAttribute("analyticsData2", analyticsData[2]); // Available
+        
+        // Backward compatibility
+        request.setAttribute("barData1", analyticsData[1]);
+        request.setAttribute("barData2", analyticsData[2]);
 
         request.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(request, response);
+    }
+
+    private void handleApiRevenueGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=UTF-8");
+        String type = request.getParameter("type");
+        if ("monthly".equals(type)) {
+            int month = java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) + 1;
+            int year = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+            try {
+                if (request.getParameter("month") != null) month = Integer.parseInt(request.getParameter("month"));
+                if (request.getParameter("year") != null) year = Integer.parseInt(request.getParameter("year"));
+            } catch (NumberFormatException e) {
+                // Ignore parsing errors, default to current
+            }
+            String[] data = dashboardDAO.getMonthlyRevenueData(month, year);
+            response.getWriter().write("{\"labels\": " + data[0] + ", \"data\": " + data[1] + "}");
+        } else {
+            response.getWriter().write("{}");
+        }
     }
 
     // ================== TOURS ==================
@@ -297,28 +341,12 @@ public class AdminTourController extends HttpServlet {
                     } catch (NumberFormatException e) {}
                 }
                 tour.setDurationDays(duration);
-                String basePriceParam = request.getParameter("basePrice");
                 double basePrice = 0.0;
                 if ("update".equalsIgnoreCase(action)) {
                     Tour existing = tourDAO.getTourByIdAdmin(tour.getTourId());
                     if (existing != null) {
                         basePrice = existing.getBasePrice();
                     }
-                }
-                if (basePriceParam != null && !basePriceParam.trim().isEmpty()) {
-                    try {
-                        String cleanPrice = basePriceParam.trim().replaceAll("[,\\s]", "");
-                        basePrice = Double.parseDouble(cleanPrice);
-                    } catch (NumberFormatException e) {}
-                }
-                if (basePrice <= 0) {
-                    request.getSession().setAttribute("errorMessage", "Starting price must be a positive number");
-                    if ("update".equalsIgnoreCase(action)) {
-                        response.sendRedirect(request.getContextPath() + "/admin/tours?action=edit&id=" + tour.getTourId());
-                    } else {
-                        response.sendRedirect(request.getContextPath() + "/admin/tours?action=create");
-                    }
-                    return;
                 }
                 tour.setBasePrice(basePrice);
                 tour.setStatus(request.getParameter("status"));
@@ -334,8 +362,8 @@ public class AdminTourController extends HttpServlet {
                         String cleanName = fileName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
                         String uniqueFileName = "tour_" + System.currentTimeMillis() + "_" + cleanName;
                         
-                        String relPath = "/assets/images/tours";
-                        String uploadPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "images" + File.separator + "tours";
+                        String relPath = "/images/tours";
+                        String uploadPath = request.getServletContext().getRealPath("") + File.separator + "images" + File.separator + "tours";
                         File uploadDir = new File(uploadPath);
                         if (!uploadDir.exists()) {
                             uploadDir.mkdirs();
@@ -343,20 +371,10 @@ public class AdminTourController extends HttpServlet {
                         File targetFile = new File(uploadDir, uniqueFileName);
                         filePart.write(targetFile.getAbsolutePath());
                         
-                        try {
-                            String srcPath = "D:" + File.separator + "HocTap" + File.separator + "SWP" + File.separator + "Tour-Booking-Website-T-Booking-" + File.separator + "src" + File.separator + "main" + File.separator + "webapp" + File.separator + "assets" + File.separator + "images" + File.separator + "tours";
-                            File srcDir = new File(srcPath);
-                            if (srcDir.exists() || srcDir.mkdirs()) {
-                                Files.copy(targetFile.toPath(), new File(srcDir, uniqueFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                            }
-                        } catch (Exception exSrc) {
-                            // ignore if source folder not writable or accessible
-                        }
-                        
                         thumbnailUrl = relPath + "/" + uniqueFileName;
                     }
                 } catch (Exception exPart) {
-                    // ignore if request was not multipart or part not found
+                    // Ignore if request was not multipart or part not found
                 }
                 tour.setThumbnailUrl(thumbnailUrl);
                 

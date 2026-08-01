@@ -167,8 +167,13 @@ public class AdminOperationController extends HttpServlet {
             booking.setScheduleId(scheduleId);
             booking.setNumberOfPeople(numberOfPeople);
             booking.setContactName(contactName.trim());
-            booking.setContactPhone(contactPhone.trim());
-            booking.setTotalPrice(numberOfPeople * sched.getPrice());
+            double unitPrice = sched.getPrice();
+            dao.PromotionDAO promoDAO = new dao.PromotionDAO();
+            model.Promotion activePromo = promoDAO.getActivePromotionByTourId(sched.getTourId());
+            if (activePromo != null && activePromo.getDiscountPercent() > 0 && activePromo.getDiscountPercent() <= 100) {
+                unitPrice = unitPrice * (100 - activePromo.getDiscountPercent()) / 100.0;
+            }
+            booking.setTotalPrice(numberOfPeople * unitPrice);
             booking.setStatus("Confirmed");
             
             boolean success = tourDAO.reserveSlots(booking);
@@ -390,6 +395,7 @@ public class AdminOperationController extends HttpServlet {
                     sched.setStatus("Cancelled");
                     boolean success = tourDAO.updateTourSchedule(sched);
                     if (success) {
+                        tourDAO.syncTourBasePriceFromSchedules(sched.getTourId());
                         request.getSession().setAttribute("successMessage", "Cancelled Tour Schedule #" + scheduleId + " successfully!");
                     } else {
                         request.getSession().setAttribute("errorMessage", "Failed to cancel tour schedule in database!");
@@ -407,8 +413,9 @@ public class AdminOperationController extends HttpServlet {
             String departureDateStr = request.getParameter("departureDate");
             String returnDateStr = request.getParameter("returnDate");
             String status = request.getParameter("status");
+            String priceStr = request.getParameter("price");
 
-            if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null) {
+            if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null || priceStr == null || priceStr.trim().isEmpty()) {
                 request.getSession().setAttribute("errorMessage", "Missing required fields for update!");
                 response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
                 return;
@@ -453,6 +460,13 @@ public class AdminOperationController extends HttpServlet {
                         status = "Open";
                     }
 
+                    double priceVal = Double.parseDouble(priceStr.trim());
+                    if (priceVal <= 0) {
+                        request.getSession().setAttribute("errorMessage", "Schedule price must be greater than 0!");
+                        response.sendRedirect(request.getContextPath() + "/admin/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                        return;
+                    }
+                    sched.setPrice(priceVal);
                     sched.setDepartureDate(departureDate);
                     sched.setReturnDate(returnDate);
                     sched.setStatus(status);

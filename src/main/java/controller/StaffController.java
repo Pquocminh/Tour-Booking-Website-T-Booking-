@@ -228,8 +228,9 @@ public class StaffController extends HttpServlet {
         String departureDateStr = request.getParameter("departureDate");
         String returnDateStr = request.getParameter("returnDate");
         String status = request.getParameter("status");
+        String priceStr = request.getParameter("price");
 
-        if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null) {
+        if (scheduleIdParam == null || departureDateStr == null || returnDateStr == null || status == null || priceStr == null || priceStr.trim().isEmpty()) {
             request.getSession().setAttribute("errorMessage", "Missing required fields for update!");
             response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
             return;
@@ -259,6 +260,13 @@ public class StaffController extends HttpServlet {
                     status = "Open";
                 }
 
+                double priceVal = Double.parseDouble(priceStr.trim());
+                if (priceVal <= 0) {
+                    request.getSession().setAttribute("errorMessage", "Schedule price must be greater than 0!");
+                    response.sendRedirect(request.getContextPath() + "/admin/staff/schedules" + (tourIdParam != null ? "?tourId=" + tourIdParam : ""));
+                    return;
+                }
+                sched.setPrice(priceVal);
                 sched.setDepartureDate(departureDate);
                 sched.setReturnDate(returnDate);
                 sched.setStatus(status);
@@ -405,6 +413,7 @@ public class StaffController extends HttpServlet {
 
         try {
             int scheduleId = Integer.parseInt(scheduleIdParam.trim());
+            TourSchedule schedToDelete = tourDAO.getTourScheduleById(scheduleId);
             
             List<Booking> bookings = tourDAO.getBookingsByScheduleId(scheduleId);
             if (bookings != null && !bookings.isEmpty()) {
@@ -412,6 +421,9 @@ public class StaffController extends HttpServlet {
             } else {
                 boolean success = tourDAO.deleteTourSchedule(scheduleId);
                 if (success) {
+                    if (schedToDelete != null) {
+                        tourDAO.syncTourBasePriceFromSchedules(schedToDelete.getTourId());
+                    }
                     request.getSession().setAttribute("successMessage", "Deleted Tour Schedule #" + scheduleId + " successfully!");
                 } else {
                     request.getSession().setAttribute("errorMessage", "Failed to delete Tour Schedule #" + scheduleId + " from database.");
@@ -491,8 +503,13 @@ public class StaffController extends HttpServlet {
             booking.setScheduleId(scheduleId);
             booking.setNumberOfPeople(numberOfPeople);
             booking.setContactName(contactName.trim());
-            booking.setContactPhone(contactPhone.trim());
-            booking.setTotalPrice(numberOfPeople * sched.getPrice());
+            double unitPrice = sched.getPrice();
+            dao.PromotionDAO promoDAO = new dao.PromotionDAO();
+            model.Promotion activePromo = promoDAO.getActivePromotionByTourId(sched.getTourId());
+            if (activePromo != null && activePromo.getDiscountPercent() > 0 && activePromo.getDiscountPercent() <= 100) {
+                unitPrice = unitPrice * (100 - activePromo.getDiscountPercent()) / 100.0;
+            }
+            booking.setTotalPrice(numberOfPeople * unitPrice);
             booking.setStatus("Confirmed");
             
             boolean success = tourDAO.reserveSlots(booking);
@@ -600,7 +617,8 @@ public class StaffController extends HttpServlet {
                 
                 boolean success = reviewDAO.updateReviewStatus(reviewId, newStatus);
                 if (success) {
-                    session.setAttribute("successMessage", "Review status updated to " + newStatus + ".");
+                    String displayStatus = "HIDDEN".equalsIgnoreCase(newStatus) ? "Hidden" : "Visible";
+                    session.setAttribute("successMessage", "Review status updated to " + displayStatus + ".");
                 } else {
                     session.setAttribute("errorMessage", "Failed to update review status.");
                 }
@@ -609,7 +627,12 @@ public class StaffController extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/staff/reviews");
+        String pageParam = request.getParameter("page");
+        String redirectUrl = request.getContextPath() + "/admin/staff/reviews";
+        if (pageParam != null && !pageParam.trim().isEmpty()) {
+            redirectUrl += "?page=" + pageParam.trim();
+        }
+        response.sendRedirect(redirectUrl);
     }
 }
 

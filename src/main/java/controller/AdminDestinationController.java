@@ -119,6 +119,8 @@ public class AdminDestinationController extends HttpServlet {
 
             if (destinationName == null || destinationName.trim().length() < 2) {
                 request.setAttribute("errorMessage", "Destination name must be at least 2 characters long!");
+            } else if (destinationDAO.isDestinationNameExists(destinationName.trim(), -1)) {
+                request.setAttribute("errorMessage", "Destination name '" + destinationName.trim() + "' already exists! Duplicate destination names are not allowed.");
             } else if (province == null || province.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "Province is required!");
             } else if (region == null || region.trim().isEmpty()) {
@@ -165,6 +167,12 @@ public class AdminDestinationController extends HttpServlet {
 
             try {
                 int id = Integer.parseInt(idParam);
+                if (destinationDAO.isDestinationNameExists(destinationName.trim(), id)) {
+                    request.setAttribute("errorMessage", "Destination name '" + destinationName.trim() + "' already exists! Duplicate destination names are not allowed.");
+                    reloadEditPage(request, response, idParam);
+                    return;
+                }
+
                 Destination dest = new Destination();
                 dest.setDestinationId(id);
                 dest.setDestinationName(destinationName.trim());

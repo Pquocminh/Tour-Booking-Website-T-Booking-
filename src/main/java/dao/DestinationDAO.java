@@ -198,6 +198,32 @@ public class DestinationDAO {
         }
     }
 
+    public boolean isDestinationNameExists(String destinationName, int excludeDestinationId) {
+        if (destinationName == null || destinationName.trim().isEmpty()) {
+            return false;
+        }
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return false;
+        }
+        String sql = "SELECT COUNT(*) FROM Destination WHERE LOWER(TRIM(destination_name)) = LOWER(TRIM(?)) AND destination_id != ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, destinationName);
+            ps.setInt(2, excludeDestinationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn);
+        }
+        return false;
+    }
+
     private void closeConnection(Connection conn) {
         if (conn != null) {
             try {

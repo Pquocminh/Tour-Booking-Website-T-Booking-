@@ -235,8 +235,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (d)</label>
-                            <input type="number" class="form-control rounded-3" id="createPrice" name="price" min="0" step="1000" placeholder="e.g. 1500000" required>
+                            <label for="createPrice" class="form-label text-muted small fw-bold">Price (VND) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control rounded-3" id="createPrice" name="price" min="0" step="any" placeholder="e.g. 1500000" required>
+                            <div class="form-text text-muted small">The lowest schedule price determines the tour base price.</div>
                         </div>
 
                         <div class="mb-3">

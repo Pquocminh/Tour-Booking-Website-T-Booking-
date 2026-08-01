@@ -25,6 +25,21 @@
             </div>
 
             <c:if test="${not empty tour}">
+                <c:set var="coverDestFallback" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                <c:if test="${not empty tour.destination and not empty tour.destination.imageUrl}">
+                    <c:choose>
+                        <c:when test="${tour.destination.imageUrl.startsWith('http')}">
+                            <c:set var="coverDestFallback" value="${tour.destination.imageUrl}" />
+                        </c:when>
+                        <c:when test="${tour.destination.imageUrl.startsWith('/')}">
+                            <c:set var="coverDestFallback" value="${pageContext.request.contextPath}${tour.destination.imageUrl}" />
+                        </c:when>
+                        <c:otherwise>
+                            <c:set var="coverDestFallback" value="${pageContext.request.contextPath}/${tour.destination.imageUrl}" />
+                        </c:otherwise>
+                    </c:choose>
+                </c:if>
+
                 <c:choose>
                     <c:when test="${not empty tour.thumbnailUrl}">
                         <c:choose>
@@ -40,12 +55,12 @@
                         </c:choose>
                     </c:when>
                     <c:otherwise>
-                        <c:set var="coverSrc" value="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop" />
+                        <c:set var="coverSrc" value="${coverDestFallback}" />
                     </c:otherwise>
                 </c:choose>
                 <img src="${coverSrc}" 
                      alt="Cover" class="cover-img shadow-sm"
-                     onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop'">
+                     onerror="this.onerror=null; this.src='${coverDestFallback}';">
 
                 <div class="row g-4">
                     <div class="col-md-12">

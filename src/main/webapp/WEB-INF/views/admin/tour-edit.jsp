@@ -92,12 +92,12 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price) <span class="text-danger">*</span></label>
+                        <label class="form-label text-muted small fw-bold">Starting Price (Base Price)</label>
                         <div class="input-group">
-                            <input type="number" min="1" step="any" name="basePrice" class="form-control rounded-start-3" value="<c:if test='${not empty tour and tour.basePrice > 0}'><fmt:formatNumber value='${tour.basePrice}' pattern='0'/></c:if>" placeholder="e.g. 1500000" required>
-                            <span class="input-group-text rounded-end-3 border-start-0">VND</span>
+                            <input type="number" name="basePrice" class="form-control rounded-start-3 bg-light" value="<c:if test='${not empty tour and tour.basePrice > 0}'><fmt:formatNumber value='${tour.basePrice}' pattern='0'/></c:if><c:if test='${empty tour or tour.basePrice == 0}'>0</c:if>" readonly tabindex="-1">
+                            <span class="input-group-text rounded-end-3 border-start-0 bg-light">VND</span>
                         </div>
-                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Set the starting / base price for this tour package. Must be greater than 0.</small>
+                        <small class="text-info d-block mt-1" style="font-size: 0.75rem;"><i class="fa-solid fa-circle-info me-1"></i>Base price is automatically calculated from the lowest price among active schedules in Manage Schedule.</small>
                     </div>
 
                     <div class="col-md-6">
@@ -257,18 +257,6 @@
                 return;
             }
 
-            const basePriceInput = document.querySelector('input[name="basePrice"]');
-            let basePriceVal = 0;
-            if (basePriceInput && basePriceInput.value) {
-                basePriceVal = parseFloat(basePriceInput.value.replace(/[,\\s]/g, ''));
-            }
-            if (isNaN(basePriceVal) || basePriceVal <= 0) {
-                event.preventDefault();
-                alert("Starting price must be greater than 0");
-                if (basePriceInput) {
-                    basePriceInput.focus();
-                }
-            }
         });
 
         function addItineraryDay() {

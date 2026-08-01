@@ -22,7 +22,9 @@ public class TourDAO {
         + "c.category_id, c.category_name, c.description AS cat_desc, "
         + "d.destination_id, d.destination_name, d.province, d.region, "
         + "d.description AS dest_desc, d.image_url AS dest_image, "
-        + "(SELECT TOP 1 image_url FROM TourImage WHERE tour_id = t.tour_id AND is_thumbnail = 1) AS thumbnail_url "
+        + "(SELECT TOP 1 image_url FROM TourImage WHERE tour_id = t.tour_id AND is_thumbnail = 1) AS thumbnail_url, "
+        + "(SELECT TOP 1 p.discount_percent FROM Promotion p JOIN TourPromotion tp ON p.promotion_id = tp.promotion_id WHERE tp.tour_id = t.tour_id AND p.status = 'Active' AND CAST(GETDATE() AS DATE) >= p.start_date AND CAST(GETDATE() AS DATE) <= p.end_date ORDER BY p.discount_percent DESC) AS promo_discount_percent, "
+        + "(SELECT TOP 1 p.promotion_name FROM Promotion p JOIN TourPromotion tp ON p.promotion_id = tp.promotion_id WHERE tp.tour_id = t.tour_id AND p.status = 'Active' AND CAST(GETDATE() AS DATE) >= p.start_date AND CAST(GETDATE() AS DATE) <= p.end_date ORDER BY p.discount_percent DESC) AS promo_name "
         + "FROM Tour t "
         + "LEFT JOIN Category c ON t.category_id = c.category_id "
         + "LEFT JOIN Destination d ON t.destination_id = d.destination_id ";
@@ -206,6 +208,12 @@ public class TourDAO {
         tour.setDestination(destination);
         
         tour.setThumbnailUrl(rs.getString("thumbnail_url"));
+        try {
+            tour.setDiscountPercent(rs.getInt("promo_discount_percent"));
+            tour.setPromotionName(rs.getString("promo_name"));
+        } catch (SQLException e) {
+            // Ignore if column is not in result set
+        }
         return tour;
     }
 

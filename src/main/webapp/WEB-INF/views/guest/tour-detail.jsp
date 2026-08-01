@@ -76,8 +76,37 @@
         </div>
     </nav>
 
+    <c:set var="heroImgSrc" value="${pageContext.request.contextPath}/images/default-tour.jpg" />
+    <c:choose>
+        <c:when test="${not empty tour.thumbnailUrl}">
+            <c:choose>
+                <c:when test="${tour.thumbnailUrl.startsWith('http')}">
+                    <c:set var="heroImgSrc" value="${tour.thumbnailUrl}" />
+                </c:when>
+                <c:when test="${tour.thumbnailUrl.startsWith('/')}">
+                    <c:set var="heroImgSrc" value="${pageContext.request.contextPath}${tour.thumbnailUrl}" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="heroImgSrc" value="${pageContext.request.contextPath}/${tour.thumbnailUrl}" />
+                </c:otherwise>
+            </c:choose>
+        </c:when>
+        <c:when test="${not empty tour.destination and not empty tour.destination.imageUrl}">
+            <c:choose>
+                <c:when test="${tour.destination.imageUrl.startsWith('http')}">
+                    <c:set var="heroImgSrc" value="${tour.destination.imageUrl}" />
+                </c:when>
+                <c:when test="${tour.destination.imageUrl.startsWith('/')}">
+                    <c:set var="heroImgSrc" value="${pageContext.request.contextPath}${tour.destination.imageUrl}" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="heroImgSrc" value="${pageContext.request.contextPath}/${tour.destination.imageUrl}" />
+                </c:otherwise>
+            </c:choose>
+        </c:when>
+    </c:choose>
     <!-- Details Hero Section -->
-    <header class="details-hero" style="background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)), url('${not empty tour.thumbnailUrl ? pageContext.request.contextPath.concat(tour.thumbnailUrl) : 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&auto=format&fit=crop'}');">
+    <header class="details-hero" style="background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.8)), url('${heroImgSrc}');">
         <div class="container">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -129,7 +158,7 @@
                                              class="d-block w-100 object-fit-cover" 
                                              style="height: 450px;" 
                                              alt="Tour image ${status.index + 1}"
-                                             onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop'">
+                                             onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/images/default-tour.jpg'">
                                     </div>
                                 </c:forEach>
                             </div>
@@ -253,10 +282,23 @@
                 <div class="glass-card p-4 mb-4 border-primary shadow-sm">
                     <span class="badge bg-success px-3 py-1 mb-2 rounded-pill">Best Price Guarantee</span>
                     <div class="mb-3">
-                        <span class="text-muted" style="font-size: 0.9rem;">Price starts from</span>
-                        <h2 class="fw-extrabold text-primary mb-0">
-                            <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0 ₫"/>
-                        </h2>
+                        <c:choose>
+                            <c:when test="${tour.discountPercent > 0}">
+                                <div class="text-muted" style="font-size: 0.9rem;">
+                                    Price starts from: <del><fmt:formatNumber value="${tour.basePrice}" pattern="#,##0"/> ₫</del>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.75rem;">-${tour.discountPercent}%</span>
+                                </div>
+                                <h2 class="fw-extrabold mb-0" style="color: #0056b3 !important;">
+                                    <fmt:formatNumber value="${tour.discountedPrice}" pattern="#,##0"/> ₫
+                                </h2>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="text-muted" style="font-size: 0.9rem;">Price starts from:</div>
+                                <h2 class="fw-extrabold mb-0" style="color: #0056b3 !important;">
+                                    <fmt:formatNumber value="${tour.basePrice}" pattern="#,##0"/> ₫
+                                </h2>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                     
                     <c:if test="${not empty sessionScope.errorMessage}">
@@ -279,9 +321,10 @@
                                 <c:otherwise>
                                     <select class="form-select custom-select" id="departureDate" name="scheduleId" required onchange="updateMaxSlots(); calculateTotalPrice()">
                                         <c:forEach var="sch" items="${tour.schedules}">
-                                            <option value="${sch.scheduleId}" data-price="${sch.price}" data-available="${sch.availableSlots}">
+                                            <c:set var="schPrice" value="${tour.discountPercent > 0 ? sch.price * (100 - tour.discountPercent) / 100.0 : sch.price}" />
+                                            <option value="${sch.scheduleId}" data-price="${schPrice}" data-available="${sch.availableSlots}">
                                                 <fmt:formatDate value="${sch.departureDate}" pattern="dd/MM/yyyy"/> 
-                                                - <fmt:formatNumber value="${sch.price}" pattern="#,##0 ₫"/> (${sch.availableSlots} left)
+                                                - <fmt:formatNumber value="${schPrice}" pattern="#,##0 ₫"/> (${sch.availableSlots} left)
                                                 <c:if test="${scheduleRefundableMap[sch.scheduleId]}">
                                                     [Non-refundable on cancellation]
                                                 </c:if>
@@ -325,7 +368,7 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-3 btn-book-now" 
+                        <button type="submit" class="btn w-100 rounded-pill py-3 fw-bold mt-3 btn-book-now shadow-sm" style="background-color: #ffe5e5; color: #d32f2f; border: none; font-size: 1.1rem; transition: all 0.2s;" 
                                 ${empty tour.schedules ? 'disabled' : ''}>
                             <i class="fa-solid fa-cart-shopping me-2"></i>Book Now
                         </button>
@@ -364,11 +407,25 @@
                 <div class="glass-card p-4">
                     <h5 class="fw-bold mb-3"><i class="fa-solid fa-earth-americas me-2 text-primary"></i>Destination Info</h5>
                     <div class="dest-card-image overflow-hidden rounded-3 mb-3">
-                        <img src="${not empty tour.destination.imageUrl ? pageContext.request.contextPath.concat(tour.destination.imageUrl) : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=400&auto=format&fit=crop'}" 
+                        <c:set var="destCardImg" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                        <c:if test="${not empty tour.destination and not empty tour.destination.imageUrl}">
+                            <c:choose>
+                                <c:when test="${tour.destination.imageUrl.startsWith('http')}">
+                                    <c:set var="destCardImg" value="${tour.destination.imageUrl}" />
+                                </c:when>
+                                <c:when test="${tour.destination.imageUrl.startsWith('/')}">
+                                    <c:set var="destCardImg" value="${pageContext.request.contextPath}${tour.destination.imageUrl}" />
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="destCardImg" value="${pageContext.request.contextPath}/${tour.destination.imageUrl}" />
+                                </c:otherwise>
+                            </c:choose>
+                        </c:if>
+                        <img src="${destCardImg}" 
                              class="img-fluid w-100 object-fit-cover" 
                              style="height: 180px;" 
                              alt="${tour.destination.destinationName}"
-                             onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop'">
+                             onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/images/default-destination.jpg';">
                     </div>
                     <h6 class="fw-bold text-main mb-1">${tour.destination.destinationName}</h6>
                     <p class="text-muted mb-2" style="font-size: 0.85rem;">

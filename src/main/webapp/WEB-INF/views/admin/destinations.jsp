@@ -133,16 +133,25 @@
                                     <tr>
                                         <td class="fw-semibold text-muted">#${dest.destinationId}</td>
                                         <td>
-                                            <c:choose>
-                                                <c:when test="${not empty dest.imageUrl}">
-                                                    <img src="${dest.imageUrl}" alt="${dest.destinationName}" class="rounded-3 shadow-sm" style="width: 60px; height: 45px; object-fit: cover;" onerror="this.src='https://placehold.co/60x45?text=No+Image'">
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 45px; font-size: 0.75rem;">
-                                                        No Image
-                                                    </div>
-                                                </c:otherwise>
-                                            </c:choose>
+                                             <c:choose>
+                                                 <c:when test="${not empty dest.imageUrl}">
+                                                     <c:choose>
+                                                         <c:when test="${dest.imageUrl.startsWith('http')}">
+                                                             <c:set var="destImg" value="${dest.imageUrl}" />
+                                                         </c:when>
+                                                         <c:when test="${dest.imageUrl.startsWith('/')}">
+                                                             <c:set var="destImg" value="${pageContext.request.contextPath}${dest.imageUrl}" />
+                                                         </c:when>
+                                                         <c:otherwise>
+                                                             <c:set var="destImg" value="${pageContext.request.contextPath}/${dest.imageUrl}" />
+                                                         </c:otherwise>
+                                                     </c:choose>
+                                                 </c:when>
+                                                 <c:otherwise>
+                                                     <c:set var="destImg" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                                                 </c:otherwise>
+                                             </c:choose>
+                                             <img src="${destImg}" alt="${dest.destinationName}" class="rounded-3 shadow-sm" style="width: 60px; height: 45px; object-fit: cover;" onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/images/default-destination.jpg';">
                                         </td>
                                         <td>
                                             <span class="fw-semibold text-dark d-block">${dest.destinationName}</span>
@@ -198,9 +207,25 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                   </div>
                                                   <div class="modal-body">
-                                                    <c:if test="${not empty dest.imageUrl}">
-                                                        <img src="${dest.imageUrl}" alt="${dest.destinationName}" class="w-100 rounded-3 mb-3 shadow-sm" style="max-height: 200px; object-fit: cover;" onerror="this.src='https://placehold.co/600x300?text=No+Image'">
-                                                    </c:if>
+                                                     <c:choose>
+                                                         <c:when test="${not empty dest.imageUrl}">
+                                                             <c:choose>
+                                                                 <c:when test="${dest.imageUrl.startsWith('http')}">
+                                                                     <c:set var="destModalImg" value="${dest.imageUrl}" />
+                                                                 </c:when>
+                                                                 <c:when test="${dest.imageUrl.startsWith('/')}">
+                                                                     <c:set var="destModalImg" value="${pageContext.request.contextPath}${dest.imageUrl}" />
+                                                                 </c:when>
+                                                                 <c:otherwise>
+                                                                     <c:set var="destModalImg" value="${pageContext.request.contextPath}/${dest.imageUrl}" />
+                                                                 </c:otherwise>
+                                                             </c:choose>
+                                                         </c:when>
+                                                         <c:otherwise>
+                                                             <c:set var="destModalImg" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                                                         </c:otherwise>
+                                                     </c:choose>
+                                                     <img src="${destModalImg}" alt="${dest.destinationName}" class="w-100 rounded-3 mb-3 shadow-sm" style="max-height: 200px; object-fit: cover;" onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/images/default-destination.jpg';">
                                                     <div class="mb-2">
                                                         <label class="text-muted small fw-bold">Destination ID</label>
                                                         <p class="fs-6 fw-semibold text-dark mb-0">#${dest.destinationId}</p>

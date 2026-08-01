@@ -16,7 +16,7 @@ public class DBContext {
             conn = DriverManager.getConnection(
                 "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false;sendStringParametersAsUnicode=true;characterEncoding=UTF-8",
                 "sa",
-                "123"
+                "123456"
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,7 +30,7 @@ public class DBContext {
                 conn = DriverManager.getConnection(
                     "jdbc:sqlserver://localhost:1433;databaseName=BookingTourWebsite;encrypt=false;sendStringParametersAsUnicode=true;characterEncoding=UTF-8",
                     "sa",
-                    "123"
+                    "123456"
                 );
             }
         } catch (Exception e) {

@@ -63,15 +63,20 @@
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
                 </div>
             </c:if>
+
+            <!-- Client Error Display -->
+            <div id="clientLoginError" class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientLoginErrorText" class="fw-semibold"></span>
+            </div>
             
             <!-- Credentials Sign-In Form -->
-            <form action="${pageContext.request.contextPath}/login" method="POST">
+            <form action="${pageContext.request.contextPath}/login" method="POST" onsubmit="return validateLoginForm()" novalidate>
                 <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username">
                     <label for="username">Username or Email</label>
                 </div>
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                     <label for="password">Password</label>
                 </div>
                 
@@ -124,6 +129,32 @@
     </form>
 
     <script>
+        function showLoginError(msg) {
+            const errBox = document.getElementById('clientLoginError');
+            const errText = document.getElementById('clientLoginErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function validateLoginForm() {
+            const username = document.getElementById("username").value.trim();
+            if (!username) {
+                showLoginError("Please enter your Username or Email.");
+                document.getElementById("username").focus();
+                return false;
+            }
+            const password = document.getElementById("password").value;
+            if (!password) {
+                showLoginError("Please enter your Password.");
+                document.getElementById("password").focus();
+                return false;
+            }
+            return true;
+        }
+
         // Callback function triggered upon successful Google authentication
         function handleCredentialResponse(response) {
             if (response.credential) {

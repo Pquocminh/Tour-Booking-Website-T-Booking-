@@ -75,8 +75,10 @@ public class AdminBookingController extends HttpServlet {
             if (bookingIdStr != null && status != null) {
                 try {
                     int bookingId = Integer.parseInt(bookingIdStr);
-                    
-                    if ("Confirmed".equals(status)) {
+                    Booking existing = bookingDAO.getBookingById(bookingId);
+                    if (existing != null && "Completed".equalsIgnoreCase(existing.getStatus())) {
+                        request.getSession().setAttribute("errorMessage", "Cannot change status of a Completed booking.");
+                    } else if ("Confirmed".equals(status)) {
                         StringBuilder errorMsg = new StringBuilder();
                         boolean success = bookingDAO.confirmBooking(bookingId, errorMsg);
                         if (success) {
@@ -101,18 +103,28 @@ public class AdminBookingController extends HttpServlet {
             if (bookingIdStr != null) {
                 try {
                     int bookingId = Integer.parseInt(bookingIdStr);
-                    boolean success = bookingDAO.cancelBooking(bookingId);
-                    if (success) {
-                        request.getSession().setAttribute("successMessage", "Cancelled Booking #" + bookingId + " successfully and released slots.");
+                    Booking existing = bookingDAO.getBookingById(bookingId);
+                    if (existing != null && "Completed".equalsIgnoreCase(existing.getStatus())) {
+                        request.getSession().setAttribute("errorMessage", "Cannot cancel a Completed booking.");
                     } else {
-                        request.getSession().setAttribute("errorMessage", "Failed to cancel booking.");
+                        boolean success = bookingDAO.cancelBooking(bookingId);
+                        if (success) {
+                            request.getSession().setAttribute("successMessage", "Cancelled Booking #" + bookingId + " successfully and released slots.");
+                        } else {
+                            request.getSession().setAttribute("errorMessage", "Failed to cancel booking.");
+                        }
                     }
                 } catch (NumberFormatException e) {
                     request.getSession().setAttribute("errorMessage", "Invalid Booking ID.");
                 }
             }
         }
-        response.sendRedirect(request.getContextPath() + "/admin/bookings");
+        String tab = request.getParameter("tab");
+        String redirectUrl = request.getContextPath() + "/admin/bookings";
+        if (tab != null && !tab.trim().isEmpty()) {
+            redirectUrl += "?tab=" + tab.trim();
+        }
+        response.sendRedirect(redirectUrl);
     }
 }
 

@@ -153,6 +153,13 @@
                             </div>
                         </c:if>
 
+                        <!-- Client Validation Errors Display -->
+                        <div id="clientFilterErrors" class="alert alert-danger alert-dismissible fade show p-2 small mb-3 shadow-sm" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px;">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            <span id="clientFilterErrorText" class="fw-semibold"></span>
+                            <button type="button" class="btn-close p-2" onclick="document.getElementById('clientFilterErrors').style.display='none'" aria-label="Close"></button>
+                        </div>
+
                         <!-- Search Keyword -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold small text-muted">Keyword</label>
@@ -324,6 +331,22 @@
                                             <span class="tour-category-tag position-absolute top-0 start-0 m-3 badge bg-primary">
                                                 <i class="fa-solid fa-tag me-1"></i>${t.category.categoryName}
                                             </span>
+                                            <!-- 3-Tier Image Fallback Strategy -->
+                                            <c:set var="destImgFallback" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                                            <c:if test="${not empty t.destination and not empty t.destination.imageUrl}">
+                                                <c:choose>
+                                                    <c:when test="${t.destination.imageUrl.startsWith('http')}">
+                                                        <c:set var="destImgFallback" value="${t.destination.imageUrl}" />
+                                                    </c:when>
+                                                    <c:when test="${t.destination.imageUrl.startsWith('/')}">
+                                                        <c:set var="destImgFallback" value="${pageContext.request.contextPath}${t.destination.imageUrl}" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:set var="destImgFallback" value="${pageContext.request.contextPath}/${t.destination.imageUrl}" />
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:if>
+
                                             <c:choose>
                                                 <c:when test="${not empty t.thumbnailUrl}">
                                                     <c:choose>
@@ -339,16 +362,16 @@
                                                     </c:choose>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <c:set var="imgSrc" value="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop" />
+                                                    <c:set var="imgSrc" value="${destImgFallback}" />
                                                 </c:otherwise>
                                             </c:choose>
                                             <img src="${imgSrc}"
                                                  alt="${t.tourName}"
                                                  class="tour-img w-100"
                                                  style="height: 200px; object-fit: cover;"
-                                                 onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop'">
+                                                 onerror="this.onerror=null; this.src='${destImgFallback}';">
 
-                                            <span class="tour-duration-tag position-absolute bottom-0 end-0 m-3 badge bg-dark bg-opacity-75">
+                                            <span class="tour-duration-tag position-absolute bottom-0 end-0 m-3 badge bg-dark bg-opacity-75 text-white">
                                                 <i class="fa-regular fa-clock me-1"></i>
                                                 <c:choose>
                                                     <c:when test="${t.durationDays > 1}">
@@ -373,15 +396,27 @@
                                                 </c:if>
                                             </div>
                                             <p class="tour-desc text-muted small flex-grow-1 line-clamp-2">${t.description}</p>
-                                            <div class="tour-card-footer d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                            <div class="tour-card-footer d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                                                 <div class="tour-price-wrapper">
-                                                    <span class="tour-price-label d-block text-muted small" style="font-size: 0.75rem;">From</span>
-                                                    <span class="tour-price text-primary fw-bold fs-5">
-                                                        <fmt:formatNumber value="${t.basePrice}" pattern="#,##0 ₫"/>
-                                                    </span>
+                                                    <c:choose>
+                                                        <c:when test="${t.discountPercent > 0}">
+                                                            <div class="text-muted" style="font-size: 0.8rem; line-height: 1.3;">
+                                                                Price from: <del><fmt:formatNumber value="${t.basePrice}" pattern="#,##0 ₫"/></del>
+                                                            </div>
+                                                            <div class="fw-bold" style="color: #0056b3 !important; font-size: 1.2rem; line-height: 1.3;">
+                                                                <fmt:formatNumber value="${t.discountedPrice}" pattern="#,##0 ₫"/>
+                                                            </div>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="text-muted" style="font-size: 0.8rem; line-height: 1.3;">Price from:</div>
+                                                            <div class="fw-bold" style="color: #0056b3 !important; font-size: 1.2rem; line-height: 1.3;">
+                                                                <fmt:formatNumber value="${t.basePrice}" pattern="#,##0 ₫"/>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
-                                                <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                                    View Details <i class="fa-solid fa-arrow-right ms-1"></i>
+                                                <a href="${pageContext.request.contextPath}/tour-detail?id=${t.tourId}" class="btn rounded-pill px-3 py-2 fw-bold shadow-sm" style="background-color: #ffe5e5; color: #d32f2f; border: none; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap;">
+                                                    Book Now
                                                 </a>
                                             </div>
                                         </div>
@@ -497,6 +532,16 @@
     document.addEventListener('DOMContentLoaded', function() {
         var filterForm = document.getElementById('filter-form');
         
+        function showFilterError(msg) {
+            var errBox = document.getElementById('clientFilterErrors');
+            var errText = document.getElementById('clientFilterErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         function validatePriceInput(val, fieldName) {
             if (!val) return null;
             var trimmed = val.trim();
@@ -505,19 +550,19 @@
             if (trimmed.indexOf(',') !== -1) {
                 var commaRegex = /^\d{1,3}(,\d{3})+$/;
                 if (!commaRegex.test(trimmed)) {
-                    alert(fieldName + ': If comma is used, it must be followed by exactly 3 digits (e.g. 1,000 or 1,234).');
+                    showFilterError(fieldName + ': If comma is used, it must be followed by exactly 3 digits (e.g. 1,000 or 1,234).');
                     return false;
                 }
             } else if (trimmed.indexOf('.') !== -1) {
                 var dotRegex = /^\d{1,3}(\.\d{3})+$/;
                 if (!dotRegex.test(trimmed)) {
-                    alert(fieldName + ': If dot separator is used, it must be followed by exactly 3 digits (e.g. 1.000 or 1.234).');
+                    showFilterError(fieldName + ': If dot separator is used, it must be followed by exactly 3 digits (e.g. 1.000 or 1.234).');
                     return false;
                 }
             } else {
                 var digitsRegex = /^\d+$/;
                 if (!digitsRegex.test(trimmed)) {
-                    alert(fieldName + ' must contain digits only.');
+                    showFilterError(fieldName + ' must contain digits only.');
                     return false;
                 }
             }
@@ -525,7 +570,7 @@
             var cleanVal = trimmed.replace(/[,.]/g, '');
             var num = parseFloat(cleanVal);
             if (isNaN(num) || num < 1000) {
-                alert(fieldName + ' must be at least 1,000 VND.');
+                showFilterError(fieldName + ' must be at least 1,000 VND.');
                 return false;
             }
             return num;
@@ -552,7 +597,7 @@
 
                 // Validate Min Price <= Max Price
                 if (parsedMinP !== null && parsedMaxP !== null && parsedMinP > parsedMaxP) {
-                    alert('Minimum price cannot be greater than maximum price.');
+                    showFilterError('Minimum price cannot be greater than maximum price.');
                     e.preventDefault();
                     return false;
                 }
@@ -561,7 +606,7 @@
                 if (minDurVal !== '') {
                     var minD = parseInt(minDurVal, 10);
                     if (isNaN(minD) || minD < 1) {
-                        alert('Minimum duration must be a valid positive integer (at least 1 day).');
+                        showFilterError('Minimum duration must be a valid positive integer (at least 1 day).');
                         e.preventDefault();
                         return false;
                     }
@@ -571,7 +616,7 @@
                 if (maxDurVal !== '') {
                     var maxD = parseInt(maxDurVal, 10);
                     if (isNaN(maxD) || maxD < 1) {
-                        alert('Maximum duration must be a valid positive integer (at least 1 day).');
+                        showFilterError('Maximum duration must be a valid positive integer (at least 1 day).');
                         e.preventDefault();
                         return false;
                     }
@@ -580,7 +625,7 @@
                 // Validate Min Duration <= Max Duration
                 if (minDurVal !== '' && maxDurVal !== '' && !isNaN(minDurVal) && !isNaN(maxDurVal)) {
                     if (parseInt(minDurVal, 10) > parseInt(maxDurVal, 10)) {
-                        alert('Minimum duration cannot be greater than maximum duration.');
+                        showFilterError('Minimum duration cannot be greater than maximum duration.');
                         e.preventDefault();
                         return false;
                     }

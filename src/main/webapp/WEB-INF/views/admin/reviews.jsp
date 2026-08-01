@@ -102,23 +102,54 @@
                                             </button>
 
                                             <!-- Toggle Status Button -->
-                                            <form method="POST" action="${pageContext.request.contextPath}/admin/staff/reviews" class="d-inline">
-                                                <input type="hidden" name="action" value="toggleStatus">
-                                                <input type="hidden" name="reviewId" value="${r.reviewId}">
-                                                <input type="hidden" name="currentStatus" value="${r.status}">
-                                                <c:choose>
-                                                    <c:when test="${'VISIBLE'.equalsIgnoreCase(r.status) || 'APPROVED'.equalsIgnoreCase(r.status)}">
-                                                        <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 mb-1 toggle-btn" title="Click to Hide" onclick="return confirm('Hide this review from public view?');">
-                                                            <i class="fa-solid fa-eye me-1"></i>Visible
-                                                        </button>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <button type="submit" class="btn btn-secondary btn-sm rounded-pill px-3 mb-1 toggle-btn" title="Click to Show" onclick="return confirm('Show this review to public view?');">
-                                                            <i class="fa-solid fa-eye-slash me-1"></i>Hidden
-                                                        </button>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </form>
+                                            <c:choose>
+                                                <c:when test="${'VISIBLE'.equalsIgnoreCase(r.status) || 'APPROVED'.equalsIgnoreCase(r.status)}">
+                                                    <button type="button" class="btn btn-success btn-sm rounded-pill px-3 mb-1 toggle-btn" title="Click to Hide" data-bs-toggle="modal" data-bs-target="#toggleModal${r.reviewId}">
+                                                        <i class="fa-solid fa-eye me-1"></i>Visible
+                                                    </button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3 mb-1 toggle-btn" title="Click to Show" data-bs-toggle="modal" data-bs-target="#toggleModal${r.reviewId}">
+                                                        <i class="fa-solid fa-eye-slash me-1"></i>Hidden
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <!-- Toggle Confirmation Modal -->
+                                            <div class="modal fade text-start" id="toggleModal${r.reviewId}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                    <div class="modal-content rounded-4 border-0 shadow">
+                                                        <div class="modal-header border-bottom-0 pb-0">
+                                                            <h5 class="modal-title fw-bold text-dark">Confirm Action</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body text-center py-3">
+                                                            <c:choose>
+                                                                <c:when test="${'VISIBLE'.equalsIgnoreCase(r.status) || 'APPROVED'.equalsIgnoreCase(r.status)}">
+                                                                    <i class="fa-solid fa-eye-slash text-warning display-4 mb-3 d-block"></i>
+                                                                    <p class="mb-0">Hide this review from public view?</p>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <i class="fa-solid fa-eye text-success display-4 mb-3 d-block"></i>
+                                                                    <p class="mb-0">Show this review to public view?</p>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                        <div class="modal-footer border-top-0 pt-0 justify-content-center">
+                                                            <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                            <form method="POST" action="${pageContext.request.contextPath}/admin/staff/reviews" class="d-inline">
+                                                                <input type="hidden" name="action" value="toggleStatus">
+                                                                <input type="hidden" name="reviewId" value="${r.reviewId}">
+                                                                <input type="hidden" name="currentStatus" value="${r.status}">
+                                                                <input type="hidden" name="page" value="${currentPage}">
+                                                                <button type="submit" class="btn ${('VISIBLE'.equalsIgnoreCase(r.status) || 'APPROVED'.equalsIgnoreCase(r.status)) ? 'btn-warning text-white' : 'btn-success'} rounded-pill px-4">
+                                                                    Confirm
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             <!-- Respond Modal -->
                                             <div class="modal fade text-start" id="respondModal${r.reviewId}" tabindex="-1">
@@ -132,6 +163,7 @@
                                                             <div class="modal-body">
                                                                 <input type="hidden" name="action" value="respond">
                                                                 <input type="hidden" name="reviewId" value="${r.reviewId}">
+                                                                <input type="hidden" name="page" value="${currentPage}">
                                                                 
                                                                 <div class="bg-light p-3 rounded-3 mb-3">
                                                                     <div class="fw-bold text-dark">${r.customerName}</div>

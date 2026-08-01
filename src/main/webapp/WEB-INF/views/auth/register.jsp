@@ -49,19 +49,24 @@
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
                 </div>
             </c:if>
+
+            <!-- Client Error Display -->
+            <div id="clientRegisterError" class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientRegisterErrorText" class="fw-semibold"></span>
+            </div>
             
-            <form action="${pageContext.request.contextPath}/register" method="POST" onsubmit="return validateForm()">
+            <form action="${pageContext.request.contextPath}/register" method="POST" onsubmit="return validateForm()" novalidate>
                 <!-- Full Name -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Full Name" 
-                           value="${not empty registeredAccount ? registeredAccount.fullName : ''}" required>
+                           value="${not empty registeredAccount ? registeredAccount.fullName : ''}">
                     <label for="fullName">Full Name</label>
                 </div>
                 
                 <!-- Email -->
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" 
-                           value="${not empty registeredAccount ? registeredAccount.email : ''}" required>
+                           value="${not empty registeredAccount ? registeredAccount.email : ''}">
                     <label for="email">Email Address</label>
                 </div>
                 
@@ -75,21 +80,19 @@
                 <!-- Username -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="username" name="username" placeholder="Username" 
-                           value="${not empty registeredAccount ? registeredAccount.username : ''}" 
-                           pattern="^[a-zA-Z0-9_]{3,30}$" title="Username must be 3-30 characters long and contain only letters, numbers, or underscores" required>
+                           value="${not empty registeredAccount ? registeredAccount.username : ''}">
                     <label for="username">Username</label>
                 </div>
                 
                 <!-- Password -->
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" 
-                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                     <label for="password">Password</label>
                 </div>
                 
                 <!-- Confirm Password -->
                 <div class="form-floating mb-4">
-                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" minlength="6" required>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password">
                     <label for="confirmPassword">Confirm Password</label>
                 </div>
                 
@@ -105,11 +108,80 @@
     </div>
 
     <script>
+        function showRegisterError(msg) {
+            const errBox = document.getElementById('clientRegisterError');
+            const errText = document.getElementById('clientRegisterErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         function validateForm() {
+            const fullName = document.getElementById("fullName").value.trim();
+            if (!fullName) {
+                showRegisterError("Please enter your Full Name.");
+                document.getElementById("fullName").focus();
+                return false;
+            }
+            const nameRegex = /^[\p{L}\s]+$/u;
+            if (!nameRegex.test(fullName)) {
+                showRegisterError("Full Name cannot contain numbers or special characters!");
+                document.getElementById("fullName").focus();
+                return false;
+            }
+
+            const email = document.getElementById("email").value.trim();
+            if (!email) {
+                showRegisterError("Please enter your Email Address.");
+                document.getElementById("email").focus();
+                return false;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showRegisterError("Please enter a valid Email Address.");
+                document.getElementById("email").focus();
+                return false;
+            }
+
+            const phone = document.getElementById("phone").value.trim();
+            if (phone && !/^\d{9,11}$/.test(phone)) {
+                showRegisterError("Phone Number must contain 9 to 11 digits only.");
+                document.getElementById("phone").focus();
+                return false;
+            }
+
+            const username = document.getElementById("username").value.trim();
+            if (!username) {
+                showRegisterError("Please enter a Username.");
+                document.getElementById("username").focus();
+                return false;
+            }
+            const userRegex = /^[a-zA-Z0-9_]{3,30}$/;
+            if (!userRegex.test(username)) {
+                showRegisterError("Username must be 3 to 30 characters long and contain only letters, numbers, or underscores.");
+                document.getElementById("username").focus();
+                return false;
+            }
+
             const password = document.getElementById("password").value;
+            if (!password) {
+                showRegisterError("Please enter a Password.");
+                document.getElementById("password").focus();
+                return false;
+            }
+            const passRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!passRegex.test(password)) {
+                showRegisterError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+                document.getElementById("password").focus();
+                return false;
+            }
+
             const confirmPassword = document.getElementById("confirmPassword").value;
             if (password !== confirmPassword) {
-                alert("Passwords do not match!");
+                showRegisterError("Passwords do not match!");
+                document.getElementById("confirmPassword").focus();
                 return false;
             }
             return true;
