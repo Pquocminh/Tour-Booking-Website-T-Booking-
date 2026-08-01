@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,15 +49,20 @@
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
                 </div>
             </c:if>
+
+            <!-- Client Error Display -->
+            <div id="clientResetError" class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientResetErrorText" class="fw-semibold"></span>
+            </div>
             
             <!-- Password Reset Form -->
-            <form action="${pageContext.request.contextPath}/reset-password" method="POST">
+            <form action="${pageContext.request.contextPath}/reset-password" method="POST" onsubmit="return validateResetForm()" novalidate>
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="New Password" required>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="New Password">
                     <label for="password">New Password</label>
                 </div>
                 <div class="form-floating mb-4">
-                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password" required>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm New Password">
                     <label for="confirmPassword">Confirm New Password</label>
                 </div>
                 
@@ -68,6 +73,39 @@
         </div>
     </div>
 
+    <script>
+        function showResetError(msg) {
+            const errBox = document.getElementById('clientResetError');
+            const errText = document.getElementById('clientResetErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function validateResetForm() {
+            const password = document.getElementById("password").value;
+            if (!password) {
+                showResetError("Please enter a New Password.");
+                document.getElementById("password").focus();
+                return false;
+            }
+            const passRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!passRegex.test(password)) {
+                showResetError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.");
+                document.getElementById("password").focus();
+                return false;
+            }
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            if (password !== confirmPassword) {
+                showResetError("Passwords do not match!");
+                document.getElementById("confirmPassword").focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
 

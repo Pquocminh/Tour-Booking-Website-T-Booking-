@@ -175,6 +175,10 @@ public class BookingDAO extends DBContext {
     }
 
     public boolean updateBookingStatus(int bookingId, String status) {
+        Booking current = getBookingById(bookingId);
+        if (current != null && "Completed".equalsIgnoreCase(current.getStatus())) {
+            return false;
+        }
         String sql = "UPDATE Booking SET status = ? WHERE booking_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -273,6 +277,9 @@ public class BookingDAO extends DBContext {
     public boolean cancelBooking(int bookingId) {
         Booking booking = getBookingById(bookingId);
         if (booking == null) {
+            return false;
+        }
+        if ("Completed".equalsIgnoreCase(booking.getStatus())) {
             return false;
         }
         if ("Cancelled".equalsIgnoreCase(booking.getStatus())) {

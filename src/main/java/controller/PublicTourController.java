@@ -132,7 +132,15 @@ public class PublicTourController extends HttpServlet {
         boolean hasActiveFilters = (searchKeyword != null) || (categoryFilter != null) || (destinationFilter != null)
                 || (minPriceFilter != null) || (maxPriceFilter != null)
                 || (minDurationFilter != null) || (maxDurationFilter != null)
-                || (sortBy != null && !sortBy.trim().isEmpty());
+                || (sortBy != null && !sortBy.trim().isEmpty() && !"newest".equalsIgnoreCase(sortBy.trim()));
+
+        if (!hasActiveFilters && rawTours != null) {
+            rawTours.sort((t1, t2) -> {
+                int diff = Integer.compare(t2.getDiscountPercent(), t1.getDiscountPercent());
+                if (diff != 0) return diff;
+                return Integer.compare(t2.getTourId(), t1.getTourId());
+            });
+        }
 
         // Parse pagination parameters
         int currentPage = 1;

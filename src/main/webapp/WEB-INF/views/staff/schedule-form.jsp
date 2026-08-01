@@ -58,9 +58,9 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="price" class="form-label text-muted small fw-bold">Price (d)</label>
-                    <input type="number" class="form-control rounded-3 bg-light" id="price" name="price" value="${schedule.price}" readonly>
-                    <div class="form-text text-muted small">Price is fixed for this schedule</div>
+                    <label for="price" class="form-label text-muted small fw-bold">Price (VND) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control rounded-3" id="price" name="price" value="<fmt:formatNumber value='${schedule.price}' pattern='0'/>" min="0" step="any" placeholder="e.g. 1500000" required>
+                    <div class="form-text text-muted small">Set the price for this departure schedule. The lowest schedule price determines the tour base price.</div>
                 </div>
 
                 <div class="row g-4 mb-4">

@@ -6,6 +6,8 @@
     <jsp:param name="activeMenu" value="bookings" />
 </jsp:include>
 
+<c:set var="activeTab" value="${not empty param.tab ? param.tab : 'pending'}" />
+
 <!-- Count bookings for each status -->
 <c:set var="pendingCount" value="0"/>
 <c:set var="confirmedCount" value="0"/>
@@ -32,6 +34,7 @@
         <div class="d-flex flex-column flex-sm-row gap-3 align-items-sm-center flex-grow-1 justify-content-md-end" style="max-width: 500px;">
             <!-- Search Form -->
             <form method="GET" action="${pageContext.request.contextPath}/admin/bookings" class="flex-grow-1 mb-0">
+                <input type="hidden" name="tab" value="${activeTab}">
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 rounded-end-3" 
@@ -62,25 +65,25 @@
         <!-- Tabs Nav -->
         <ul class="nav nav-tabs mb-4" id="bookingTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active fw-bold" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+                <button class="nav-link ${activeTab == 'pending' ? 'active' : ''} fw-bold" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="${activeTab == 'pending' ? 'true' : 'false'}">
                     <i class="fa-solid fa-circle-pause me-2 text-warning"></i>Pending
                     <span class="badge bg-warning text-dark ms-1 rounded-pill">${pendingCount}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed" type="button" role="tab" aria-controls="confirmed" aria-selected="false">
+                <button class="nav-link ${activeTab == 'confirmed' ? 'active' : ''} fw-bold" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed" type="button" role="tab" aria-controls="confirmed" aria-selected="${activeTab == 'confirmed' ? 'true' : 'false'}">
                     <i class="fa-solid fa-circle-check me-2 text-success"></i>Confirmed
                     <span class="badge bg-success text-white ms-1 rounded-pill">${confirmedCount}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
+                <button class="nav-link ${activeTab == 'completed' ? 'active' : ''} fw-bold" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="${activeTab == 'completed' ? 'true' : 'false'}">
                     <i class="fa-solid fa-square-check me-2 text-primary"></i>Completed
                     <span class="badge bg-secondary text-white ms-1 rounded-pill">${completedCount}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link fw-bold" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+                <button class="nav-link ${activeTab == 'cancelled' ? 'active' : ''} fw-bold" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="${activeTab == 'cancelled' ? 'true' : 'false'}">
                     <i class="fa-solid fa-ban me-2 text-danger"></i>Cancelled
                     <span class="badge bg-danger text-white ms-1 rounded-pill">${cancelledCount}</span>
                 </button>
@@ -91,7 +94,7 @@
         <div class="tab-content" id="bookingTabsContent">
             
             <!-- Pending Tab -->
-            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+            <div class="tab-pane fade ${activeTab == 'pending' ? 'show active' : ''}" id="pending" role="tabpanel" aria-labelledby="pending-tab">
                 <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-custom table-hover align-middle w-100 mb-0">
                         <thead class="table-light">
@@ -143,6 +146,7 @@
                                                     <form action="${pageContext.request.contextPath}/admin/bookings" method="post" class="m-0 p-0">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                                        <input type="hidden" name="tab" value="pending">
                                                         <select name="status" class="form-select form-select-sm fw-bold rounded-pill text-center border-0" 
                                                             onchange="this.form.submit()" 
                                                             style="cursor: pointer; box-shadow: none; width: 130px; display: inline-block; background-color: #fff3cd; color: #856404;">
@@ -173,7 +177,7 @@
             </div>
 
             <!-- Confirmed Tab -->
-            <div class="tab-pane fade" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
+            <div class="tab-pane fade ${activeTab == 'confirmed' ? 'show active' : ''}" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
                 <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-custom table-hover align-middle w-100 mb-0">
                         <thead class="table-light">
@@ -225,6 +229,7 @@
                                                     <form action="${pageContext.request.contextPath}/admin/bookings" method="post" class="m-0 p-0">
                                                         <input type="hidden" name="action" value="updateStatus">
                                                         <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                                        <input type="hidden" name="tab" value="confirmed">
                                                         <select name="status" class="form-select form-select-sm fw-bold rounded-pill text-center border-0" 
                                                             onchange="this.form.submit()" 
                                                             style="cursor: pointer; box-shadow: none; width: 130px; display: inline-block; background-color: #d1e7dd; color: #0f5132;">
@@ -255,7 +260,7 @@
             </div>
 
             <!-- Completed Tab -->
-            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            <div class="tab-pane fade ${activeTab == 'completed' ? 'show active' : ''}" id="completed" role="tabpanel" aria-labelledby="completed-tab">
                 <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-custom table-hover align-middle w-100 mb-0">
                         <thead class="table-light">
@@ -304,24 +309,14 @@
                                                     <fmt:formatNumber value="${b.totalPrice}" pattern="#,##0 ₫"/>
                                                 </td>
                                                 <td>
-                                                    <form action="${pageContext.request.contextPath}/admin/bookings" method="post" class="m-0 p-0">
-                                                        <input type="hidden" name="action" value="updateStatus">
-                                                        <input type="hidden" name="bookingId" value="${b.bookingId}">
-                                                        <select name="status" class="form-select form-select-sm fw-bold rounded-pill text-center border-0" 
-                                                            onchange="this.form.submit()" 
-                                                            style="cursor: pointer; box-shadow: none; width: 130px; display: inline-block; background-color: #e2e3e5; color: #41464b;">
-                                                            <option value="Pending" style="background-color: white; color: black;">Pending</option>
-                                                            <option value="Confirmed" style="background-color: white; color: black;">Confirmed</option>
-                                                            <option value="Completed" style="background-color: white; color: black;" selected>Completed</option>
-                                                        </select>
-                                                    </form>
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill"><i class="fa-solid fa-square-check me-1"></i>Completed</span>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="d-flex justify-content-center gap-2">
                                                         <button class="btn btn-outline-info btn-icon shadow-sm" title="View Details" data-bs-toggle="modal" data-bs-target="#viewDetailsModal${b.bookingId}">
                                                             <i class="fa-solid fa-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-outline-danger btn-icon shadow-sm" title="Cancel Booking" data-bs-toggle="modal" data-bs-target="#cancelModal${b.bookingId}">
+                                                        <button class="btn btn-outline-secondary btn-icon shadow-sm" disabled title="Completed bookings cannot be cancelled">
                                                             <i class="fa-solid fa-ban"></i>
                                                         </button>
                                                     </div>
@@ -337,7 +332,7 @@
             </div>
 
             <!-- Cancelled Tab -->
-            <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+            <div class="tab-pane fade ${activeTab == 'cancelled' ? 'show active' : ''}" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
                 <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
                     <table class="table table-custom table-hover align-middle w-100 mb-0">
                         <thead class="table-light">
@@ -420,7 +415,7 @@
                         </c:when>
                         <c:otherwise>
                             <li class="page-item" style="list-style: none !important;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${currentPage - 1}">Previous</a>
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${currentPage - 1}&tab=${activeTab}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}">Previous</a>
                             </li>
                         </c:otherwise>
                     </c:choose>
@@ -435,7 +430,7 @@
                             </c:when>
                             <c:otherwise>
                                 <li class="page-item" style="list-style: none !important;">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${i}">${i}</a>
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${i}&tab=${activeTab}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}">${i}</a>
                                 </li>
                             </c:otherwise>
                         </c:choose>
@@ -450,7 +445,7 @@
                         </c:when>
                         <c:otherwise>
                             <li class="page-item" style="list-style: none !important;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${currentPage + 1}">Next</a>
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/bookings?page=${currentPage + 1}&tab=${activeTab}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}">Next</a>
                             </li>
                         </c:otherwise>
                     </c:choose>
@@ -523,6 +518,7 @@
                             <div class="modal-body text-start">
                                 <input type="hidden" name="action" value="cancel">
                                 <input type="hidden" name="bookingId" value="${b.bookingId}">
+                                <input type="hidden" name="tab" value="${b.status.toLowerCase()}">
                                 <p class="mb-0">Are you sure you want to cancel booking <strong>#${b.bookingId}</strong> for <strong>${b.contactName}</strong>?</p>
                                 <p class="text-danger small mt-2 mb-0"><i class="fa-solid fa-triangle-exclamation me-1"></i>This will update the booking status to Cancelled and release ${b.numberOfPeople} slots back to the schedule.</p>
                             </div>
@@ -539,4 +535,29 @@
     </c:forEach>
 </c:if>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const tabButtons = document.querySelectorAll('#bookingTabs button[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('shown.bs.tab', function(e) {
+            const targetId = e.target.getAttribute('data-bs-target').replace('#', '');
+            const url = new URL(window.location);
+            url.searchParams.set('tab', targetId);
+            window.history.replaceState({}, '', url);
+            
+            const searchTabInput = document.querySelector('form[action*="/admin/bookings"] input[name="tab"]');
+            if (searchTabInput) searchTabInput.value = targetId;
+            
+            document.querySelectorAll('.pagination a.page-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== 'javascript:void(0);') {
+                    const linkUrl = new URL(href, window.location.origin);
+                    linkUrl.searchParams.set('tab', targetId);
+                    link.setAttribute('href', linkUrl.pathname + linkUrl.search);
+                }
+            });
+        });
+    });
+});
+</script>
 <jsp:include page="layout/footer.jsp" />

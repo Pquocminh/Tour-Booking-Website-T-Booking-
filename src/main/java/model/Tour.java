@@ -189,4 +189,31 @@ public class Tour {
     public void setSchedules(List<TourSchedule> schedules) {
         this.schedules = schedules;
     }
+
+    private int discountPercent;
+    private String promotionName;
+
+    public int getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(int discountPercent) {
+        this.discountPercent = discountPercent;
+    }
+
+    public String getPromotionName() {
+        return promotionName;
+    }
+
+    public void setPromotionName(String promotionName) {
+        this.promotionName = promotionName;
+    }
+
+    public double getDiscountedPrice() {
+        if (discountPercent > 0 && discountPercent <= 100) {
+            return basePrice * (100 - discountPercent) / 100.0;
+        }
+        return basePrice;
+    }
 }
+

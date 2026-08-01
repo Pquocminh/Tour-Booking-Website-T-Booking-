@@ -127,31 +127,44 @@
                                 <c:forEach var="t" items="${tours}">
                                     <tr>
                                         <td>
-                                            <c:choose>
-                                                <c:when test="${not empty t.thumbnailUrl}">
-                                                    <c:choose>
-                                                        <c:when test="${t.thumbnailUrl.startsWith('http')}">
-                                                            <c:set var="adminImgSrc" value="${t.thumbnailUrl}" />
-                                                        </c:when>
-                                                        <c:when test="${t.thumbnailUrl.startsWith('/')}">
-                                                            <c:set var="adminImgSrc" value="${pageContext.request.contextPath}${t.thumbnailUrl}" />
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <c:set var="adminImgSrc" value="${pageContext.request.contextPath}/${t.thumbnailUrl}" />
-                                                        </c:otherwise>
-                                                    </c:choose>
-                                                    <img src="${adminImgSrc}" 
-                                                         alt="Tour Thumbnail" 
-                                                         class="tour-thumbnail"
-                                                         loading="lazy"
-                                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=200&auto=format&fit=crop';">
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <div class="tour-thumbnail d-flex align-items-center justify-content-center bg-light text-secondary rounded border shadow-sm" style="width: 70px; height: 50px; font-size: 0.75rem; font-weight: 600;">
-                                                        <i class="fa-solid fa-image me-1 text-muted"></i>No Pic
-                                                    </div>
-                                                </c:otherwise>
-                                            </c:choose>
+                                             <c:set var="adminDestFallback" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                                             <c:if test="${not empty t.destination and not empty t.destination.imageUrl}">
+                                                 <c:choose>
+                                                     <c:when test="${t.destination.imageUrl.startsWith('http')}">
+                                                         <c:set var="adminDestFallback" value="${t.destination.imageUrl}" />
+                                                     </c:when>
+                                                     <c:when test="${t.destination.imageUrl.startsWith('/')}">
+                                                         <c:set var="adminDestFallback" value="${pageContext.request.contextPath}${t.destination.imageUrl}" />
+                                                     </c:when>
+                                                     <c:otherwise>
+                                                         <c:set var="adminDestFallback" value="${pageContext.request.contextPath}/${t.destination.imageUrl}" />
+                                                     </c:otherwise>
+                                                 </c:choose>
+                                             </c:if>
+
+                                             <c:choose>
+                                                 <c:when test="${not empty t.thumbnailUrl}">
+                                                     <c:choose>
+                                                         <c:when test="${t.thumbnailUrl.startsWith('http')}">
+                                                             <c:set var="adminImgSrc" value="${t.thumbnailUrl}" />
+                                                         </c:when>
+                                                         <c:when test="${t.thumbnailUrl.startsWith('/')}">
+                                                             <c:set var="adminImgSrc" value="${pageContext.request.contextPath}${t.thumbnailUrl}" />
+                                                         </c:when>
+                                                         <c:otherwise>
+                                                             <c:set var="adminImgSrc" value="${pageContext.request.contextPath}/${t.thumbnailUrl}" />
+                                                         </c:otherwise>
+                                                     </c:choose>
+                                                 </c:when>
+                                                 <c:otherwise>
+                                                     <c:set var="adminImgSrc" value="${adminDestFallback}" />
+                                                 </c:otherwise>
+                                             </c:choose>
+                                             <img src="${adminImgSrc}" 
+                                                  alt="Tour Thumbnail" 
+                                                  class="tour-thumbnail"
+                                                  loading="lazy"
+                                                  onerror="this.onerror=null; this.src='${adminDestFallback}';">
                                         </td>
                                         <td>
                                             <span class="text-muted small d-block">ID: #${t.tourId}</span>

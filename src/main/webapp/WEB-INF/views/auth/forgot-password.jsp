@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,11 +49,16 @@
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
                 </div>
             </c:if>
+
+            <!-- Client Error Display -->
+            <div id="clientForgotError" class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientForgotErrorText" class="fw-semibold"></span>
+            </div>
             
             <!-- Email Submission Form -->
-            <form action="${pageContext.request.contextPath}/forgot-password" method="POST">
+            <form action="${pageContext.request.contextPath}/forgot-password" method="POST" onsubmit="return validateForgotForm()" novalidate>
                 <div class="form-floating mb-4">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
                     <label for="email">Email Address</label>
                 </div>
                 
@@ -68,6 +73,33 @@
         </div>
     </div>
 
+    <script>
+        function showForgotError(msg) {
+            const errBox = document.getElementById('clientForgotError');
+            const errText = document.getElementById('clientForgotErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function validateForgotForm() {
+            const email = document.getElementById("email").value.trim();
+            if (!email) {
+                showForgotError("Please enter your Email Address.");
+                document.getElementById("email").focus();
+                return false;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showForgotError("Please enter a valid Email Address.");
+                document.getElementById("email").focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
 

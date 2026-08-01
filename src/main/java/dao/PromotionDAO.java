@@ -298,6 +298,42 @@ public class PromotionDAO {
         }
     }
 
+    public Promotion getActivePromotionByTourId(int tourId) {
+        Promotion p = null;
+        DBContext db = new DBContext();
+        Connection conn = db.getConnection();
+        if (conn == null) {
+            return p;
+        }
+        String sql = "SELECT TOP 1 p.promotion_id, p.promotion_name, p.discount_percent, p.start_date, p.end_date, p.status " +
+                     "FROM Promotion p " +
+                     "JOIN TourPromotion tp ON p.promotion_id = tp.promotion_id " +
+                     "WHERE tp.tour_id = ? " +
+                     "AND p.status = 'Active' " +
+                     "AND CAST(GETDATE() AS DATE) >= p.start_date " +
+                     "AND CAST(GETDATE() AS DATE) <= p.end_date " +
+                     "ORDER BY p.discount_percent DESC";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tourId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    p = new Promotion();
+                    p.setPromotionId(rs.getInt("promotion_id"));
+                    p.setPromotionName(rs.getString("promotion_name"));
+                    p.setDiscountPercent(rs.getInt("discount_percent"));
+                    p.setStartDate(rs.getDate("start_date"));
+                    p.setEndDate(rs.getDate("end_date"));
+                    p.setStatus(rs.getString("status"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeConnection(conn);
+        }
+        return p;
+    }
+
     private void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {
@@ -308,3 +344,4 @@ public class PromotionDAO {
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,13 +50,18 @@
                     <i class="fa-solid fa-circle-exclamation me-2"></i>${error}
                 </div>
             </c:if>
+
+            <!-- Client Error Display -->
+            <div id="clientOtpError" class="alert alert-danger border-0 rounded-3 mb-4" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientOtpErrorText" class="fw-semibold"></span>
+            </div>
             
             <!-- OTP Verification Form -->
-            <form action="${pageContext.request.contextPath}/verify-otp" method="POST">
+            <form action="${pageContext.request.contextPath}/verify-otp" method="POST" onsubmit="return validateOtpForm()" novalidate>
                 <div class="mb-4">
                     <label for="otp" class="form-label text-muted d-block text-center mb-2" style="font-size: 0.85rem;">Verification Code</label>
                     <input type="text" class="form-control form-control-lg otp-input" id="otp" name="otp" 
-                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autocomplete="off">
+                           placeholder="000000" maxlength="6" autocomplete="off">
                     <div class="form-text text-center mt-2">Enter 6 numeric digits.</div>
                 </div>
                 
@@ -73,6 +78,32 @@
         </div>
     </div>
 
+    <script>
+        function showOtpError(msg) {
+            const errBox = document.getElementById('clientOtpError');
+            const errText = document.getElementById('clientOtpErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function validateOtpForm() {
+            const otp = document.getElementById("otp").value.trim();
+            if (!otp) {
+                showOtpError("Please enter your 6-digit verification code.");
+                document.getElementById("otp").focus();
+                return false;
+            }
+            if (!/^\d{6}$/.test(otp)) {
+                showOtpError("Verification code must be exactly 6 numeric digits.");
+                document.getElementById("otp").focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
 

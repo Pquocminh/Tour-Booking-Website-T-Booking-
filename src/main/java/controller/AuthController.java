@@ -160,7 +160,9 @@ public class AuthController extends HttpServlet {
 
         String result = "Registration failed! Please try again.";
         if (acc != null) {
-            if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
+            if (fullName == null || fullName.trim().isEmpty() || !fullName.trim().matches("^[\\p{L}\\s]+$")) {
+                result = "Full Name cannot be empty and cannot contain numbers or special characters!";
+            } else if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
                 result = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.";
             } else if (!password.equals(confirmPassword)) {
                 result = "Passwords do not match!";

@@ -236,25 +236,28 @@
             <h5 class="modal-title" id="editProfileModalLabel"><i class="fa-solid fa-user-pen me-2"></i>Edit Profile</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="${pageContext.request.contextPath}/profile" method="POST" id="editProfileForm">
+          <form action="${pageContext.request.contextPath}/profile" method="POST" id="editProfileForm" novalidate>
               <div class="modal-body p-4">
+                  <div id="clientProfileError" class="alert alert-danger border-0 rounded-3 mb-3" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.85rem;">
+                      <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientProfileErrorText" class="fw-semibold"></span>
+                  </div>
                   <input type="hidden" name="action" value="updateProfile">
                   
                   <div class="mb-3">
                       <label for="fullName" class="form-label font-weight-semibold">Full Name <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" value="${sessionScope.user.fullName}" required>
+                      <input type="text" class="form-control form-control-lg" id="fullName" name="fullName" value="${sessionScope.user.fullName}">
                       <div class="form-text text-muted" style="font-size: 0.8rem;">Must contain only letters & spaces (auto-capitalizes first letters).</div>
                   </div>
                   
                   <div class="mb-3">
                       <label for="email" class="form-label font-weight-semibold">Email Address <span class="text-danger">*</span></label>
-                      <input type="email" class="form-control form-control-lg" id="email" name="email" value="${sessionScope.user.email}" required>
+                      <input type="email" class="form-control form-control-lg" id="email" name="email" value="${sessionScope.user.email}">
                       <div class="form-text text-muted" style="font-size: 0.8rem;">Must end with @gmail.com</div>
                   </div>
                   
                   <div class="mb-3">
                       <label for="phone" class="form-label font-weight-semibold">Phone Number <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control form-control-lg" id="phone" name="phone" value="${sessionScope.user.phone}" required>
+                      <input type="text" class="form-control form-control-lg" id="phone" name="phone" value="${sessionScope.user.phone}">
                       <div class="form-text text-muted" style="font-size: 0.8rem;">Must contain 9-11 digits only (no characters or special symbols).</div>
                   </div>
                   
@@ -280,23 +283,26 @@
             <h5 class="modal-title" id="changePasswordModalLabel"><i class="fa-solid fa-lock me-2"></i>Change Password</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <form action="${pageContext.request.contextPath}/profile" method="POST">
+          <form action="${pageContext.request.contextPath}/profile" method="POST" id="changePasswordForm" novalidate>
               <div class="modal-body p-4">
+                  <div id="clientPassError" class="alert alert-danger border-0 rounded-3 mb-3" role="alert" style="display: none; background-color: #fef2f2; color: #b91c1c; font-size: 0.85rem;">
+                      <i class="fa-solid fa-circle-exclamation me-2"></i><span id="clientPassErrorText" class="fw-semibold"></span>
+                  </div>
                   <input type="hidden" name="action" value="changePassword">
                   
                   <div class="mb-3">
                       <label for="oldPassword" class="form-label font-weight-semibold">Current Password <span class="text-danger">*</span></label>
-                      <input type="password" class="form-control form-control-lg" id="oldPassword" name="oldPassword" required>
+                      <input type="password" class="form-control form-control-lg" id="oldPassword" name="oldPassword">
                   </div>
                   
                   <div class="mb-3">
                       <label for="newPassword" class="form-label font-weight-semibold">New Password <span class="text-danger">*</span></label>
-                      <input type="password" class="form-control form-control-lg" id="newPassword" name="newPassword" required>
+                      <input type="password" class="form-control form-control-lg" id="newPassword" name="newPassword">
                   </div>
                   
                   <div class="mb-3">
                       <label for="confirmPassword" class="form-label font-weight-semibold">Confirm New Password <span class="text-danger">*</span></label>
-                      <input type="password" class="form-control form-control-lg" id="confirmPassword" name="confirmPassword" required>
+                      <input type="password" class="form-control form-control-lg" id="confirmPassword" name="confirmPassword">
                   </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
@@ -344,6 +350,26 @@
     <!-- Bootstrap JS Bundle -->
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap.bundle.min.js"></script>
     <script>
+        function showProfileError(msg) {
+            const errBox = document.getElementById('clientProfileError');
+            const errText = document.getElementById('clientProfileErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function showPassError(msg) {
+            const errBox = document.getElementById('clientPassError');
+            const errText = document.getElementById('clientPassErrorText');
+            if (errBox && errText) {
+                errText.innerText = msg;
+                errBox.style.display = 'block';
+                errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const editForm = document.getElementById('editProfileForm');
             if (editForm) {
@@ -352,33 +378,65 @@
                     const emailInput = document.getElementById('email');
                     const phoneInput = document.getElementById('phone');
 
-                    const fullNameVal = fullNameInput.value.trim();
-                    const emailVal = emailInput.value.trim();
-                    const phoneVal = phoneInput.value.trim();
+                    const fullNameVal = fullNameInput ? fullNameInput.value.trim() : '';
+                    const emailVal = emailInput ? emailInput.value.trim() : '';
+                    const phoneVal = phoneInput ? phoneInput.value.trim() : '';
 
-                    // 1. Full Name check: non-empty, letters & spaces only
                     const nameRegex = /^[\p{L}\s]+$/u;
                     if (!fullNameVal || !nameRegex.test(fullNameVal)) {
-                        alert('Full name cannot be empty and cannot contain numbers or special characters.');
-                        fullNameInput.focus();
+                        showProfileError('Full Name cannot be empty and cannot contain numbers or special characters.');
+                        if (fullNameInput) fullNameInput.focus();
                         e.preventDefault();
                         return false;
                     }
 
-                    // 2. Email check: must end with @gmail.com
                     const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
                     if (!emailVal || !emailRegex.test(emailVal)) {
-                        alert('Email address must end with @gmail.com.');
-                        emailInput.focus();
+                        showProfileError('Email address must end with @gmail.com.');
+                        if (emailInput) emailInput.focus();
                         e.preventDefault();
                         return false;
                     }
 
-                    // 3. Phone check: digits only, 9-11 numbers
                     const phoneRegex = /^\d{9,11}$/;
                     if (!phoneVal || !phoneRegex.test(phoneVal)) {
-                        alert('Phone number cannot be empty and must contain digits only (9-11 numbers).');
-                        phoneInput.focus();
+                        showProfileError('Phone Number cannot be empty and must contain 9 to 11 digits only.');
+                        if (phoneInput) phoneInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            const passForm = document.getElementById('changePasswordForm');
+            if (passForm) {
+                passForm.addEventListener('submit', function(e) {
+                    const oldPass = document.getElementById('oldPassword').value;
+                    const newPass = document.getElementById('newPassword').value;
+                    const confirmPass = document.getElementById('confirmPassword').value;
+
+                    if (!oldPass) {
+                        showPassError('Please enter your Current Password.');
+                        document.getElementById('oldPassword').focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                    if (!newPass) {
+                        showPassError('Please enter your New Password.');
+                        document.getElementById('newPassword').focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                    const passRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+                    if (!passRegex.test(newPass)) {
+                        showPassError('New Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.');
+                        document.getElementById('newPassword').focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                    if (newPass !== confirmPass) {
+                        showPassError('Confirm Password does not match New Password!');
+                        document.getElementById('confirmPassword').focus();
                         e.preventDefault();
                         return false;
                     }

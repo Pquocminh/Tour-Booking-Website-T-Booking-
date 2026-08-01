@@ -485,7 +485,13 @@ public class CustomerController extends HttpServlet {
                 return;
             }
 
-            double totalPrice = schedule.getPrice() * numberOfPeople;
+            double unitPrice = schedule.getPrice();
+            dao.PromotionDAO promoDAO = new dao.PromotionDAO();
+            model.Promotion activePromo = promoDAO.getActivePromotionByTourId(schedule.getTourId());
+            if (activePromo != null && activePromo.getDiscountPercent() > 0 && activePromo.getDiscountPercent() <= 100) {
+                unitPrice = unitPrice * (100 - activePromo.getDiscountPercent()) / 100.0;
+            }
+            double totalPrice = unitPrice * numberOfPeople;
             
             String contactName = user.getFullName();
             String contactPhone = user.getPhone() != null ? user.getPhone() : "0123456789"; 
@@ -730,11 +736,11 @@ public class CustomerController extends HttpServlet {
 
             if (booking != null && booking.getCustomerId() == user.getAccountId() && "Pending".equalsIgnoreCase(booking.getStatus())) {
                 
-                // 1. Kiểm tra mã voucher rỗng
+                
                 if (voucherCode == null || voucherCode.trim().isEmpty()) {
                     request.setAttribute("errorMessage", "The voucher code cannot be left blank.");
                     
-                    // Nạp lại thông tin voucher đã áp dụng hiện tại nếu có
+                   
                     if (booking.getVoucherId() != null) {
                         VoucherDAO voucherDAO = new VoucherDAO();
                         model.Voucher voucher = voucherDAO.getVoucherById(booking.getVoucherId());
@@ -753,17 +759,17 @@ public class CustomerController extends HttpServlet {
                     return;
                 }
 
-                // 2. Tìm voucher trong database
+              
                 VoucherDAO voucherDAO = new VoucherDAO();
                 model.Voucher voucher = voucherDAO.getVoucherByCode(voucherCode.trim());
 
                 TourDAO tourDAO = new TourDAO();
                 TourSchedule schedule = tourDAO.getTourScheduleById(booking.getScheduleId());
                 
-                // 3. Kiểm tra null lịch trình tour
+           
                 if (schedule == null) {
                     request.setAttribute("errorMessage", "Tour itinerary information not found. Please contact support.");
-                    // Vẫn nạp lại thông tin voucher đã áp dụng cũ nếu có
+                  
                     if (booking.getVoucherId() != null) {
                         model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
                         request.setAttribute("appliedVoucher", oldVoucher);
@@ -811,7 +817,7 @@ public class CustomerController extends HttpServlet {
                         request.setAttribute("discountAmount", discount);
                     } else {
                         request.setAttribute("errorMessage", "Voucher application failed due to a database error.");
-                        // Nạp lại thông tin cũ
+                     
                         if (booking.getVoucherId() != null) {
                             model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
                             request.setAttribute("appliedVoucher", oldVoucher);
@@ -821,7 +827,7 @@ public class CustomerController extends HttpServlet {
                     }
                 } else {
                     request.setAttribute("errorMessage", "The voucher code is invalid or has expired.");
-                    // Nạp lại thông tin cũ
+              
                     if (booking.getVoucherId() != null) {
                         model.Voucher oldVoucher = voucherDAO.getVoucherById(booking.getVoucherId());
                         request.setAttribute("appliedVoucher", oldVoucher);

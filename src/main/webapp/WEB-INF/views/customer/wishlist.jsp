@@ -158,9 +158,43 @@
                                                     <span class="badge bg-primary wishlist-badge rounded-pill px-3 py-2">
                                                         <i class="fa-solid fa-tag me-1"></i>${tour.category.categoryName}
                                                     </span>
-                                                    <img src="${not empty tour.thumbnailUrl ? pageContext.request.contextPath.concat(tour.thumbnailUrl) : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=600&auto=format&fit=crop'}" 
-                                                         alt="${tour.tourName}"
-                                                         onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop'">
+                                                     <!-- 3-Tier Image Fallback Strategy -->
+                                                     <c:set var="wishlistDestImg" value="${pageContext.request.contextPath}/images/default-destination.jpg" />
+                                                     <c:if test="${not empty tour.destination and not empty tour.destination.imageUrl}">
+                                                         <c:choose>
+                                                             <c:when test="${tour.destination.imageUrl.startsWith('http')}">
+                                                                 <c:set var="wishlistDestImg" value="${tour.destination.imageUrl}" />
+                                                             </c:when>
+                                                             <c:when test="${tour.destination.imageUrl.startsWith('/')}">
+                                                                 <c:set var="wishlistDestImg" value="${pageContext.request.contextPath}${tour.destination.imageUrl}" />
+                                                             </c:when>
+                                                             <c:otherwise>
+                                                                 <c:set var="wishlistDestImg" value="${pageContext.request.contextPath}/${tour.destination.imageUrl}" />
+                                                             </c:otherwise>
+                                                         </c:choose>
+                                                     </c:if>
+                                                     
+                                                     <c:choose>
+                                                         <c:when test="${not empty tour.thumbnailUrl}">
+                                                             <c:choose>
+                                                                 <c:when test="${tour.thumbnailUrl.startsWith('http')}">
+                                                                     <c:set var="wishlistImgSrc" value="${tour.thumbnailUrl}" />
+                                                                 </c:when>
+                                                                 <c:when test="${tour.thumbnailUrl.startsWith('/')}">
+                                                                     <c:set var="wishlistImgSrc" value="${pageContext.request.contextPath}${tour.thumbnailUrl}" />
+                                                                 </c:when>
+                                                                 <c:otherwise>
+                                                                     <c:set var="wishlistImgSrc" value="${pageContext.request.contextPath}/${tour.thumbnailUrl}" />
+                                                                 </c:otherwise>
+                                                             </c:choose>
+                                                         </c:when>
+                                                         <c:otherwise>
+                                                             <c:set var="wishlistImgSrc" value="${wishlistDestImg}" />
+                                                         </c:otherwise>
+                                                     </c:choose>
+                                                     <img src="${wishlistImgSrc}" 
+                                                          alt="${tour.tourName}"
+                                                          onerror="this.onerror=null; this.src='${wishlistDestImg}';">
                                                 </div>
                                                 
                                                 <!-- Body -->
